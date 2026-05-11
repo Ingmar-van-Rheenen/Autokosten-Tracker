@@ -8,6 +8,7 @@ Thumbs.db
 # Wrangler (Cloudflare Workers)
 tikkie-worker/.wrangler/
 
+
 # Claude tooling
 .agents/
 .impeccable/

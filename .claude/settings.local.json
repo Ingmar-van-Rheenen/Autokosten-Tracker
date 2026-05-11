@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Content \"C:\\\\Users\\\\ivanr\\\\OneDrive\\\\Documenten\\\\private_projects\\\\Autokosten-Tracker\\\\js\\\\TankController.js\" -Raw | Select-String -Pattern \"suggestieEl.textContent\" | ForEach-Object { $_.Line })",
+      "Skill(impeccable)",
+      "Bash(node *)",
+      "PowerShell(New-Item *)"
+    ]
+  }
+}
