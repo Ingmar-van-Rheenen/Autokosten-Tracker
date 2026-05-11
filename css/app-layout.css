@@ -1,0 +1,107 @@
+/* ── HOOFD APP ──────────────────────── */
+#screen-app {
+  display: flex;
+  flex-direction: column;
+  background: var(--dark);
+  /* Geen globale top-padding: elke tab regelt dit zelf */
+}
+
+.app-tabs {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  transform: translateZ(0);
+}
+
+.app-tab {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+}
+
+.app-tab.active {
+  display: flex;
+}
+
+/* ── BOTTOM NAV ──────────────────────── */
+.bottom-nav {
+  display: flex;
+  background: var(--dark);
+  border-top: 1px solid var(--dark-border);
+  flex-shrink: 0;
+  padding: 0 4px;
+  /* max() zorgt voor minimaal 20px, of de echte home-indicator hoogte */
+  padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+}
+
+/* ── NAV BUTTONS ─────────────────────── */
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--txt-dark-m);
+  padding: 8px 4px 7px;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s ease;
+}
+
+.nav-btn:active {
+  transform: scale(0.92);
+}
+
+/* Pill achter het icoon */
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 30px;
+  border-radius: 16px;
+  background: rgba(122, 184, 122, 0.12);
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  position: relative;
+  z-index: 1;
+}
+
+.nav-btn span {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── ACTIEVE STATE ───────────────────── */
+.nav-btn.active {
+  color: var(--green-lite);
+}
+
+.nav-btn.active::before {
+  width: 52px;
+}
+
+/* ── NAV ICOON STUIT ─────────────────────── */
+.nav-icoon-stuit {
+  animation: nav-stuit 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes nav-stuit {
+  0%, 100% { transform: translateY(0) scale(1); }
+  42%       { transform: translateY(-4px) scale(1.16); }
+}

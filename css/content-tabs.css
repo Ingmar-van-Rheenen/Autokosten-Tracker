@@ -1,0 +1,113 @@
+/* ── CONTENT TABS ────────────────────────── */
+.tab-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-bottom: 24px;
+  background: var(--cream);
+  scrollbar-width: none;
+}
+
+.tab-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-kop {
+  /* Eerste zichtbare kop van ritten/overzicht: geef ruimte voor de notch */
+  padding: calc(28px + env(safe-area-inset-top)) 24px 16px;
+  background: var(--cream);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab-kop-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--txt-muted);
+  letter-spacing: 0.22em;
+  margin-bottom: 5px;
+}
+
+.tab-kop-titel {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+.tab-sectie-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--txt-muted);
+  letter-spacing: 0.18em;
+  padding: 22px 24px 8px;
+}
+
+/* ── SALDO HERO ──────────────────────────── */
+.saldo-hero {
+  background: var(--dark);
+  /* Extend dark bg tot in de notch zodat status bar matcht met saldo container */
+  padding: calc(36px + env(safe-area-inset-top)) 24px 30px;
+  text-align: center;
+}
+
+.saldo-hero-lbl {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--txt-dark-m);
+  letter-spacing: 0.32em;
+  margin-bottom: 10px;
+}
+
+.saldo-hero-val {
+  font-family: var(--mono);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--txt-dark);
+  margin-bottom: 8px;
+  transition: color 0.3s;
+}
+
+.saldo-hero-val.positief {
+  color: var(--green-lite);
+}
+
+.saldo-hero-val.negatief {
+  color: #e07070;
+}
+
+.saldo-hero-uitleg {
+  font-size: 0.78rem;
+  color: var(--txt-dark-m);
+}
+
+/* ── STATS GRID ──────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px 24px;
+}
+
+.stat-blok {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stat-val {
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+
+.stat-lbl {
+  font-size: 0.72rem;
+  color: var(--txt-muted);
+}

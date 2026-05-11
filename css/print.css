@@ -1,0 +1,21 @@
+/* ── PRINT ─────────────────────────────────── */
+
+@media print {
+  #screen-splash,
+  #screen-auto,
+  .bottom-nav,
+  .bottom-sheet,
+  .rit-pill {
+    display: none !important;
+  }
+
+  .app-tab {
+    display: flex !important;
+    position: static !important;
+  }
+
+  #screen-app {
+    position: static;
+    box-shadow: none;
+  }
+}

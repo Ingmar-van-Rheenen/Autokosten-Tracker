@@ -1,0 +1,66 @@
+/* ── SPLASH ────────────────────────── */
+#screen-splash {
+  background: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Vul ook het notch-gebied boven de safe area */
+  padding-top: env(safe-area-inset-top);
+}
+
+.splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.splash-title {
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.45em;
+  margin-bottom: 6px;
+}
+
+.splash-sub {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--txt-dark-m);
+  letter-spacing: 0.05em;
+  margin-bottom: 52px;
+}
+
+.splash-stage {
+  width: 230px;
+  overflow: visible;
+}
+
+.splash-loader {
+  margin-top: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.splash-spinner {
+  width: 34px;
+  height: 34px;
+  border: 2.5px solid var(--dark-3);
+  border-top-color: var(--green-lite);
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+}
+
+.splash-loader-text {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--txt-dark-m);
+  letter-spacing: 0.28em;
+  transition: opacity 0.18s ease;
+}
+
+.splash-txt-wissel {
+  opacity: 0;
+}

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1b2537" />
+  <meta name="description" content="Houd ritten, tankbeurten en kosten bij per auto." />
+
+  <!-- PWA / Apple -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Tanklog" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <title>Vroom — Autokosten Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+
+<body>
+
+  <!-- SCHERM 1: SPLASH -->
+  <div id="screen-splash" class="screen">
+    <div class="splash-inner">
+      <div class="splash-title">TANKLOG</div>
+      <div class="splash-sub">auto · km · kosten</div>
+      <div class="splash-stage" id="splash-car-scene"></div>
+      <div class="splash-loader">
+        <div class="splash-spinner"></div>
+        <div class="splash-loader-text">LOCATIE OPHALEN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHERM INTRO (eenmalig bij eerste installatie) -->
+  <div id="screen-intro" class="screen hidden">
+    <div class="intro-wrap">
+      <button class="intro-skip" id="intro-skip">Overslaan</button>
+
+      <div class="intro-slides">
+
+        <!-- SLIDE 0: Welkom -->
+        <div class="intro-slide actief" data-slide="0">
+          <div class="intro-visual">
+            <div class="intro-car-scene" id="intro-car-scene"></div>
+          </div>
+          <div class="intro-app-naam">TANKLOG</div>
+          <h2 class="intro-kop">Rij slim,<br>betaal eerlijk.</h2>
+          <p class="intro-sub">Bijhoud ritten, brandstof en kosten — automatisch en overzichtelijk.</p>
+        </div>
+
+        <!-- SLIDE 1: GPS meten -->
+        <div class="intro-slide" data-slide="1">
+          <div class="intro-visual">
+            <svg class="intro-map-svg" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+              <rect width="200" height="130" rx="16" fill="#141f2e" />
+              <rect x="80" y="0" width="40" height="130" fill="#1e2d42" />
+              <rect x="0" y="50" width="200" height="30" fill="#1e2d42" />
+              <line x1="100" y1="0" x2="100" y2="47" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+              <line x1="100" y1="83" x2="100" y2="130" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+              <line x1="0" y1="65" x2="77" y2="65" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+              <line x1="123" y1="65" x2="200" y2="65" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+              <rect x="8" y="6" width="58" height="36" rx="4" fill="#1a2940" />
+              <rect x="134" y="6" width="58" height="36" rx="4" fill="#1a2940" />
+              <rect x="8" y="88" width="58" height="36" rx="4" fill="#1a2940" />
+              <rect x="134" y="88" width="58" height="36" rx="4" fill="#1a2940" />
+              <circle class="gps-ring gps-ring-1" cx="100" cy="65" r="14" fill="none" stroke="#4e7d52" stroke-width="2" />
+              <circle class="gps-ring gps-ring-2" cx="100" cy="65" r="14" fill="none" stroke="#4e7d52" stroke-width="1.5" />
+              <g class="gps-pin-group">
+                <path d="M100,22 C89,22 80,31 80,42 C80,57 100,75 100,75 C100,75 120,57 120,42 C120,31 111,22 100,22Z" fill="#4e7d52" />
+                <circle cx="100" cy="42" r="9" fill="#141f2e" />
+              </g>
+            </svg>
+          </div>
+          <h2 class="intro-kop">Automatisch<br>meten</h2>
+          <p class="intro-sub">Start een rit en Tanklog volgt de kilometers live via GPS.</p>
+        </div>
+
+        <!-- SLIDE 2: Verdelen -->
+        <div class="intro-slide" data-slide="2">
+          <div class="intro-visual">
+            <div class="intro-deal-preview">
+              <div class="intro-deal-rit">Rit naar Amsterdam · 47 km</div>
+              <div class="intro-deal-pp-lbl">Per persoon (1/3)</div>
+              <div class="intro-deal-bedrag">€ 2,16</div>
+              <div class="intro-deal-knoppen">
+                <span class="intro-deal-wa-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.253 2 2 6.253 2 11.5c0 1.887.535 3.644 1.459 5.132L2 22l5.545-1.424A9.457 9.457 0 0 0 11.5 21C16.747 21 21 16.747 21 11.5S16.747 2 11.5 2z" fill-opacity=".4"/></svg>
+                  WhatsApp
+                </span>
+                <span class="intro-deal-rev-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.924 4.124A6.5 6.5 0 0 0 14.5 0H4v24h4v-9h4.382l4.4 9H21l-4.7-9.5A6.5 6.5 0 0 0 20.924 4.124ZM14.5 11H8V4h6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+                  Revolut
+                </span>
+              </div>
+            </div>
+          </div>
+          <h2 class="intro-kop">Eerlijk<br>verdelen</h2>
+          <p class="intro-sub">Stuur na elke rit een betaalverzoek via WhatsApp of Revolut.</p>
+        </div>
+
+      </div>
+
+      <div class="intro-footer">
+        <div class="intro-dots" id="intro-dots">
+          <span class="intro-dot actief"></span>
+          <span class="intro-dot"></span>
+          <span class="intro-dot"></span>
+        </div>
+        <button class="intro-volgende-btn" id="intro-volgende">Volgende →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHERM 2: AUTO SELECTIE -->
+  <div id="screen-auto" class="screen hidden">
+    <div class="auto-scroll">
+      <div class="auto-content">
+        <div class="auto-greeting" id="auto-greeting">GOEDEMORGEN</div>
+        <h1 class="auto-heading">Met welke<br>auto rijd je?</h1>
+        <p class="auto-sub">Selecteer of voeg een auto toe</p>
+        <div id="auto-kaarten" class="auto-kaarten"></div>
+        <button class="btn-add-auto" id="btn-add-auto">+ Nieuwe auto toevoegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHERM 3: HOOFD APP -->
+  <div id="screen-app" class="screen hidden">
+    <div class="app-tabs">
+
+      <!-- TAB: KAART -->
+      <div id="tab-kaart" class="app-tab active">
+        <div id="map"></div>
+        <div id="rit-pill" class="rit-pill hidden">
+          <span class="rit-pill-dot"></span>
+          <span class="rit-pill-tag">RIT BEZIG</span>
+          <span id="pill-km" class="rit-pill-km">0.0 km</span>
+        </div>
+        <div class="bottom-sheet" id="bottom-sheet">
+          <div class="bs-handle" id="bs-handle"></div>
+
+          <!-- Uitklapbare stats + acties -->
+          <div class="bs-expanded" id="bs-expanded">
+
+            <!-- Stats grid: saldo / km / kosten -->
+            <div class="bs-stats-grid">
+              <div class="bs-stats-tile">
+                <span class="bs-stats-val" id="bs-q-saldo">—</span>
+                <span class="bs-stats-lbl">saldo</span>
+              </div>
+              <div class="bs-stats-tile">
+                <span class="bs-stats-val" id="bs-q-km">—</span>
+                <span class="bs-stats-lbl">km / maand</span>
+              </div>
+              <div class="bs-stats-tile">
+                <span class="bs-stats-val" id="bs-q-kosten">—</span>
+                <span class="bs-stats-lbl">kosten / maand</span>
+              </div>
+            </div>
+
+            <!-- Laatste rit -->
+            <div class="bs-laatste-rit hidden" id="bs-laatste-rit">
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="4" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/>
+                <path d="M1 4h10l2 6H3z"/>
+              </svg>
+              <span id="bs-lr-tekst">—</span>
+            </div>
+
+            <!-- Actie knoppen -->
+            <div class="bs-acties">
+              <button id="btn-tankstations" class="bs-actie-btn">
+                <svg class="ts-icon" viewBox="0 0 22 26" width="16" height="16" fill="none">
+                  <rect x="1" y="4" width="13" height="20" rx="2.5" fill="currentColor"/>
+                  <rect x="3" y="7" width="9" height="5.5" rx="1.5" fill="rgba(0,0,0,0.3)"/>
+                  <path d="M14 8 Q19.5 8 19.5 13.5 L19.5 19.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                  <rect x="17.5" y="18.5" width="5" height="2.5" rx="1.2" fill="currentColor"/>
+                </svg>
+                <svg class="ts-spinner hidden" viewBox="0 0 24 24" fill="none" width="16" height="16">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="42 14"/>
+                </svg>
+                <span class="bs-actie-lbl">Tankstations</span>
+              </button>
+              <button class="bs-actie-btn bs-shortcut" data-tab="saldo">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>
+                </svg>
+                <span class="bs-actie-lbl">Tankbeurt</span>
+              </button>
+              <button class="bs-actie-btn bs-shortcut" data-tab="saldo">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12h18M3 6h18M3 18h12"/>
+                  <path d="M17 15l4 3-4 3"/>
+                </svg>
+                <span class="bs-actie-lbl">Planner</span>
+              </button>
+            </div>
+
+          </div>
+
+          <div class="bs-auto-row">
+            <span class="bs-auto-naam" id="bs-auto-naam" role="button" tabindex="0">—</span>
+            <button class="bs-wissel" id="btn-wissel">Wissel →</button>
+          </div>
+
+          <div id="bs-idle" class="bs-state">
+            <div class="bs-idle-hint">Klaar voor de rit</div>
+            <button id="btn-start" class="btn-rit btn-start">START RIT</button>
+          </div>
+
+          <div id="bs-bezig" class="bs-state hidden">
+            <div class="bs-rit-naam" id="bs-rit-naam">Rit bezig…</div>
+            <div class="bs-stats">
+              <div class="bs-stat">
+                <div class="bs-stat-val" id="bs-km">—</div>
+                <div class="bs-stat-lbl">km</div>
+              </div>
+              <div class="bs-stat">
+                <div class="bs-stat-val" id="bs-kosten">—</div>
+                <div class="bs-stat-lbl">kosten</div>
+              </div>
+              <div class="bs-stat">
+                <div class="bs-stat-val" id="bs-saldo">—</div>
+                <div class="bs-stat-lbl">saldo</div>
+              </div>
+            </div>
+            <button id="btn-stop" class="btn-rit btn-stop">STOP RIT</button>
+          </div>
+
+          <div id="bs-confirm" class="bs-state hidden">
+            <div class="bs-rit-naam">Rit opslaan?</div>
+            <div class="confirm-row">
+              <span class="confirm-km" id="confirm-km">— km</span>
+              <input type="number" id="km-override" class="km-input" step="0.1" min="0" placeholder="Aanpassen" />
+            </div>
+            <button class="km-info-link" id="btn-km-info">
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                <circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 5.2v.4"/>
+              </svg>
+              Waarom dit veld?
+            </button>
+            <input type="text" id="rit-notitie" class="notitie-input"
+              placeholder="Notitie (optioneel, bijv. winkelen)" />
+            <div class="confirm-btns">
+              <button id="btn-opslaan" class="btn-rit btn-save">Opslaan ✓</button>
+              <button id="btn-annuleer" class="btn-rit btn-cancel">Annuleer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: RITTEN -->
+      <div id="tab-ritten" class="app-tab hidden">
+        <div class="tab-scroll">
+          <div class="tab-kop">
+            <div class="tab-kop-label">RITTEN</div>
+            <h2 class="tab-kop-titel">Jouw ritten</h2>
+          </div>
+          <ul id="ritten-lijst" class="item-lijst"></ul>
+        </div>
+      </div>
+
+      <!-- TAB: SALDO -->
+      <div id="tab-saldo" class="app-tab hidden">
+        <div class="tab-scroll">
+          <div class="saldo-hero">
+            <div class="saldo-hero-lbl">SALDO</div>
+            <div id="saldo-val" class="saldo-hero-val">€ —</div>
+            <div id="saldo-uitleg" class="saldo-hero-uitleg"></div>
+          </div>
+          <div class="tab-sectie-label">RIT PLANNER</div>
+          <div class="form-kaart">
+            <label class="form-lbl">Vertrekpunt</label>
+            <div class="planner-locatie-rij">
+              <input type="text" id="plan-van" class="form-input" placeholder="Adres of straat" autocomplete="off" />
+              <button id="plan-gps-btn" class="plan-gps-btn" title="Gebruik huidige locatie">⊙</button>
+            </div>
+            <label class="form-lbl">Bestemming</label>
+            <div class="planner-stop-rij">
+              <input type="text" id="plan-bestemming" class="form-input" placeholder="Bestemming" autocomplete="off" />
+            </div>
+            <div id="plan-stops"></div>
+            <button id="plan-add-stop" class="btn-form-sec plan-add-stop-btn">+ Tussenstop toevoegen</button>
+            <button id="plan-bereken" class="btn-form-primary">Bereken route</button>
+            <div id="plan-resultaat" class="plan-resultaat hidden"></div>
+          </div>
+          <div class="tab-sectie-label" id="tank-sectie-lbl">TANKBEURT TOEVOEGEN</div>
+          <div class="form-kaart">
+            <label class="form-lbl" id="tank-liters-lbl">Aantal liters</label>
+            <input type="number" id="tank-liters" class="form-input" step="0.01" min="0" placeholder="bijv. 35.5" />
+            <label class="form-lbl" id="tank-prijs-lbl">Prijs per liter (€)</label>
+            <div id="tank-prijs-suggestie" class="tank-prijs-suggestie hidden"></div>
+            <input type="number" id="tank-prijs" class="form-input" step="0.001" min="0" placeholder="bijv. 2.10" />
+            <div class="tank-totaal-rij">Totaal: <strong id="tank-totaal">€ —</strong></div>
+            <button id="btn-tank" class="btn-form-primary">Opslaan</button>
+          </div>
+          <div class="tab-sectie-label">TANKBEURTEN</div>
+          <ul id="tank-lijst" class="item-lijst"></ul>
+        </div>
+      </div>
+
+      <!-- TAB: OVERZICHT -->
+      <div id="tab-overzicht" class="app-tab hidden">
+        <div class="tab-scroll">
+          <div class="tab-kop">
+            <div class="tab-kop-label">OVERZICHT</div>
+            <h2 class="tab-kop-titel">Alles op een rij</h2>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-blok">
+              <div class="stat-val" id="ov-km">—</div>
+              <div class="stat-lbl">km gereden</div>
+            </div>
+            <div class="stat-blok">
+              <div class="stat-val" id="ov-ritten">—</div>
+              <div class="stat-lbl">ritten</div>
+            </div>
+            <div class="stat-blok">
+              <div class="stat-val" id="ov-betaald">—</div>
+              <div class="stat-lbl">betaald</div>
+            </div>
+            <div class="stat-blok">
+              <div class="stat-val" id="ov-kosten">—</div>
+              <div class="stat-lbl">brandstof</div>
+            </div>
+          </div>
+          <div class="tab-sectie-label">KM PER MAAND</div>
+          <div class="grafiek-sectie">
+            <div class="grafiek-kaart" id="grafiek-km"></div>
+          </div>
+          <div class="tab-sectie-label">ONDERHOUD</div>
+          <div class="form-kaart">
+            <label class="form-lbl">Type</label>
+            <select id="ond-type" class="onderhoud-type-select">
+              <option value="apk">APK</option>
+              <option value="banden">Banden</option>
+              <option value="olie">Olieverversing</option>
+              <option value="remmen">Remmen</option>
+              <option value="overig">Overig</option>
+            </select>
+            <label class="form-lbl">Kosten (€)</label>
+            <input type="number" id="ond-kosten" class="form-input" step="0.01" min="0" placeholder="bijv. 89.50" />
+            <label class="form-lbl">Opmerking (optioneel)</label>
+            <input type="text" id="ond-opmerking" class="form-input" placeholder="bijv. Michelin Energy Saver" />
+            <button id="btn-ond-save" class="btn-form-primary">Toevoegen</button>
+          </div>
+          <ul id="ond-lijst" class="item-lijst" style="margin-top:8px;margin-bottom:16px"></ul>
+        </div>
+      </div>
+
+      <div id="tab-instellingen" class="app-tab hidden">
+        <div class="tab-scroll">
+          <div class="tab-kop">
+            <div class="tab-kop-label">INSTELLINGEN</div>
+            <h2 class="tab-kop-titel">Voorkeuren</h2>
+          </div>
+          <div class="tab-sectie-label">AUTO</div>
+          <div class="form-kaart" id="auto-inst-form"></div>
+          <div class="tab-sectie-label">NAAM</div>
+          <div class="form-kaart">
+            <label class="form-lbl">Jouw naam (voor begroeting)</label>
+            <input type="text" id="inst-naam" class="form-input" placeholder="bijv. Ingmar" />
+            <button id="btn-naam" class="btn-form-primary">Opslaan</button>
+          </div>
+          <div class="tab-sectie-label">TRACKING</div>
+          <div class="form-kaart">
+            <div class="smart-toggle-rij">
+              <div class="smart-toggle-info-col">
+                <div class="smart-toggle-naam">Slimme km-meting</div>
+                <div class="smart-toggle-sub">Volgt GPS continu — scherm blijft aan</div>
+              </div>
+              <button class="smart-info-btn" id="btn-smart-info" aria-label="Meer info">
+                <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <circle cx="10" cy="10" r="8"/>
+                  <path d="M10 9v5M10 6.5v.5"/>
+                </svg>
+              </button>
+              <label class="toggle-switch">
+                <input type="checkbox" id="chk-smart-tracking" />
+                <span class="toggle-knop"></span>
+              </label>
+            </div>
+          </div>
+          <div class="tab-sectie-label">BETAALVERZOEK</div>
+          <div class="form-kaart">
+            <label class="form-lbl">Revolut gebruikersnaam</label>
+            <div class="tikkie-key-rij">
+              <span class="revolut-prefix">revolut.me/</span>
+              <input type="text" id="revolut-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" />
+            </div>
+            <div class="form-kaart-scheiding"></div>
+            <label class="form-lbl">bunq gebruikersnaam</label>
+            <div class="tikkie-key-rij">
+              <span class="revolut-prefix">bunq.me/</span>
+              <input type="text" id="betaalverzoek-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" />
+            </div>
+            <button id="btn-betaalverzoek-save" class="btn-form-primary">Opslaan</button>
+          </div>
+          <div class="tab-sectie-label">SNELKOPPELING</div>
+          <div class="shortcut-kaart">
+            <div class="shortcut-intro">
+              <div class="shortcut-icoon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <div>
+                <div class="shortcut-intro-titel">Rit starten in één tik</div>
+                <div class="shortcut-intro-sub">Maak een snelkoppeling op je beginscherm of vergrendelscherm die direct de rit-flow opent.</div>
+              </div>
+            </div>
+            <div class="shortcut-platforms">
+              <div class="shortcut-platform">
+                <div class="shortcut-platform-kop">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                  iPhone / iPad
+                </div>
+                <div class="shortcut-stappen">
+                  <div class="shortcut-stap"><span class="shortcut-nr">1</span><span>Open de <strong>Opdrachten</strong>-app en tik op <strong>+</strong></span></div>
+                  <div class="shortcut-stap"><span class="shortcut-nr">2</span><span><strong>Voeg actie toe</strong> → <strong>Safari</strong> → <strong>Open URL</strong></span></div>
+                  <div class="shortcut-stap"><span class="shortcut-nr">3</span><span>Plak de URL hieronder, sla op en voeg toe aan vergrendelscherm</span></div>
+                </div>
+              </div>
+              <div class="shortcut-platform shortcut-platform--border">
+                <div class="shortcut-platform-kop">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341a5.53 5.53 0 0 1-5.53 5.53 5.53 5.53 0 0 1-5.53-5.53 5.53 5.53 0 0 1 5.53-5.53 5.53 5.53 0 0 1 5.53 5.53zm-5.53-13.18A13.18 13.18 0 0 0 .813 15.341h3.36a9.82 9.82 0 0 1 9.82-9.82 9.82 9.82 0 0 1 9.82 9.82h3.36A13.18 13.18 0 0 0 11.993 2.161z"/></svg>
+                  Android / Desktop
+                </div>
+                <div class="shortcut-stappen">
+                  <div class="shortcut-stap"><span class="shortcut-nr">1</span><span>Kopieer de URL hieronder</span></div>
+                  <div class="shortcut-stap"><span class="shortcut-nr">2</span><span>Open Chrome → plak URL → tik op <strong>⋮</strong> → <strong>Toevoegen aan beginscherm</strong></span></div>
+                  <div class="shortcut-stap"><span class="shortcut-nr">3</span><span>Kies een naam en tik op <strong>Toevoegen</strong></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="shortcut-url-blok">
+              <div class="shortcut-url-lbl">Snelkoppeling-URL</div>
+              <div class="shortcut-url-rij">
+                <code class="shortcut-url" id="shortcut-url"></code>
+                <button class="shortcut-kopieer" id="btn-shortcut-kopieer">Kopieer</button>
+              </div>
+            </div>
+          </div>
+          <div class="tab-sectie-label">DATA</div>
+          <div class="form-kaart">
+            <button class="btn-form-sec" onclick="exportData()">↓ Exporteer JSON</button>
+            <button class="btn-form-sec" onclick="importData()">↑ Importeer JSON</button>
+            <button id="btn-reset" class="btn-form-danger" onclick="resetData()">Verwijder alle data</button>
+            <input type="file" id="import-file" accept=".json" class="hidden" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-tab="kaart">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor"
+            stroke-width="2" fill="none" />
+          <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2" />
+        </svg>
+        <span>KAART</span>
+      </button>
+      <button class="nav-btn" data-tab="ritten">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" />
+        </svg>
+        <span>RITTEN</span>
+      </button>
+      <button class="nav-btn" data-tab="saldo">
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" />
+          <path d="M3 10h18" stroke="currentColor" stroke-width="2" />
+          <path d="M7 15h2M15 15h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span>SALDO</span>
+      </button>
+      <button class="nav-btn" data-tab="overzicht">
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>OVERZICHT</span>
+      </button>
+      <button class="nav-btn" data-tab="instellingen">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>INSTELL.</span>
+      </button>
+    </nav>
+
+    <!-- CHANGELOG OVERLAY -->
+    <div id="changelog-overlay" class="changelog-overlay hidden" role="dialog" aria-modal="true">
+      <div class="changelog-backdrop" id="changelog-backdrop"></div>
+      <div class="changelog-card">
+        <div class="changelog-handel"></div>
+        <div class="changelog-kop">
+          <span class="changelog-badge">NIEUW</span>
+          <span class="changelog-versie" id="cl-versie">v1.5</span>
+          <span class="changelog-datum" id="cl-datum"></span>
+        </div>
+        <div class="changelog-titel">Wat is er nieuw?</div>
+        <ul class="changelog-lijst" id="cl-lijst"></ul>
+        <button class="changelog-sluit-btn" id="cl-sluit-btn">Sluiten ✓</button>
+      </div>
+    </div>
+
+    <!-- INFO OVERLAY (gedeeld component — binnen screen-app voor correcte stacking) -->
+    <div id="info-overlay" class="info-overlay hidden" role="dialog" aria-modal="true">
+      <div class="io-backdrop" id="info-overlay-backdrop"></div>
+      <div class="io-panel">
+        <div class="io-handel"></div>
+        <div class="io-visual" id="info-overlay-icoon"></div>
+        <div class="io-content">
+          <div class="io-chip" id="info-overlay-chip">INFO</div>
+          <div class="io-titel" id="info-overlay-titel">—</div>
+          <div class="io-tekst" id="info-overlay-tekst">—</div>
+          <button class="io-btn" id="info-overlay-btn">Begrepen</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INSTALL OVERLAY (iOS & Android, position:fixed op viewport) -->
+  <div id="install-overlay" class="install-overlay hidden">
+    <div class="install-overlay-bd" id="install-overlay-bd"></div>
+    <div class="install-sheet">
+      <button class="install-sluit" id="install-sluit">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="install-app-icon">
+        <svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#2a3a2c"/>
+          <path d="M10 28 L15 18 H33 L38 28 V34 H10 Z" fill="#4e7d52"/>
+          <path d="M14 28 L18 20 H30 L34 28" fill="#5e9464"/>
+          <rect x="10" y="28" width="28" height="7" rx="2" fill="#4e7d52"/>
+          <circle cx="17" cy="35" r="4" fill="#1a251c"/>
+          <circle cx="17" cy="35" r="2" fill="#3a5a3c"/>
+          <circle cx="31" cy="35" r="4" fill="#1a251c"/>
+          <circle cx="31" cy="35" r="2" fill="#3a5a3c"/>
+          <rect x="20" y="21" width="8" height="5" rx="1" fill="rgba(255,255,255,0.15)"/>
+        </svg>
+      </div>
+
+      <div class="install-titel">Installeer Vroom als app</div>
+      <div class="install-sub">Voeg Vroom toe aan je beginscherm voor de snelste ervaring — ook offline beschikbaar.</div>
+
+      <!-- Android: directe installatieknop -->
+      <div id="install-android-sectie" class="install-sectie hidden">
+        <button id="pwa-install-btn" class="install-primaire-btn">Toevoegen aan beginscherm</button>
+      </div>
+
+      <!-- iOS: stap-voor-stap instructies -->
+      <div id="install-ios-sectie" class="install-sectie hidden">
+        <ol class="install-stappen">
+          <li>
+            <span class="install-stap-nr">1</span>
+            <span>Tik op het <strong>Deel</strong>-icoon
+              <svg class="install-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v9M9 5l3-3 3 3"/><rect x="3" y="11" width="18" height="10" rx="2"/>
+              </svg>
+              onderaan je scherm
+            </span>
+          </li>
+          <li>
+            <span class="install-stap-nr">2</span>
+            <span>Kies <strong>'Zet op beginscherm'</strong></span>
+          </li>
+          <li>
+            <span class="install-stap-nr">3</span>
+            <span>Tik op <strong>'Voeg toe'</strong></span>
+          </li>
+        </ol>
+        <div class="install-pijl">▼</div>
+      </div>
+
+      <button class="install-later" id="install-later">Misschien later</button>
+    </div>
+  </div>
+
+  <!-- MODAL: AUTO TOEVOEGEN -->
+  <div id="modal-auto" class="modal hidden">
+    <div class="modal-sheet">
+      <div class="modal-handel"></div>
+      <div class="modal-kop">
+        <h3 class="modal-titel">Auto toevoegen</h3>
+        <button class="modal-sluit" id="modal-sluit">✕</button>
+      </div>
+      <label class="form-lbl">Naam</label>
+      <input type="text" id="auto-naam-inp" class="form-input" placeholder="bijv. Auto van Mama" />
+      <label class="form-lbl">Merk &amp; model</label>
+      <input type="text" id="auto-merk-inp" class="form-input" placeholder="bijv. Volkswagen Polo" />
+      <label class="form-lbl">Brandstoftype</label>
+      <select id="auto-brandstof-inp" class="form-input">
+        <option value="E10">Benzine (Euro 95 / E10)</option>
+        <option value="E5">Super (Euro 98 / E5)</option>
+        <option value="diesel">Diesel</option>
+        <option value="lpg">LPG / Autogas</option>
+        <option value="cng">CNG / Aardgas</option>
+        <option value="elektrisch">⚡ Elektrisch (EV)</option>
+      </select>
+      <label class="form-lbl" id="auto-kml-lbl">Verbruik (km per liter)</label>
+      <input type="number" id="auto-kml-inp" class="form-input" step="0.1" min="1" placeholder="bijv. 14" />
+      <label class="form-lbl" id="auto-prijs-lbl">Standaard brandstofprijs (€/L)</label>
+      <input type="number" id="auto-prijs-inp" class="form-input" step="0.001" min="0" placeholder="bijv. 2.10" />
+      <button id="btn-auto-save" class="btn-form-primary">Toevoegen</button>
+    </div>
+  </div>
+
+  <!-- MODAL: AUTO WISSELEN (quick picker) -->
+  <div id="modal-auto-wissel" class="modal hidden">
+    <div class="modal-sheet modal-sheet--compact">
+      <div class="modal-handel"></div>
+      <div class="modal-kop">
+        <h3 class="modal-titel">Kies auto</h3>
+        <button class="modal-sluit" id="modal-wissel-sluit">✕</button>
+      </div>
+      <div id="wissel-lijst" class="wissel-lijst"></div>
+      <button id="btn-wissel-add" class="btn-form-sec">+ Nieuwe auto toevoegen</button>
+    </div>
+  </div>
+
+  <!-- MODAL: RIT BEWERKEN -->
+  <div id="modal-rit" class="modal hidden">
+    <div class="modal-sheet">
+      <div class="modal-handel"></div>
+      <div class="modal-kop">
+        <h3 class="modal-titel">Rit bewerken</h3>
+        <button class="modal-sluit" id="modal-rit-sluit">✕</button>
+      </div>
+      <label class="form-lbl">Afstand (km)</label>
+      <input type="number" id="rit-edit-km" class="form-input" step="0.1" min="0" />
+      <label class="form-lbl">Notitie (optioneel)</label>
+      <input type="text" id="rit-edit-notitie" class="form-input" placeholder="bijv. winkelen, dokter…" />
+      <button id="btn-rit-edit-save" class="btn-form-primary">Opslaan</button>
+    </div>
+  </div>
+
+  <!-- MODAL: RIT SPLITSEN -->
+  <div id="modal-deel" class="modal hidden">
+    <div class="modal-sheet">
+      <div class="modal-handel"></div>
+      <div class="modal-kop">
+        <h3 class="modal-titel">Rit splitsen</h3>
+        <button class="modal-sluit" id="modal-deel-sluit">✕</button>
+      </div>
+      <div class="deel-rit-blok">
+        <div class="deel-rit-naam" id="deel-rit-naam">Rit</div>
+        <div class="deel-rit-info" id="deel-rit-info"></div>
+        <div class="deel-rit-kosten" id="deel-rit-kosten"></div>
+      </div>
+      <div class="deel-stepper-rij">
+        <span class="deel-stepper-lbl">Personen</span>
+        <div class="deel-stepper">
+          <button class="deel-stepper-btn" id="deel-min">−</button>
+          <span class="deel-stepper-val" id="deel-aantal">2</span>
+          <button class="deel-stepper-btn" id="deel-plus">+</button>
+        </div>
+      </div>
+      <div class="deel-passagiers-sectie">
+        <div class="deel-passagiers-header">
+          <span class="deel-passagiers-lbl">Wie rijden mee? <span id="deel-passagier-count" class="deel-passagier-count"></span></span>
+          <button class="deel-passagier-nieuw" id="deel-passagier-nieuw">+ Naam</button>
+        </div>
+        <div class="deel-passagiers-lijst" id="deel-passagiers-lijst"></div>
+        <div class="deel-passagier-invoer hidden" id="deel-passagier-invoer">
+          <input type="text" class="deel-passagier-inp" id="deel-passagier-inp" placeholder="Naam..." maxlength="20" />
+          <button class="deel-passagier-bevestig" id="deel-passagier-bevestig">✓</button>
+        </div>
+      </div>
+      <div class="deel-bedrag">
+        <div class="deel-bedrag-lbl">Per persoon</div>
+        <div class="deel-bedrag-val" id="deel-per-persoon">€ —</div>
+      </div>
+      <a id="deel-revolut" class="deel-revolut-btn hidden" href="#" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.924 4.124A6.5 6.5 0 0 0 14.5 0H4v24h4v-9h4.382l4.4 9H21l-4.7-9.5A6.5 6.5 0 0 0 20.924 4.124ZM14.5 11H8V4h6.5a2.5 2.5 0 0 1 0 5Z"/>
+        </svg>
+        Betaal via Revolut
+      </a>
+      <a id="deel-whatsapp" class="deel-wa-btn" href="#" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+        Stuur via WhatsApp
+      </a>
+      <button id="deel-kopieer" class="btn-form-sec">Kopieer bericht</button>
+    </div>
+  </div>
+
+  <!-- Leaflet JS (globaal beschikbaar als `L`) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- App entrypoint als ES module -->
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

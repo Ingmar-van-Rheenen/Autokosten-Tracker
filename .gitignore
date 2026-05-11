@@ -1,0 +1,17 @@
+# Editor
+.vscode/sftp.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Wrangler (Cloudflare Workers)
+tikkie-worker/.wrangler/
+
+# Claude tooling
+.agents/
+.impeccable/
+skills-lock.json
+
+# Docs / planning notes
+docs/

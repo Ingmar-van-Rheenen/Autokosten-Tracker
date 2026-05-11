@@ -1,0 +1,65 @@
+/* ── AUTOKOSTEN TRACKER – MAIN CSS ENTRY POINT ──────────────────── */
+/* Importeer alle deelbestanden in logische volgorde                  */
+
+/* 1. Tokens & reset */
+@import './tokens.css';
+
+/* 2. Animaties & keyframes */
+@import './animations.css';
+
+/* 3. Rijdende auto component */
+@import './car-scene.css';
+
+/* 4. Scherm-container */
+@import './screens.css';
+
+/* 5. Splash scherm */
+@import './splash.css';
+
+/* 6. Intro / onboarding scherm */
+@import './intro.css';
+
+/* 7. Auto-selectie scherm */
+@import './auto-select.css';
+
+/* 8. App-layout & bottom navigatie */
+@import './app-layout.css';
+
+/* 9. Kaart-tab (map, bottom sheet, rit-knoppen) */
+@import './kaart-tab.css';
+
+/* 10. Content tabs (scroll, kop, saldo hero, stats) */
+@import './content-tabs.css';
+
+/* 11. Formulieren & buttons */
+@import './forms.css';
+
+/* 12. Item-lijsten & maand-headers */
+@import './items.css';
+
+/* 13. Modals (auto toevoegen, wissel, deel) */
+@import './modal.css';
+
+/* 14. PWA install overlay & toast */
+@import './pwa.css';
+
+/* 15. Rit planner */
+@import './planner.css';
+
+/* 16. SVG grafieken */
+@import './grafieken.css';
+
+/* 17. Snelkoppeling kaart */
+@import './shortcut.css';
+
+/* 18. Info overlay */
+@import './info-overlay.css';
+
+/* 19. Changelog overlay */
+@import './changelog.css';
+
+/* 20. Toggle, km-info-link, tikkie-key */
+@import './controls.css';
+
+/* 21. Print */
+@import './print.css';

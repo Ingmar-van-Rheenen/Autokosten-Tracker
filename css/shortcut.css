@@ -1,0 +1,160 @@
+/* ── SNELKOPPELING KAART ───────────────────── */
+
+.shortcut-kaart {
+  margin: 0 16px;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.shortcut-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 18px 16px;
+  border-bottom: 1px solid var(--cream-2);
+}
+
+.shortcut-icoon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.shortcut-icoon-wrap svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--green-lite);
+}
+
+.shortcut-intro-titel {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--txt);
+  margin-bottom: 3px;
+  padding-top: 2px;
+}
+
+.shortcut-intro-sub {
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+  line-height: 1.45;
+}
+
+.shortcut-platforms {
+  border-bottom: 1px solid var(--cream-2);
+}
+
+.shortcut-platform {
+  padding: 14px 18px;
+}
+
+.shortcut-platform--border {
+  border-top: 1px solid var(--cream-2);
+}
+
+.shortcut-platform-kop {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--txt-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.shortcut-platform-kop svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--txt-muted);
+  flex-shrink: 0;
+}
+
+.shortcut-stappen {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.shortcut-stap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: var(--txt);
+  line-height: 1.45;
+}
+
+.shortcut-nr {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cream-2);
+  color: var(--txt-muted);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.shortcut-url-blok {
+  padding: 14px 18px 18px;
+}
+
+.shortcut-url-lbl {
+  font-size: 0.68rem;
+  font-family: var(--mono);
+  color: var(--txt-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.shortcut-url-rij {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cream);
+  border: 1.5px solid var(--cream-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.shortcut-url {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 0.67rem;
+  color: var(--txt);
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.shortcut-kopieer {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  background: var(--dark);
+  color: var(--txt-dark);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.shortcut-kopieer:active {
+  opacity: 0.7;
+}

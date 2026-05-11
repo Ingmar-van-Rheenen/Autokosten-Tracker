@@ -1,0 +1,246 @@
+/* ── SCHERM OVERGANGEN ─────────────────────── */
+.screen-enter {
+  animation: screen-slide-up 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Splash → volgend scherm: start 180ms later zodat animaties overlappen */
+.screen-enter-from-splash {
+  animation: screen-slide-up 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.screen-exit {
+  animation: screen-slide-down 0.32s ease both;
+  pointer-events: none;
+}
+
+/* Mobiel: geen horizontale offset */
+@keyframes screen-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes screen-slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+
+/* Desktop (≥500px): behoud translateX(-50%) centrering tijdens animatie */
+@media (min-width: 500px) {
+  @keyframes screen-slide-up {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(60px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes screen-slide-down {
+    from {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(-50%) translateY(32px);
+    }
+  }
+}
+
+/* ── TAB OVERGANGEN ─────────────────────────── */
+.tab-from-right {
+  animation: tab-slide-right 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tab-from-left {
+  animation: tab-slide-left 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes tab-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tab-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-36px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── BOTTOM SHEET STATE INGANG ──────────────── */
+.bs-state-enter {
+  animation: bs-state-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes bs-state-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.splash-item-exit {
+  animation: splash-item-fade 0.28s ease both;
+}
+
+@keyframes splash-item-fade {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* ── LOCATIE PULSE ──────────────────────────── */
+@keyframes locatie-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+
+  70% {
+    transform: scale(1.8);
+    opacity: 0.1;
+  }
+
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* ── RIT PILL PULSE ─────────────────────────── */
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ── SPLASH SPINNER ─────────────────────────── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── PWA INSTALL BANNER ─────────────────────── */
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── iOS BANNER ─────────────────────────────── */
+@keyframes ios-banner-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── iOS PIJL BOB ───────────────────────────── */
+@keyframes pijl-bob {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* ── GPS BUTTON ─────────────────────────────── */
+@keyframes gps-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gps-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(78, 125, 82, 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(78, 125, 82, 0);
+  }
+}
+
+/* ── PLAN RESULTAAT ─────────────────────────── */
+@keyframes plan-res-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,138 @@
+/* ── TRACKING TOGGLE ───────────────────────── */
+
+.smart-toggle-rij {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.smart-toggle-info-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.smart-toggle-naam {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--txt);
+  margin-bottom: 2px;
+}
+
+.smart-toggle-sub {
+  font-size: 0.72rem;
+  color: var(--txt-muted);
+  line-height: 1.3;
+}
+
+.smart-info-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: none;
+  border: 1px solid var(--cream-2);
+  color: var(--txt-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-switch {
+  flex-shrink: 0;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-knop {
+  position: absolute;
+  inset: 0;
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 100px;
+  transition: background 0.22s, border-color 0.22s;
+}
+
+.toggle-knop::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 3px;
+  left: 3px;
+  background: var(--txt-dark-m);
+  border-radius: 50%;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s;
+}
+
+.toggle-switch input:checked + .toggle-knop {
+  background: rgba(94, 148, 100, 0.25);
+  border-color: var(--green);
+}
+
+.toggle-switch input:checked + .toggle-knop::after {
+  transform: translateX(18px);
+  background: var(--green-lite);
+}
+
+/* ── KM INFO LINK ────────────────────────── */
+.km-info-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: var(--txt-dark-m);
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  -webkit-tap-highlight-color: transparent;
+  align-self: flex-start;
+}
+
+/* ── TIKKIE KEY INPUT ────────────────────── */
+.tikkie-key-rij {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tikkie-key-rij .form-input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.revolut-prefix {
+  font-size: 0.85rem;
+  color: var(--txt-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tikkie-key-toon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1.5px solid var(--cream-2);
+  background: transparent;
+  color: var(--txt-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

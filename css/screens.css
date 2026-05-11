@@ -1,0 +1,17 @@
+/* ── SCREENS ─────────────────────────────── */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+/* Desktop centering */
+@media (min-width: 500px) {
+  .screen {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 390px;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
+  }
+}

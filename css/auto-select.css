@@ -1,0 +1,464 @@
+/* ── AUTO SELECTIE ───────────────────────── */
+#screen-auto {
+  background: var(--cream);
+  overflow: hidden;
+  z-index: 20; /* boven #screen-app (10) zodat nav-balk niet doorschijnt tijdens overgang */
+}
+
+.auto-scroll {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.auto-content {
+  /* Basispadding + extra ruimte boven voor de notch, onder voor home-indicator */
+  padding: calc(72px + env(safe-area-inset-top)) 24px calc(48px + env(safe-area-inset-bottom, 0px));
+}
+
+.auto-greeting {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--txt-muted);
+  letter-spacing: 0.18em;
+  margin-bottom: 10px;
+}
+
+.auto-heading {
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--txt);
+  margin-bottom: 8px;
+}
+
+.auto-sub {
+  font-size: 0.88rem;
+  color: var(--txt-muted);
+  margin-bottom: 28px;
+}
+
+.auto-kaarten {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.auto-kaart {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.auto-kaart.selected {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(78, 125, 82, 0.12);
+}
+
+.auto-kaart-emoji {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--green-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  flex-shrink: 0;
+}
+
+.auto-kaart.selected .auto-kaart-emoji {
+  background: #c4dfc4;
+}
+
+.auto-kaart-info {
+  flex: 1;
+}
+
+.auto-kaart-naam {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--txt);
+  margin-bottom: 3px;
+}
+
+.auto-kaart-sub {
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+}
+
+.auto-kaart-radio {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--cream-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.18s, border-color 0.18s;
+}
+
+.auto-kaart.selected .auto-kaart-radio {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.auto-kaart.selected .auto-kaart-radio::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--white);
+}
+
+.btn-add-auto {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 2px dashed var(--cream-2);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  color: var(--txt-muted);
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: border-color 0.18s, color 0.18s;
+}
+
+.btn-add-auto:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* ── STAGGER ENTRY ANIMATIE ───────────────── */
+.auto-content--animeer .auto-greeting {
+  animation: auto-fade-op 0.45s cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+
+.auto-content--animeer .auto-heading {
+  animation: auto-fade-op 0.45s cubic-bezier(0.22, 1, 0.36, 1) 265ms both;
+}
+
+.auto-content--animeer .auto-sub {
+  animation: auto-fade-op 0.45s cubic-bezier(0.22, 1, 0.36, 1) 320ms both;
+}
+
+.auto-content--animeer .auto-kaart {
+  animation: auto-fade-op 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--kaart-delay, 380ms) both;
+}
+
+.auto-content--animeer .btn-add-auto {
+  animation: auto-fade-op 0.42s cubic-bezier(0.22, 1, 0.36, 1) 480ms both;
+}
+
+@keyframes auto-fade-op {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── AUTO KAART KIES ANIMATIE ─────────────── */
+.auto-kaart--gekozen {
+  animation: kaart-kies 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes kaart-kies {
+  0%, 100% { transform: scale(1); }
+  40%       { transform: scale(1.04); }
+}
+
+/* ── WIZARD: EERSTE AUTO INSTELLEN ───────── */
+
+/* Stagger fade-in voor wizard elementen */
+.wiz-el {
+  animation: auto-fade-op 0.45s cubic-bezier(0.22, 1, 0.36, 1) var(--wiz-d, 0ms) both;
+}
+
+/* Live preview kaart */
+.wiz-preview {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  margin-bottom: 20px;
+  border: 2px solid var(--green-bg);
+  transition: border-color 0.3s ease;
+}
+
+.wiz-preview-emoji {
+  font-size: 2rem;
+  width: 52px;
+  height: 52px;
+  background: var(--green-bg);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wiz-preview-info { flex: 1; min-width: 0; }
+
+.wiz-preview-naam {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--txt);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wiz-preview-sub {
+  font-size: 0.75rem;
+  color: var(--txt-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Voortgangsbalk */
+.wiz-prog-wrap {
+  margin-bottom: 20px;
+}
+
+.wiz-prog {
+  height: 4px;
+  background: var(--cream-2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.wiz-prog-balk {
+  height: 100%;
+  background: var(--green);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wiz-prog-lbl {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--txt-muted);
+  text-transform: uppercase;
+}
+
+/* Stappen container */
+.wiz-stappen {
+  position: relative;
+  min-height: 110px;
+  margin-bottom: 24px;
+}
+
+/* Individuele stap */
+.wiz-stap {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wiz-stap.actief {
+  display: flex;
+  animation: wiz-stap-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.wiz-stap.verlaat-links,
+.wiz-stap.verlaat-rechts {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wiz-stap.verlaat-links {
+  animation: wiz-stap-uit-links 0.22s ease both;
+}
+
+.wiz-stap.verlaat-rechts {
+  animation: wiz-stap-uit-rechts 0.22s ease both;
+}
+
+@keyframes wiz-stap-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes wiz-stap-uit-links {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-24px); }
+}
+
+@keyframes wiz-stap-uit-rechts {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(24px); }
+}
+
+.wiz-stap-vraag {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--txt);
+  line-height: 1.3;
+}
+
+/* Wizard input */
+.wiz-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-family: var(--sans);
+  border: 2px solid var(--cream-2);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--txt);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s;
+}
+
+.wiz-input:focus {
+  border-color: var(--green);
+}
+
+.wiz-hint {
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+  margin-top: -4px;
+}
+
+/* Type-selectie kaartjes (benzine vs elektrisch) */
+.wiz-type-keuze {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.wiz-type-kaart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--cream-2);
+  background: var(--white);
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wiz-type-kaart-icoon {
+  font-size: 1.8rem;
+}
+
+.wiz-type-kaart-lbl {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--txt-muted);
+  text-align: center;
+}
+
+.wiz-type-kaart.actief {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+
+.wiz-type-kaart.actief .wiz-type-kaart-lbl {
+  color: var(--green);
+}
+
+.wiz-type-kaart:hover:not(.actief) {
+  border-color: var(--green);
+}
+
+/* Chips (snelkeuze) */
+.wiz-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wiz-chip {
+  padding: 8px 14px;
+  border-radius: 100px;
+  border: 1.5px solid var(--cream-2);
+  background: var(--white);
+  font-size: 0.85rem;
+  font-family: var(--sans);
+  font-weight: 500;
+  color: var(--txt-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wiz-chip.actief {
+  border-color: var(--green);
+  background: var(--green-bg);
+  color: var(--green);
+  font-weight: 600;
+}
+
+.wiz-chip:hover:not(.actief) {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* Footer met knoppen */
+.wiz-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wiz-terug {
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--txt-muted);
+  cursor: pointer;
+  padding: 10px 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wiz-terug.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.wiz-volgende {
+  flex: 1;
+  padding: 15px 20px;
+  background: var(--green);
+  color: var(--white);
+  border: none;
+  border-radius: 100px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--sans);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wiz-volgende:active {
+  transform: scale(0.97);
+  background: #3d6b47;
+}
