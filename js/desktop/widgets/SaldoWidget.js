@@ -1,7 +1,7 @@
 // ── SaldoWidget ──────────────────────────────────────────────────────────────
 // Toont het live saldo, een uitleg-zin en drie mini-stats (gereden, brandstof,
 // vaste lasten per maand). Geen interne state; render() is idempotent.
-import { Utils } from '../../Utils.js';
+import { Utils } from '../../core/Utils.js';
 
 export class SaldoWidget {
   constructor(db) {

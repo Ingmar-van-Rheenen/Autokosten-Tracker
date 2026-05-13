@@ -1,6 +1,6 @@
 // ── TankController ────────────────────────────────────────────────────────────
 // Beheert het toevoegen, verwijderen en renderen van tankbeurten.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 export class TankController {
   constructor(db, onUpdate) {

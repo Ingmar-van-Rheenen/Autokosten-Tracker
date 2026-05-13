@@ -1,6 +1,6 @@
 // ── RittenWidget ────────────────────────────────────────────────────────────
 // Toont de laatste 5 ritten in compacte vorm; bij expanded view tot 20.
-import { Utils } from '../../Utils.js';
+import { Utils } from '../../core/Utils.js';
 
 export class RittenWidget {
   constructor(db) {

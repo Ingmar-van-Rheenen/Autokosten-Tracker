@@ -1,7 +1,7 @@
 // ── TankWidget ──────────────────────────────────────────────────────────────
 // Toont de laatste 5 tankbeurten; bij expanded view tot 20.
 // Past zich aan op elektrische auto's (kWh-label ipv L).
-import { Utils } from '../../Utils.js';
+import { Utils } from '../../core/Utils.js';
 
 export class TankWidget {
   constructor(db) {

@@ -1,7 +1,7 @@
 // ── Changelog ─────────────────────────────────────────────────────────────────
 // Voeg nieuwe entries bovenaan toe. Versie is een oplopend integer.
 // De popup verschijnt automatisch als de user een hogere versie nog niet heeft gezien.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 const SEEN_KEY = 'tanklog_changelog_seen';
 

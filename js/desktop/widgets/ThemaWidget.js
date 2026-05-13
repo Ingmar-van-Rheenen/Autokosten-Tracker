@@ -1,7 +1,7 @@
 // ── ThemaWidget ─────────────────────────────────────────────────────────────
 // 3-knops segmented control (klassiek / licht / donker). Sync't met de
 // huidige Database-waarde; ThemaController.set wordt aangeroepen op klik.
-import { ThemaController } from '../../ThemaController.js';
+import { ThemaController } from '../../ui/ThemaController.js';
 
 export class ThemaWidget {
   constructor(db) {

@@ -1,6 +1,6 @@
 // ── BottomSheetController ────────────────────────────────────────────────────
 // Beheert swipe-up/down op de bottom sheet + quick-stats + shortcut-navigatie
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 const SWIPE_THRESHOLD = 40; // px minimale drag om te triggeren
 

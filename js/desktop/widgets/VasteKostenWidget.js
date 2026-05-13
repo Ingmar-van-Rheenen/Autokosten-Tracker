@@ -1,6 +1,6 @@
 // ── VasteKostenWidget ───────────────────────────────────────────────────────
 // Lijst van vaste kosten met bedrag/maand + totaal-footer.
-import { Utils } from '../../Utils.js';
+import { Utils } from '../../core/Utils.js';
 
 export class VasteKostenWidget {
   constructor(db) {

@@ -1,6 +1,6 @@
 // ── StatsWidget ─────────────────────────────────────────────────────────────
 // 2×2 grid: totaal km, ritten, l/100km, € per km.
-import { Utils } from '../../Utils.js';
+import { Utils } from '../../core/Utils.js';
 
 export class StatsWidget {
   constructor(db) {

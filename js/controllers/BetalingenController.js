@@ -1,8 +1,8 @@
 // ── BetalingenController ──────────────────────────────────────────────────────
 // Geschiedenis van afrekeningen tussen jou en je auto-deler.
 // Renders #bet-lijst onder de Instellingen-tab + form-binding op #btn-bet-opslaan.
-import { Utils } from './Utils.js';
-import { ConfirmModal } from './ConfirmModal.js';
+import { Utils } from '../core/Utils.js';
+import { ConfirmModal } from '../ui/ConfirmModal.js';
 
 const METHODE_LABEL = {
   tikkie: 'Tikkie',

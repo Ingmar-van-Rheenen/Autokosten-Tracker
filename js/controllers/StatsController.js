@@ -1,7 +1,7 @@
 // ── StatsController ───────────────────────────────────────────────────────────
 // Beheert saldo-berekening, overzicht-statistieken, grafiek en auto-instellingen.
-import { Utils } from './Utils.js';
-import { InfoOverlay } from './InfoOverlay.js';
+import { Utils } from '../core/Utils.js';
+import { InfoOverlay } from '../ui/InfoOverlay.js';
 
 export class StatsController {
   constructor(db) {
