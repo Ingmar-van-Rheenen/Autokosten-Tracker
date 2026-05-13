@@ -21,7 +21,7 @@ import { ConfirmModal } from './ConfirmModal.js';
 import { VasteKostenController } from './VasteKostenController.js';
 import { BetalingenController } from './BetalingenController.js';
 import { AfrekenController } from './AfrekenController.js';
-import { DesktopDashboard } from './DesktopDashboard.js';
+import { DesktopDashboard } from './desktop/DesktopDashboard.js';
 
 const SCHERMEN = ['screen-splash', 'screen-intro', 'screen-auto', 'screen-app'];
 const TAB_VOLGORDE = ['kaart', 'ritten', 'saldo', 'overzicht', 'instellingen'];

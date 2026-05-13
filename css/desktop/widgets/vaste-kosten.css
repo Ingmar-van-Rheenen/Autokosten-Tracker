@@ -1,0 +1,55 @@
+/* ── VASTE KOSTEN WIDGET ────────────────────────────────────────── */
+@media (min-width: 1280px) {
+  .dash-vk-lijst {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .dash-vk-rij {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+  }
+
+  .dash-vk-naam {
+    font-size: 0.88rem;
+    color: var(--txt-dark);
+  }
+
+  .dash-vk-bedrag {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--txt-dark);
+  }
+
+  .dash-vk-totaal {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--dark-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .dash-vk-totaal-lbl {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--txt-dark-m);
+  }
+
+  .dash-vk-totaal-val {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--green-lite);
+  }
+}

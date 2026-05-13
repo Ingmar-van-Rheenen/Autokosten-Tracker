@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v44';
+const CACHE = 'tanklog-v45';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -34,7 +34,15 @@ const ASSETS = [
   '/css/afreken.css',
   '/css/confirm-modal.css',
   '/css/swipe.css',
-  '/css/desktop.css',
+  '/css/desktop/layout.css',
+  '/css/desktop/widgets/saldo.css',
+  '/css/desktop/widgets/trend.css',
+  '/css/desktop/widgets/mini-lijst.css',
+  '/css/desktop/widgets/vaste-kosten.css',
+  '/css/desktop/widgets/stats.css',
+  '/css/desktop/widgets/kaart.css',
+  '/css/desktop/widgets/quick-actions.css',
+  '/css/desktop/widgets/thema.css',
   '/js/main.js',
   '/js/CarScene.js',
   '/js/SplashScene.js',
@@ -59,7 +67,16 @@ const ASSETS = [
   '/js/VasteKostenController.js',
   '/js/BetalingenController.js',
   '/js/AfrekenController.js',
-  '/js/DesktopDashboard.js',
+  '/js/desktop/DesktopDashboard.js',
+  '/js/desktop/widgets/SaldoWidget.js',
+  '/js/desktop/widgets/TrendWidget.js',
+  '/js/desktop/widgets/RittenWidget.js',
+  '/js/desktop/widgets/TankWidget.js',
+  '/js/desktop/widgets/VasteKostenWidget.js',
+  '/js/desktop/widgets/StatsWidget.js',
+  '/js/desktop/widgets/KaartWidget.js',
+  '/js/desktop/widgets/QuickActionsWidget.js',
+  '/js/desktop/widgets/ThemaWidget.js',
   '/js/ThemaController.js',
   '/js/ConfirmModal.js',
   '/icons/icon-192.png',

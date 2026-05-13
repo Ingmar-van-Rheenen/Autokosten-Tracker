@@ -82,4 +82,12 @@
 @import './swipe.css';
 
 /* 27. Desktop dashboard (≥1280px) */
-@import './desktop.css';
+@import './desktop/layout.css';
+@import './desktop/widgets/saldo.css';
+@import './desktop/widgets/trend.css';
+@import './desktop/widgets/mini-lijst.css';
+@import './desktop/widgets/vaste-kosten.css';
+@import './desktop/widgets/stats.css';
+@import './desktop/widgets/kaart.css';
+@import './desktop/widgets/quick-actions.css';
+@import './desktop/widgets/thema.css';

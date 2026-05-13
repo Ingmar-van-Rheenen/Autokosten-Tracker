@@ -1,0 +1,47 @@
+/* ── THEMA WIDGET — 3-knops segmented control ──────────────────── */
+@media (min-width: 1280px) {
+  .w-themas {
+    padding: 14px 18px;
+  }
+
+  .dash-themas-rij {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    height: 100%;
+  }
+
+  .dash-thema-toggle {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--dark-3);
+    border: 1px solid var(--dark-border);
+    border-radius: 100px;
+  }
+
+  .dash-thema-knop {
+    background: transparent;
+    border: none;
+    color: var(--txt-dark-m);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background 0.15s ease-out, color 0.15s ease-out;
+  }
+
+  .dash-thema-knop:hover {
+    color: var(--txt-dark);
+  }
+
+  .dash-thema-knop.actief {
+    background: var(--green);
+    color: #fff;
+  }
+}

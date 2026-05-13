@@ -1,0 +1,9 @@
+/* ── TREND WIDGET — canvas chart ────────────────────────────────── */
+@media (min-width: 1280px) {
+  .dash-canvas {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    display: block;
+  }
+}
