@@ -46,9 +46,49 @@
   font-size: 0.88rem;
 }
 
+/* Suppress browser-native autofill/clear/reveal icons */
+.form-input::-ms-clear,
+.form-input::-ms-reveal,
+.form-input::-webkit-credentials-auto-fill-button,
+.form-input::-webkit-strong-password-auto-fill-button,
+.form-input::-webkit-contacts-auto-fill-button {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+  margin: 0;
+}
+
 .tank-totaal-rij {
   font-size: 0.88rem;
   color: var(--txt-muted);
+}
+
+.form-hint {
+  font-size: 0.76rem;
+  color: var(--txt-muted);
+  line-height: 1.45;
+  margin-top: -2px;
+}
+
+.form-hint-link {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--green);
+}
+
+/* Rij voor label + info-knop, gebruikt o.a. bij Stadia-instelling */
+.form-lbl-rij {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.form-lbl-rij .form-lbl {
+  margin-top: 0;
+  flex: 1;
 }
 
 /* ── FORM BUTTONS ────────────────────────── */
@@ -65,6 +105,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.15s;
+  margin-top: 10px;
 }
 
 .btn-form-primary:active {
@@ -74,6 +115,7 @@
 .btn-form-sec {
   width: 100%;
   padding: 12px;
+  margin-top: 10px;
   background: var(--cream);
   color: var(--txt);
   border: 1.5px solid var(--cream-2);
@@ -126,4 +168,133 @@
   color: var(--green);
   font-family: var(--mono);
   cursor: pointer;
+}
+
+/* ── v3: BON-FOTO UPLOAD ─────────────────── */
+.bon-upload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--tekst);
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--rand);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.bon-upload:hover,
+.bon-upload:active {
+  border-color: var(--primair);
+}
+
+.bon-upload svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Verberg de echte file-input — label fungeert als knop */
+.bon-upload input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.bon-thumb-wrap {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  position: relative;
+}
+
+.bon-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  object-fit: cover;
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--rand);
+}
+
+.bon-thumb-verwijder {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--gevaar);
+  color: #ffffff;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── v3: THEMA TOGGLE (segmented control) ─────────── */
+.thema-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--cream);
+  border-radius: 100px;
+  border: 1.5px solid var(--cream-2);
+}
+
+.thema-toggle .thema-optie {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.thema-toggle .thema-optie input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.thema-toggle .thema-optie span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--txt-muted);
+  transition: background 0.18s, color 0.18s;
+}
+
+.thema-toggle .thema-optie input[type='radio']:checked + span {
+  background: var(--green);
+  color: var(--white);
+  box-shadow: 0 1px 3px rgba(78, 125, 82, 0.3);
+}
+
+.thema-toggle .thema-optie:active span {
+  transform: scale(0.97);
+}
+
+.bon-thumb-verwijder:hover {
+  opacity: 0.85;
 }

@@ -128,48 +128,52 @@
   width: 100%;
 }
 
-.io-gps-wrap {
-  position: relative;
-  width: 140px;
-  height: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ── ROUTE TRACKING ANIMATIE ─────────────── */
+.io-smart-route {
+  width: 100%;
+  max-width: 320px;
+  padding: 6px 0;
 }
 
-.io-gps-ring {
-  position: absolute;
-  border-radius: 50%;
-  width: 56px;
-  height: 56px;
-  border: 1.5px solid var(--green-lite);
-  animation: io-ring-uit 2.4s ease-out infinite;
-  pointer-events: none;
+.io-smart-route svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-@keyframes io-ring-uit {
-  0%   { width: 56px;  height: 56px;  opacity: 0.7; }
-  100% { width: 140px; height: 140px; opacity: 0;   }
+/* De groene polyline die "achter de cursor aan" intekent.
+   pathLength=100 op het pad maakt dasharray:100 exact = volledige lengte. */
+.io-smart-fill {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: io-smart-trace 3.6s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(122, 184, 122, 0.5));
 }
 
-.io-gps-center {
-  position: relative;
-  z-index: 2;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(62, 107, 71, 0.25);
-  border: 2px solid var(--green-lite);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--green-lite);
-  animation: io-glow 2s ease-in-out infinite;
+@keyframes io-smart-trace {
+  to { stroke-dashoffset: 0; }
 }
 
-@keyframes io-glow {
-  0%, 100% { box-shadow: 0 0 0 0    rgba(94, 148, 100, 0.4); }
-  50%       { box-shadow: 0 0 0 12px rgba(94, 148, 100, 0);   }
+/* De centrale cursor-dot — glow effect */
+.io-smart-cursor > circle:last-of-type {
+  filter: drop-shadow(0 0 4px rgba(122, 184, 122, 0.6));
+}
+
+/* Pulserende ringen die met de cursor meebewegen.
+   SVG transform-origin is 0,0 (waar de cursor zit) — schaal naar buiten. */
+.io-smart-ring-wrap {
+  transform-origin: 0 0;
+  animation: io-smart-pulse 1.6s ease-out infinite;
+}
+
+.io-smart-ring-1 { animation-delay: 0s; }
+.io-smart-ring-2 { animation-delay: 0.8s; }
+
+@keyframes io-smart-pulse {
+  0%   { transform: scale(0.4); opacity: 0.75; }
+  90%  { opacity: 0;            }
+  100% { transform: scale(2.6); opacity: 0;    }
 }
 
 .io-smart-cards {
@@ -289,4 +293,68 @@
 
 @keyframes io-teken-route {
   to { stroke-dashoffset: 0; }
+}
+
+/* ── KAART INFO SCENE ─────────────────────── */
+.io-kaart-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 0 4px;
+}
+
+.io-kaart-tegel {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  transform: perspective(800px) rotateX(8deg);
+  animation: io-kaart-floaten 4s ease-in-out infinite;
+}
+
+.io-kaart-tegel svg {
+  display: block;
+}
+
+@keyframes io-kaart-floaten {
+  0%, 100% { transform: perspective(800px) rotateX(8deg) translateY(0); }
+  50%      { transform: perspective(800px) rotateX(8deg) translateY(-3px); }
+}
+
+/* Route tekent zich in */
+.io-kaart-route {
+  animation: io-teken-route 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+/* Merk-pins poppen één voor één in */
+.io-kaart-pin {
+  opacity: 0;
+  transform-origin: center;
+  animation: io-pin-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes io-pin-pop {
+  0%   { opacity: 0; transform: scale(0) translateY(-4px); }
+  60%  { opacity: 1; transform: scale(1.18) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Eigen locatie-puls (zoals op de echte kaart) */
+.io-kaart-acc {
+  animation: io-acc-puls 2.4s ease-out infinite;
+  transform-origin: 60px 95px;
+}
+
+@keyframes io-acc-puls {
+  0%   { opacity: 0.5; transform: scale(0.7); }
+  60%  { opacity: 0.1; transform: scale(1.35); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Thema-aware: in donker en klassiek ander grid-pattern */
+html[data-thema='donker'] .io-kaart-bg,
+html[data-thema='klassiek'] .io-kaart-bg {
+  fill: url(#ioKaartBgDark);
 }

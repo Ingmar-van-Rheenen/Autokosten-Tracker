@@ -49,7 +49,6 @@ export class DeelController {
   // ── Events ────────────────────────────────────────────────────────────────
 
   _bindEvents() {
-    document.getElementById('modal-deel-sluit').addEventListener('click', () => this._sluitModal());
     document.getElementById('modal-deel').addEventListener('click', (e) => {
       if (e.target === document.getElementById('modal-deel')) this._sluitModal();
     });
@@ -216,6 +215,8 @@ export class DeelController {
     const betaalLinks = [];
     const revolutUsername = this._db.getRevolutUsername();
     if (revolutUsername) betaalLinks.push(`revolut.me/${revolutUsername}`);
+    const tikkieHandle = (typeof this._db.getTikkieHandle === 'function') ? this._db.getTikkieHandle() : '';
+    if (tikkieHandle) betaalLinks.push(`tikkie.me/${tikkieHandle}`);
     const bankUrl = this._bouwBankUrl(pp);
     if (bankUrl) betaalLinks.push(bankUrl);
 

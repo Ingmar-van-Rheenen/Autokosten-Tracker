@@ -63,3 +63,20 @@
 
 /* 21. Print */
 @import './print.css';
+
+/* ── v3 TOEVOEGINGEN ─────────────────────── */
+
+/* 22. Vaste kosten (lijst + sheet) */
+@import './vaste-kosten.css';
+
+/* 23. Betalingen (lijst + form) */
+@import './betalingen.css';
+
+/* 24. Afreken-sheet (saldo + deeplinks) */
+@import './afreken.css';
+
+/* 25. Confirm modal (2-knops bottom sheet) */
+@import './confirm-modal.css';
+
+/* 26. Swipe-to-delete primitieven */
+@import './swipe.css';

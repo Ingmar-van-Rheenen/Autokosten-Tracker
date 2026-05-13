@@ -8,7 +8,68 @@
 }
 
 /* ── DESIGN TOKENS ────────────────────────── */
+/*  Niet-kleur tokens (radius, typografie, spacing, z-index, schaduw).
+    Staan los van het thema en zijn de bron van waarheid voor alle nieuwe CSS.
+    Zie docs/COMPONENT_CONTRACT.md §11 + §12 voor uitleg per token. */
 :root {
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --mono: 'Space Mono', monospace;
+  --serif: 'Fraunces', serif;
+  --sans: 'DM Sans', sans-serif;
+
+  /* Typografie-schaal — gebruik semantisch, niet in pixels denken */
+  --font-xs: 11px;
+  --font-sm: 13px;
+  --font-base: 15px;
+  --font-md: 17px;
+  --font-lg: 20px;
+  --font-xl: 28px;
+  --font-hero: 40px;   /* saldo-bedrag */
+
+  --weight-body: 400;
+  --weight-label: 500;
+  --weight-nadruk: 600;
+  --weight-kop: 700;
+
+  /* Spacing-ladder — vermenigvuldigers van 4px */
+  --ruimte-1: 4px;
+  --ruimte-2: 8px;
+  --ruimte-3: 12px;
+  --ruimte-4: 16px;
+  --ruimte-5: 24px;
+  --ruimte-6: 32px;
+
+  /* Touch-targets — iOS HIG-minimum is 44px, default knop 48px */
+  --tap-min: 44px;
+  --knop-hoogte: 48px;
+  --knop-hoogte-klein: 36px;
+
+  /* Schaduwen — drie niveaus, niet meer */
+  --schaduw-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --schaduw-2: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --schaduw-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Z-index ladder — alle nieuwe componenten gebruiken deze tokens */
+  --z-base: 0;
+  --z-tabs: 100;
+  --z-fab: 110;
+  --z-sheet-backdrop: 190;
+  --z-sheet: 200;
+  --z-toast: 300;
+  --z-modal-backdrop: 390;
+  --z-modal: 400;
+  --z-changelog: 490;
+  --z-info-overlay: 500;
+  --z-install-overlay: 9000;
+}
+
+/* ── PALETTE: DEFAULT (klassiek = originele v2 look) ──── */
+:root,
+html[data-thema='klassiek'] {
+  /* Bestaande palette-aliassen — donker (v2 oorsprong, blijft default) */
   --dark: #1b2537;
   --dark-2: #232f44;
   --dark-3: #2a3850;
@@ -25,11 +86,74 @@
   --txt-muted: #7a8a9a;
   --txt-dark: #dce8f4;
   --txt-dark-m: #546070;
-  --radius: 16px;
-  --mono: 'Space Mono', monospace;
-  --serif: 'Fraunces', serif;
-  --sans: 'DM Sans', sans-serif;
+
+  /* v3 semantische tokens — defaults stemmen overeen met licht thema */
+  --bg: #f0ebe0;
+  --bg-elev: #ffffff;
+  --surface: #e6e0d2;
+  --tekst: #1b2537;
+  --tekst-zwak: #7a8a9a;
+  --rand: #d8d2c2;
+  --primair: #4e7d52;
+  --succes: #4e7d52;
+  --gevaar: #EF4444;
+  --accent: #7ab87a;
 }
+
+/* ── PALETTE: EXPLICIET LICHT ──── */
+html[data-thema='licht'] {
+  /* v2-tokens — zelfde als :root default */
+  --green: #4e7d52;
+  --green-2: #5e9464;
+  --green-lite: #7ab87a;
+  --green-bg: #d4e8d4;
+  --cream: #f0ebe0;
+  --cream-2: #e6e0d2;
+  --white: #ffffff;
+  --red: #c94040;
+  --txt: #1b2537;
+  --txt-muted: #7a8a9a;
+
+  /* v3-tokens */
+  --bg: #f0ebe0;
+  --bg-elev: #ffffff;
+  --surface: #e6e0d2;
+  --tekst: #1b2537;
+  --tekst-zwak: #7a8a9a;
+  --rand: #d8d2c2;
+  --primair: #4e7d52;
+  --succes: #4e7d52;
+  --gevaar: #e05252;
+  --accent: #7ab87a;
+}
+
+/* ── PALETTE: EXPLICIET DONKER ──── */
+html[data-thema='donker'] {
+  /* v2-tokens — donker overschrijft de lichte :root waarden */
+  --green: #5e9464;
+  --green-2: #7ab87a;
+  --green-lite: #9fd09f;
+  --green-bg: #1e3320;
+  --cream: #1b2537;
+  --cream-2: #2a3850;
+  --white: #232f44;
+  --red: #ef5555;
+  --txt: #dce8f4;
+  --txt-muted: #8a9ab0;
+
+  /* v3-tokens */
+  --bg: #1b2537;
+  --bg-elev: #232f44;
+  --surface: #2a3850;
+  --tekst: #dce8f4;
+  --tekst-zwak: #8a9ab0;
+  --rand: #35445e;
+  --primair: #5e9464;
+  --succes: #5e9464;
+  --gevaar: #ef5555;
+  --accent: #7ab87a;
+}
+
 
 /* ── BASIS ────────────────────────────────── */
 html,
@@ -38,8 +162,8 @@ body {
   overflow: hidden;
   overscroll-behavior: none;
   font-family: var(--sans);
-  background: var(--dark);
-  color: var(--txt);
+  background: var(--bg);
+  color: var(--tekst);
 }
 
 /* iOS PWA: html { height: 100% } sluit soms de onderste safe area uit.

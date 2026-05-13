@@ -3,7 +3,7 @@
 export class GeoService {
   /**
    * Vraag huidige GPS-positie op
-   * @returns {Promise<{lat: number, lng: number}>}
+   * @returns {Promise<{lat:number,lng:number,accuracy:number,heading:number|null}>}
    */
   getGps() {
     return new Promise((res, rej) => {
@@ -12,7 +12,12 @@ export class GeoService {
         return;
       }
       navigator.geolocation.getCurrentPosition(
-        (p) => res({ lat: p.coords.latitude, lng: p.coords.longitude }),
+        (p) => res({
+          lat: p.coords.latitude,
+          lng: p.coords.longitude,
+          accuracy: p.coords.accuracy || 0,
+          heading: Number.isFinite(p.coords.heading) ? p.coords.heading : null,
+        }),
         (e) => rej(new Error(e.message)),
         { enableHighAccuracy: true, timeout: 12000 }
       );

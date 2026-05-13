@@ -2,7 +2,7 @@
 #screen-app {
   display: flex;
   flex-direction: column;
-  background: var(--dark);
+  background: var(--bg);
   /* Geen globale top-padding: elke tab regelt dit zelf */
 }
 
@@ -24,15 +24,31 @@
   display: flex;
 }
 
-/* ── BOTTOM NAV ──────────────────────── */
+/* ── BOTTOM NAV ──────────────────────────────────────────
+   Thema-aware: donker in dark mode, licht in light mode.
+   Custom props worden per thema overschreven in tokens.css. */
+
+/* Klassiek = donkere nav (originele v2 look) */
+html[data-thema='klassiek'] .bottom-nav {
+  background: #1b2537;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+html[data-thema='klassiek'] .nav-btn {
+  color: rgba(255, 255, 255, 0.38);
+}
+html[data-thema='klassiek'] .nav-btn.active {
+  color: #7ab87a;
+}
+
 .bottom-nav {
   display: flex;
-  background: var(--dark);
-  border-top: 1px solid var(--dark-border);
+  background: var(--cream);
+  border-top: 1px solid var(--cream-2);
   flex-shrink: 0;
   padding: 0 4px;
-  /* max() zorgt voor minimaal 20px, of de echte home-indicator hoogte */
-  padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+  padding-bottom: max(env(safe-area-inset-bottom, 20px), 16px);
+  z-index: var(--z-tabs);
+  position: relative;
 }
 
 /* ── NAV BUTTONS ─────────────────────── */
@@ -45,8 +61,8 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--txt-dark-m);
-  padding: 8px 4px 7px;
+  color: var(--txt-muted);
+  padding: 10px 4px 7px;
   position: relative;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.2s ease;
@@ -56,20 +72,6 @@
   transform: scale(0.92);
 }
 
-/* Pill achter het icoon */
-.nav-btn::before {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 30px;
-  border-radius: 16px;
-  background: rgba(122, 184, 122, 0.12);
-  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 .nav-btn svg {
   width: 20px;
   height: 20px;
@@ -77,23 +79,26 @@
   fill: none;
   position: relative;
   z-index: 1;
+  transition: stroke-width 0.2s ease;
 }
 
 .nav-btn span {
   font-family: var(--mono);
   font-size: 0.5rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   position: relative;
   z-index: 1;
+  font-weight: 600;
 }
 
 /* ── ACTIEVE STATE ───────────────────── */
 .nav-btn.active {
-  color: var(--green-lite);
+  color: var(--green);
 }
 
-.nav-btn.active::before {
-  width: 52px;
+
+.nav-btn.active svg {
+  stroke-width: 2.4;
 }
 
 /* ── NAV ICOON STUIT ─────────────────────── */
@@ -105,3 +110,12 @@
   0%, 100% { transform: translateY(0) scale(1); }
   42%       { transform: translateY(-4px) scale(1.16); }
 }
+
+/* ── v3 NOTITIE: TAB LABELS ──────────────────
+   In v3 wisselen de zichtbare labels (KAART→RIT, SALDO→TANK,
+   OVERZICHT→STATS) maar de data-tab attributen blijven gelijk
+   (kaart / ritten / saldo / overzicht / instellingen).
+   Alle selectoren hier targeten .nav-btn / data-tab — niet de
+   span-tekst — dus er is geen CSS-aanpassing nodig.
+   Owner van de label-wijziging is Agent 9 (index.html).
+   ─────────────────────────────────────────── */

@@ -1,35 +1,55 @@
 // ── Database ──────────────────────────────────────────────────────────────────
+// v3 storage. Migreert non-destructief vanuit v2 (tanklog_v2) en v1 (autokosten_v1).
+// Elke mutator emit een 'db:updated' event op window zodat controllers reactief
+// kunnen re-renderen zonder handmatige callback-chains.
+
 import { Utils } from './Utils.js';
 
-const DB_KEY = 'tanklog_v2';
-const DB_KEY_OLD = 'autokosten_v1';
+const DB_KEY = 'tanklog_v3';
+const DB_KEY_V2 = 'tanklog_v2';
+const DB_KEY_V1 = 'autokosten_v1';
 
 export class Database {
+  // ── Load / Save / Wipe ──────────────────────────────────────────────────────
+
   load() {
     try {
-      const raw = localStorage.getItem(DB_KEY);
-      if (raw) {
-        const data = JSON.parse(raw);
-        if (!Array.isArray(data.autos)) data.autos = [];
-        if (!Array.isArray(data.ritten)) data.ritten = [];
-        if (!Array.isArray(data.tankbeurten)) data.tankbeurten = [];
-        if (!Array.isArray(data.onderhoud)) data.onderhoud = [];
-        return data;
+      const rawV3 = localStorage.getItem(DB_KEY);
+      if (rawV3) {
+        return this._hydrate(JSON.parse(rawV3));
       }
 
-      const oud = localStorage.getItem(DB_KEY_OLD);
-      if (oud) {
-        const gemigreerd = this._migreer(JSON.parse(oud));
-        this.save(gemigreerd);
+      const rawV2 = localStorage.getItem(DB_KEY_V2);
+      if (rawV2) {
+        const gemigreerd = this._migreerV2NaarV3(JSON.parse(rawV2));
+        // Non-destructief: v2 key blijft bestaan voor eventuele downgrade.
+        this._schrijf(gemigreerd);
         return gemigreerd;
       }
+
+      const rawV1 = localStorage.getItem(DB_KEY_V1);
+      if (rawV1) {
+        const v2obj = this._migreerV1NaarV2(JSON.parse(rawV1));
+        const v3obj = this._migreerV2NaarV3(v2obj);
+        this._schrijf(v3obj);
+        return v3obj;
+      }
     } catch {
-      // Corrupte data — start schoon
+      // Corrupte data — start schoon.
     }
-    return this._leeg();
+    return this._leegV3();
   }
 
   save(data) {
+    this._schrijf(data);
+    this._emit('save', null);
+  }
+
+  /**
+   * Interne schrijf zonder event-emit. Gebruikt door load() en mutators
+   * die hun eigen, specifieke event willen uitzenden.
+   */
+  _schrijf(data) {
     try {
       localStorage.setItem(DB_KEY, JSON.stringify(data));
     } catch {
@@ -40,10 +60,26 @@ export class Database {
 
   verwijderAlles() {
     localStorage.removeItem(DB_KEY);
-    localStorage.removeItem(DB_KEY_OLD);
+    localStorage.removeItem(DB_KEY_V2);
+    localStorage.removeItem(DB_KEY_V1);
     localStorage.removeItem('tanklog_lopende_rit');
     localStorage.removeItem('tanklog_cbs_dataset');
     localStorage.removeItem('pwa_banner_dismissed');
+    this._emit('verwijderAlles', null);
+  }
+
+  // ── Algemene instellingen ───────────────────────────────────────────────────
+
+  getThema() {
+    return this.load().thema ?? 'auto';
+  }
+
+  setThema(thema) {
+    if (!['auto', 'licht', 'donker'].includes(thema)) return;
+    const d = this.load();
+    d.thema = thema;
+    this._schrijf(d);
+    this._emit('setThema', { thema });
   }
 
   getSmartTracking() {
@@ -52,28 +88,9 @@ export class Database {
 
   setSmartTracking(aan) {
     const d = this.load();
-    d.smart_tracking = aan;
-    this.save(d);
-  }
-
-  getGeselecteerdeAuto() {
-    const d = this.load();
-    return d.autos.find((a) => a.id === d.geselecteerd) || d.autos[0] || null;
-  }
-
-  getAutoRitten(autoId) {
-    const d = this.load();
-    return d.ritten.filter((r) => r.auto_id === autoId || !r.auto_id);
-  }
-
-  getAutoTankbeurten(autoId) {
-    const d = this.load();
-    return d.tankbeurten.filter((t) => t.auto_id === autoId || !t.auto_id);
-  }
-
-  getAutoOnderhoud(autoId) {
-    const d = this.load();
-    return (d.onderhoud || []).filter((o) => o.auto_id === autoId || !o.auto_id);
+    d.smart_tracking = !!aan;
+    this._schrijf(d);
+    this._emit('setSmartTracking', { aan: d.smart_tracking });
   }
 
   getBetaalverzoekUsername() {
@@ -82,8 +99,9 @@ export class Database {
 
   setBetaalverzoekUsername(username) {
     const d = this.load();
-    d.betaalverzoek_username = username;
-    this.save(d);
+    d.betaalverzoek_username = username ?? '';
+    this._schrijf(d);
+    this._emit('setBetaalverzoekUsername', { username: d.betaalverzoek_username });
   }
 
   getRevolutUsername() {
@@ -92,8 +110,38 @@ export class Database {
 
   setRevolutUsername(username) {
     const d = this.load();
-    d.revolut_username = username;
-    this.save(d);
+    d.revolut_username = username ?? '';
+    this._schrijf(d);
+    this._emit('setRevolutUsername', { username: d.revolut_username });
+  }
+
+  getTikkieHandle() {
+    return this.load().tikkie_handle ?? '';
+  }
+
+  setTikkieHandle(handle) {
+    const d = this.load();
+    d.tikkie_handle = handle ?? '';
+    this._schrijf(d);
+    this._emit('setTikkieHandle', { handle: d.tikkie_handle });
+  }
+
+  getStadiaApiKey() {
+    return this.load().stadia_api_key ?? '';
+  }
+
+  setStadiaApiKey(key) {
+    const d = this.load();
+    d.stadia_api_key = (key ?? '').trim();
+    this._schrijf(d);
+    this._emit('setStadiaApiKey', { key: d.stadia_api_key });
+  }
+
+  // ── Auto's ─────────────────────────────────────────────────────────────────
+
+  getGeselecteerdeAuto() {
+    const d = this.load();
+    return d.autos.find((a) => a.id === d.geselecteerd) || d.autos[0] || null;
   }
 
   getPassagiers(autoId) {
@@ -106,15 +154,333 @@ export class Database {
     const d = this.load();
     const auto = d.autos.find((a) => a.id === autoId);
     if (!auto) return;
-    auto.passagiers = namen;
-    this.save(d);
+    auto.passagiers = Array.isArray(namen) ? namen : [];
+    this._schrijf(d);
+    this._emit('setPassagiers', { autoId, namen: auto.passagiers });
   }
 
-  _leeg() {
-    return { naam: '', autos: [], geselecteerd: null, ritten: [], tankbeurten: [], onderhoud: [] };
+  // ── Ritten ─────────────────────────────────────────────────────────────────
+
+  getAutoRitten(autoId) {
+    const d = this.load();
+    return d.ritten.filter((r) => r.auto_id === autoId || !r.auto_id);
   }
 
-  _migreer(oud) {
+  addRit(rit) {
+    if (!rit || typeof rit !== 'object') return;
+    const d = this.load();
+    const compleet = {
+      id: rit.id ?? Utils.uid(),
+      auto_id: rit.auto_id ?? d.geselecteerd ?? null,
+      datum: rit.datum ?? new Date().toISOString(),
+      start: rit.start ?? null,
+      eind: rit.eind ?? null,
+      km: Number(rit.km) || 0,
+      bestemming: rit.bestemming ?? null,
+      notitie: rit.notitie ?? null,
+      km_stand: rit.km_stand ?? null,
+      gps_track: rit.gps_track ?? null,
+    };
+    d.ritten.unshift(compleet);
+    this._schrijf(d);
+    this._emit('addRit', compleet);
+  }
+
+  updateRit(id, patch) {
+    if (!id || !patch) return;
+    const d = this.load();
+    const idx = d.ritten.findIndex((r) => r.id === id);
+    if (idx === -1) return;
+    d.ritten[idx] = { ...d.ritten[idx], ...patch, id };
+    this._schrijf(d);
+    this._emit('updateRit', { id, patch });
+  }
+
+  deleteRit(id) {
+    if (!id) return;
+    const d = this.load();
+    const voor = d.ritten.length;
+    d.ritten = d.ritten.filter((r) => r.id !== id);
+    if (d.ritten.length === voor) return;
+    this._schrijf(d);
+    this._emit('deleteRit', { id });
+  }
+
+  // ── Tankbeurten ────────────────────────────────────────────────────────────
+
+  getAutoTankbeurten(autoId) {
+    const d = this.load();
+    return d.tankbeurten.filter((t) => t.auto_id === autoId || !t.auto_id);
+  }
+
+  addTankbeurt(tank) {
+    if (!tank || typeof tank !== 'object') return;
+    const d = this.load();
+    const liters = Number(tank.liters) || 0;
+    const prijs = Number(tank.prijs_per_liter) || 0;
+    const totaal = tank.totaal != null ? Number(tank.totaal) : liters * prijs;
+    const compleet = {
+      id: tank.id ?? Utils.uid(),
+      auto_id: tank.auto_id ?? d.geselecteerd ?? null,
+      datum: tank.datum ?? new Date().toISOString(),
+      liters,
+      prijs_per_liter: prijs,
+      totaal,
+      bon_foto: tank.bon_foto ?? null,
+      km_stand: tank.km_stand ?? null,
+      notitie: tank.notitie ?? null,
+    };
+    d.tankbeurten.unshift(compleet);
+    this._schrijf(d);
+    this._emit('addTankbeurt', compleet);
+  }
+
+  deleteTankbeurt(id) {
+    if (!id) return;
+    const d = this.load();
+    const voor = d.tankbeurten.length;
+    d.tankbeurten = d.tankbeurten.filter((t) => t.id !== id);
+    if (d.tankbeurten.length === voor) return;
+    this._schrijf(d);
+    this._emit('deleteTankbeurt', { id });
+  }
+
+  // ── Onderhoud (eenmalig — bestaand schema) ─────────────────────────────────
+
+  getAutoOnderhoud(autoId) {
+    const d = this.load();
+    return (d.onderhoud || []).filter((o) => o.auto_id === autoId || !o.auto_id);
+  }
+
+  // ── Vaste kosten (NEW v3) ──────────────────────────────────────────────────
+
+  getAutoVasteKosten(autoId) {
+    const d = this.load();
+    return (d.vaste_kosten || []).filter((v) => v.auto_id === autoId);
+  }
+
+  addVasteKost(v) {
+    if (!v || typeof v !== 'object') return;
+    if (!v.auto_id) return;
+    const bedrag = Number(v.bedrag);
+    if (!(bedrag > 0)) return;
+    if (!['maandelijks', 'jaarlijks'].includes(v.frequentie)) return;
+
+    const d = this.load();
+    const compleet = {
+      id: v.id ?? Utils.uid(),
+      auto_id: v.auto_id,
+      type: v.type ?? 'overig',
+      label: v.label ?? '',
+      bedrag,
+      frequentie: v.frequentie,
+      start_datum: v.start_datum ?? new Date().toISOString(),
+      eind_datum: v.eind_datum ?? null,
+      notitie: v.notitie ?? null,
+    };
+    d.vaste_kosten = d.vaste_kosten || [];
+    d.vaste_kosten.unshift(compleet);
+    this._schrijf(d);
+    this._emit('addVasteKost', compleet);
+  }
+
+  updateVasteKost(id, patch) {
+    if (!id || !patch) return;
+    const d = this.load();
+    d.vaste_kosten = d.vaste_kosten || [];
+    const idx = d.vaste_kosten.findIndex((v) => v.id === id);
+    if (idx === -1) return;
+    const samen = { ...d.vaste_kosten[idx], ...patch, id };
+    // Lichte validatie op critical fields wanneer ze meeveranderen.
+    if (patch.bedrag != null && !(Number(patch.bedrag) > 0)) return;
+    if (patch.frequentie && !['maandelijks', 'jaarlijks'].includes(patch.frequentie)) return;
+    d.vaste_kosten[idx] = samen;
+    this._schrijf(d);
+    this._emit('updateVasteKost', { id, patch });
+  }
+
+  deleteVasteKost(id) {
+    if (!id) return;
+    const d = this.load();
+    d.vaste_kosten = d.vaste_kosten || [];
+    const voor = d.vaste_kosten.length;
+    d.vaste_kosten = d.vaste_kosten.filter((v) => v.id !== id);
+    if (d.vaste_kosten.length === voor) return;
+    this._schrijf(d);
+    this._emit('deleteVasteKost', { id });
+  }
+
+  // ── Betalingen (NEW v3) ────────────────────────────────────────────────────
+
+  getAutoBetalingen(autoId) {
+    const d = this.load();
+    return (d.betalingen || []).filter((b) => b.auto_id === autoId);
+  }
+
+  addBetaling(b) {
+    if (!b || typeof b !== 'object') return;
+    if (!b.auto_id) return;
+    // van/naar zijn verplichte strings — saldo-richting wordt at read-time bepaald.
+    const van = typeof b.van === 'string' ? b.van.trim() : '';
+    const naar = typeof b.naar === 'string' ? b.naar.trim() : '';
+    if (!van || !naar) return;
+    const bedrag = Number(b.bedrag);
+    if (!Number.isFinite(bedrag) || bedrag === 0) return;
+
+    const d = this.load();
+    const compleet = {
+      id: b.id ?? Utils.uid(),
+      auto_id: b.auto_id,
+      datum: b.datum ?? new Date().toISOString(),
+      bedrag,
+      van,
+      naar,
+      methode: b.methode ?? 'overig',
+      notitie: b.notitie ?? null,
+    };
+    d.betalingen = d.betalingen || [];
+    d.betalingen.unshift(compleet);
+    this._schrijf(d);
+    this._emit('addBetaling', compleet);
+  }
+
+  deleteBetaling(id) {
+    if (!id) return;
+    const d = this.load();
+    d.betalingen = d.betalingen || [];
+    const voor = d.betalingen.length;
+    d.betalingen = d.betalingen.filter((b) => b.id !== id);
+    if (d.betalingen.length === voor) return;
+    this._schrijf(d);
+    this._emit('deleteBetaling', { id });
+  }
+
+  // ── Per-auto reset ─────────────────────────────────────────────────────────
+
+  resetAuto(autoId) {
+    if (!autoId) return;
+    const d = this.load();
+    d.ritten = (d.ritten || []).filter((r) => r.auto_id !== autoId);
+    d.tankbeurten = (d.tankbeurten || []).filter((t) => t.auto_id !== autoId);
+    d.onderhoud = (d.onderhoud || []).filter((o) => o.auto_id !== autoId);
+    d.vaste_kosten = (d.vaste_kosten || []).filter((v) => v.auto_id !== autoId);
+    d.betalingen = (d.betalingen || []).filter((b) => b.auto_id !== autoId);
+    this._schrijf(d);
+    this._emit('resetAuto', { autoId });
+  }
+
+  // ── Event helper ───────────────────────────────────────────────────────────
+
+  _emit(mutator, payload) {
+    try {
+      if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('db:updated', {
+          detail: { mutator, payload },
+        }));
+      }
+    } catch {
+      // Stilzwijgend negeren — events zijn aanvullend, niet kritiek.
+    }
+  }
+
+  // ── Defaults & migraties ───────────────────────────────────────────────────
+
+  _leegV3() {
+    return {
+      versie: 3,
+      thema: 'auto',
+      naam: '',
+      autos: [],
+      geselecteerd: null,
+      ritten: [],
+      tankbeurten: [],
+      onderhoud: [],
+      vaste_kosten: [],
+      betalingen: [],
+      smart_tracking: false,
+      betaalverzoek_username: '',
+      revolut_username: '',
+      tikkie_handle: '',
+    };
+  }
+
+  /**
+   * Hydrate vult ontbrekende velden aan zodat oudere v3-saves zonder
+   * later toegevoegde velden niet crashen. Gebruikt op elke load.
+   */
+  _hydrate(data) {
+    if (!data || typeof data !== 'object') return this._leegV3();
+    data.versie = 3;
+    if (!['auto', 'licht', 'donker'].includes(data.thema)) data.thema = 'auto';
+    if (typeof data.naam !== 'string') data.naam = '';
+    if (!Array.isArray(data.autos)) data.autos = [];
+    if (data.geselecteerd === undefined) data.geselecteerd = null;
+    if (!Array.isArray(data.ritten)) data.ritten = [];
+    if (!Array.isArray(data.tankbeurten)) data.tankbeurten = [];
+    if (!Array.isArray(data.onderhoud)) data.onderhoud = [];
+    if (!Array.isArray(data.vaste_kosten)) data.vaste_kosten = [];
+    if (!Array.isArray(data.betalingen)) data.betalingen = [];
+    if (typeof data.smart_tracking !== 'boolean') data.smart_tracking = !!data.smart_tracking;
+    if (typeof data.betaalverzoek_username !== 'string') data.betaalverzoek_username = '';
+    if (typeof data.revolut_username !== 'string') data.revolut_username = '';
+    if (typeof data.tikkie_handle !== 'string') data.tikkie_handle = '';
+
+    // Item-niveau defaults voor nieuwe v3-velden — idempotent.
+    data.ritten = data.ritten.map((r) => ({
+      ...r,
+      notitie: r.notitie ?? null,
+      km_stand: r.km_stand ?? null,
+      gps_track: r.gps_track ?? null,
+    }));
+    data.tankbeurten = data.tankbeurten.map((t) => ({
+      ...t,
+      bon_foto: t.bon_foto ?? null,
+      km_stand: t.km_stand ?? null,
+      notitie: t.notitie ?? null,
+    }));
+
+    return data;
+  }
+
+  /**
+   * Non-destructieve migratie v2 → v3. Kopieert alle bestaande velden,
+   * vult nieuwe v3-velden met sensible defaults.
+   */
+  _migreerV2NaarV3(v2) {
+    if (!v2 || typeof v2 !== 'object') return this._leegV3();
+    return {
+      versie: 3,
+      thema: 'auto',
+      naam: v2.naam ?? '',
+      autos: Array.isArray(v2.autos) ? v2.autos : [],
+      geselecteerd: v2.geselecteerd ?? null,
+      ritten: (Array.isArray(v2.ritten) ? v2.ritten : []).map((r) => ({
+        ...r,
+        notitie: r.notitie ?? null,
+        km_stand: r.km_stand ?? null,
+        gps_track: r.gps_track ?? null,
+      })),
+      tankbeurten: (Array.isArray(v2.tankbeurten) ? v2.tankbeurten : []).map((t) => ({
+        ...t,
+        bon_foto: t.bon_foto ?? null,
+        km_stand: t.km_stand ?? null,
+        notitie: t.notitie ?? null,
+      })),
+      onderhoud: Array.isArray(v2.onderhoud) ? v2.onderhoud : [],
+      vaste_kosten: [],
+      betalingen: [],
+      smart_tracking: !!v2.smart_tracking,
+      betaalverzoek_username: v2.betaalverzoek_username ?? '',
+      revolut_username: v2.revolut_username ?? '',
+      tikkie_handle: '',
+    };
+  }
+
+  /**
+   * Migratie v1 → v2 (legacy, behouden uit oude codebase). Output gaat
+   * vervolgens door _migreerV2NaarV3 zodat de v3-chain compleet is.
+   */
+  _migreerV1NaarV2(oud) {
     const id = Utils.uid();
     return {
       naam: '',
@@ -122,13 +488,13 @@ export class Database {
         id,
         naam: 'Auto van Mama',
         merk: '',
-        km_per_liter: oud.instellingen?.km_per_liter || 14,
-        prijs_per_liter: oud.instellingen?.prijs_per_liter || 2.10,
+        km_per_liter: oud?.instellingen?.km_per_liter || 14,
+        prijs_per_liter: oud?.instellingen?.prijs_per_liter || 2.10,
         emoji: '🚗',
       }],
       geselecteerd: id,
-      ritten: (oud.ritten || []).map((r) => ({ ...r, auto_id: id })),
-      tankbeurten: (oud.tankbeurten || []).map((t) => ({ ...t, auto_id: id })),
+      ritten: (oud?.ritten || []).map((r) => ({ ...r, auto_id: id })),
+      tankbeurten: (oud?.tankbeurten || []).map((t) => ({ ...t, auto_id: id })),
       onderhoud: [],
     };
   }

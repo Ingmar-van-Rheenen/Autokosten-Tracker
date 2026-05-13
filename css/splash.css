@@ -1,17 +1,52 @@
-/* ── SPLASH ────────────────────────── */
+/* ── SPLASH v2 ──────────────────────────────────────────────────────
+   Solid dark navy. Kernanimatie: een tracking-route die de
+   GPS-functionaliteit van de app visualiseert. ──────────────────── */
+
 #screen-splash {
-  background: var(--dark);
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Vul ook het notch-gebied boven de safe area */
   padding-top: env(safe-area-inset-top);
+  overflow: hidden;
+  background: var(--dark, #1b2537);
 }
 
+/* ── Sky/clouds/stars/celestial/mountains volledig uit ────────────── */
+.splash-sky,
+.splash-clouds,
+.splash-stars,
+.splash-celestial,
+.splash-mountains,
+.splash-wolk,
+.splash-ster {
+  display: none !important;
+}
+
+/* ── INNER LAYOUT ───────────────────────────────────────────────────── */
 .splash-inner {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.splash-greeting {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 4px;
+  animation: groet-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+@keyframes groet-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .splash-title {
@@ -21,6 +56,7 @@
   color: var(--white);
   letter-spacing: 0.45em;
   margin-bottom: 6px;
+  animation: groet-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
 }
 
 .splash-sub {
@@ -28,20 +64,73 @@
   font-size: 0.85rem;
   color: var(--txt-dark-m);
   letter-spacing: 0.05em;
-  margin-bottom: 52px;
+  margin-bottom: 44px;
+  animation: groet-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
 }
 
+/* ── CAR STAGE ─────────────────────────────────────────────────────── */
 .splash-stage {
   width: 230px;
   overflow: visible;
 }
 
+/* ── TRACKING ROUTE ANIMATIE (kernfeature) ──────────────────────────── */
+.splash-track {
+  margin-top: 22px;
+  width: 280px;
+  max-width: 90vw;
+  opacity: 0;
+  animation: groet-in 1.0s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both;
+}
+
+.splash-track svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Polyline die continu "achter de cursor aan" tekent — pathLength=100
+   maakt dasharray:100 = exact volledige lengte, gesynced met 3.4s loop. */
+.splash-track-fill {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: splash-track-trace 3.4s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(122, 184, 122, 0.45));
+}
+
+@keyframes splash-track-trace {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Cursor-glow */
+.splash-track-cursor > circle:last-of-type {
+  filter: drop-shadow(0 0 4px rgba(122, 184, 122, 0.55));
+}
+
+/* GPS-ringen pulseren met de cursor mee (SVG transform-origin 0,0 = cursor) */
+.splash-track-ring {
+  transform-origin: 0 0;
+  animation: splash-track-pulse 1.5s ease-out infinite;
+}
+
+.splash-track-ring-1 { animation-delay: 0s; }
+.splash-track-ring-2 { animation-delay: 0.75s; }
+
+@keyframes splash-track-pulse {
+  0%   { transform: scale(0.4); opacity: 0.75; }
+  90%  { opacity: 0;            }
+  100% { transform: scale(2.5); opacity: 0;    }
+}
+
+/* ── LOADER ────────────────────────────────────────────────────────── */
 .splash-loader {
-  margin-top: 52px;
+  margin-top: 38px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
+  animation: groet-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
 }
 
 .splash-spinner {
@@ -61,6 +150,13 @@
   transition: opacity 0.18s ease;
 }
 
-.splash-txt-wissel {
-  opacity: 0;
+.splash-txt-wissel { opacity: 0; }
+
+/* ── EXIT-ANIMATIES ────────────────────────────────────────────────── */
+.splash-item-exit {
+  animation: splash-uit 0.35s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+@keyframes splash-uit {
+  to { opacity: 0; transform: translateY(-12px); }
 }

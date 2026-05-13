@@ -16,6 +16,11 @@ import { BottomSheetController } from './BottomSheetController.js';
 import { PrijsService } from './PrijsService.js';
 import { InfoOverlay } from './InfoOverlay.js';
 import { Changelog } from './Changelog.js';
+import { ThemaController } from './ThemaController.js';
+import { ConfirmModal } from './ConfirmModal.js';
+import { VasteKostenController } from './VasteKostenController.js';
+import { BetalingenController } from './BetalingenController.js';
+import { AfrekenController } from './AfrekenController.js';
 
 const SCHERMEN = ['screen-splash', 'screen-intro', 'screen-auto', 'screen-app'];
 const TAB_VOLGORDE = ['kaart', 'ritten', 'saldo', 'overzicht', 'instellingen'];
@@ -25,9 +30,16 @@ export class App {
     this._db = new Database();
     this._geo = new GeoService();
 
-    this._kaart = new MapController('map');
+    // Thema MOET vóór de eerste render — schrijft data-thema op <html>
+    ThemaController.init(this._db);
+
+    this._kaart = new MapController('map', this._db);
     this._stats = new StatsController(this._db);
     this._prijsService = new PrijsService();
+
+    this._vasteKosten = new VasteKostenController(this._db);
+    this._betalingen = new BetalingenController(this._db);
+    this._afreken = new AfrekenController(this._db);
 
     this._ritController = new RitController(
       this._db, this._geo, this._kaart, () => this._onRitUpdate()
@@ -58,20 +70,43 @@ export class App {
   }
 
   async init() {
+    // Vaste minimum splash-duur zodat alle stagger-animaties kunnen afspelen
+    // en de gebruiker écht ziet wat er gebeurt — ongeacht hoe snel GPS is.
+    const MIN_SPLASH_MS = 2800;
+    const splashStart = Date.now();
+
     document.getElementById('screen-splash').classList.remove('hidden');
 
-    // GPS start alvast in de achtergrond
+    // GPS start alvast in de achtergrond — getGps heeft zelf 12s timeout
     const gpsBelofte = this._geo.getGps().catch(() => null);
 
     // Install overlay als allereerste stap (blokkeert tot dismiss)
     await this._checkInstallOverlay();
 
-    this._animeerSplashTekst();
-    await Utils.wacht(1800);
+    this._setSplashStatus('LOCATIE OPHALEN');
+
+    // Wacht óf tot GPS terugkomt, óf max 6s
     this._cachedGps = await Promise.race([
       gpsBelofte,
-      Utils.wacht(300).then(() => null),
+      Utils.wacht(6000).then(() => null),
     ]);
+
+    // Pre-warm map tiles rondom de gevonden locatie zodat de map
+    // direct ingezoomd verschijnt (SW cached ze in TILE_CACHE).
+    if (this._cachedGps) {
+      this._setSplashStatus('KAART VOORBEREIDEN');
+      await this._prefetchTilesRond(this._cachedGps);
+      this._setSplashStatus('KLAAR');
+    } else {
+      this._setSplashStatus('GEEN GPS — VERDER ZONDER');
+    }
+
+    // Forceer minimum splash-tijd — als alles snel klaar was, wacht extra
+    const verstreken = Date.now() - splashStart;
+    if (verstreken < MIN_SPLASH_MS) {
+      await Utils.wacht(MIN_SPLASH_MS - verstreken);
+    }
+
     this._ritController.setCachedGps(this._cachedGps);
 
     const d = this._db.load();
@@ -178,30 +213,73 @@ export class App {
     }
   }
 
-  _animeerSplashTekst() {
-    const teksten = ['LOCATIE OPHALEN', 'GEGEVENS LADEN', 'BIJNA KLAAR'];
-    let i = 0;
+  /** Update de splash-status-tekst met fade-transition. */
+  _setSplashStatus(tekst) {
     const el = document.querySelector('.splash-loader-text');
     if (!el) return;
+    if (el.textContent === tekst) return;
+    el.classList.add('splash-txt-wissel');
+    setTimeout(() => {
+      el.textContent = tekst;
+      el.classList.remove('splash-txt-wissel');
+    }, 180);
+  }
 
-    const interval = setInterval(() => {
-      i++;
-      if (i >= teksten.length) { clearInterval(interval); return; }
-      el.classList.add('splash-txt-wissel');
-      setTimeout(() => {
-        el.textContent = teksten[i];
-        el.classList.remove('splash-txt-wissel');
-      }, 180);
-    }, 600);
+  /**
+   * Pre-warm de map tile cache: vraagt het 3×3 raster tiles rond de GPS-positie
+   * op zoom 15 op via fetch(). De service worker cached ze in TILE_CACHE zodat
+   * Leaflet ze direct uit cache haalt zodra de map zichtbaar wordt.
+   */
+  async _prefetchTilesRond(gps) {
+    const zoom = 15;
+    const n = Math.pow(2, zoom);
+    const latRad = gps.lat * Math.PI / 180;
+    const xMid = Math.floor((gps.lng + 180) / 360 * n);
+    const yMid = Math.floor(
+      (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n
+    );
+
+    const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+    const stadiaKey = this._db.getStadiaApiKey?.() || '';
+    const thema = document.documentElement.getAttribute('data-thema') || 'klassiek';
+    const useStadia = stadiaKey || isLocalhost;
+
+    const bouwUrl = (x, y) => {
+      if (useStadia) {
+        const stijl = thema === 'donker' ? 'alidade_smooth_dark' : 'alidade_smooth';
+        const key = stadiaKey ? `?api_key=${encodeURIComponent(stadiaKey)}` : '';
+        return `https://tiles.stadiamaps.com/tiles/${stijl}/${zoom}/${x}/${y}.png${key}`;
+      }
+      const stijl = thema === 'donker' ? 'dark_all' : 'light_all';
+      const sub = 'abcd'[(x + y) % 4];
+      return `https://${sub}.basemaps.cartocdn.com/${stijl}/${zoom}/${x}/${y}.png`;
+    };
+
+    const taken = [];
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        taken.push(
+          fetch(bouwUrl(xMid + dx, yMid + dy), { mode: 'no-cors' })
+            .catch(() => null)
+        );
+      }
+    }
+    // Wacht max 1.5s op de tiles — als ze niet binnen die tijd komen geven
+    // we het op (Leaflet haalt ze later alsnog op uit het netwerk).
+    await Promise.race([
+      Promise.all(taken),
+      Utils.wacht(1500),
+    ]);
   }
 
   _splashExit() {
     document.querySelector('#splash-car-scene .car-wrapper')?.classList.add('car-vroom');
     setTimeout(() => {
+      document.querySelector('.splash-greeting')?.classList.add('splash-item-exit');
       document.querySelector('.splash-title')?.classList.add('splash-item-exit');
       document.querySelector('.splash-sub')?.classList.add('splash-item-exit');
       document.querySelector('.splash-loader')?.classList.add('splash-item-exit');
-      document.querySelector('.splash-road')?.classList.add('splash-item-exit');
+      document.querySelector('.car-road')?.classList.add('splash-item-exit');
     }, 100);
   }
 
@@ -218,6 +296,7 @@ export class App {
     await this._toonScherm('screen-app');
 
     this._kaart.init(this._cachedGps);
+    this._kaart.setLocateMeHandler(() => this._locateMe());
     this._cachedGps = null;
     this._ritController.herstelState();
     this._rittenController.render();
@@ -235,6 +314,99 @@ export class App {
     Changelog.init();
     Changelog.check();
     this._bindShortcutUrl();
+    this._bindV3Instellingen();
+    this._bindDbUpdated();
+    this._vasteKosten.render();
+    this._betalingen.render();
+  }
+
+  // ── v3 wire-ups voor Instellingen-tab + globale db:updated listener ───────
+
+  _bindV3Instellingen() {
+    if (this._v3Gebonden) return;
+    this._v3Gebonden = true;
+
+    // Thema-radio's
+    const huidigThema = (() => {
+      const t = this._db.getThema();
+      return t === 'auto' ? 'klassiek' : t;
+    })();
+    document.querySelectorAll('input[name="thema"]').forEach((radio) => {
+      radio.checked = (radio.value === huidigThema);
+      radio.addEventListener('change', () => {
+        if (radio.checked) ThemaController.set(radio.value);
+      });
+    });
+
+    // Tikkie-handle input
+    const tikkieInp = document.getElementById('tikkie-handle-inp');
+    if (tikkieInp) {
+      tikkieInp.value = this._db.getTikkieHandle() || '';
+      tikkieInp.addEventListener('change', () => {
+        this._db.setTikkieHandle(tikkieInp.value.trim());
+      });
+    }
+
+    // Stadia Maps API key
+    const stadiaInp = document.getElementById('stadia-key-inp');
+    const stadiaBtn = document.getElementById('btn-stadia-save');
+    if (stadiaInp) stadiaInp.value = this._db.getStadiaApiKey() || '';
+    if (stadiaBtn && stadiaInp) {
+      stadiaBtn.addEventListener('click', () => {
+        this._db.setStadiaApiKey(stadiaInp.value);
+        if (this._kaart && typeof this._kaart.refreshTiles === 'function') {
+          this._kaart.refreshTiles();
+        }
+        Utils.toast('Kaart-instellingen opgeslagen ✓');
+      });
+    }
+    document.getElementById('btn-stadia-info')?.addEventListener('click', () => {
+      InfoOverlay.toon('kaart');
+    });
+
+    // Afrekenen knop op de saldo-hero (Tank-tab)
+    document.getElementById('afreken-knop')?.addEventListener('click', () => {
+      this._afreken.openSheet();
+    });
+
+    // Reset-auto knop
+    document.getElementById('reset-auto-knop')?.addEventListener('click', async () => {
+      const auto = this._db.getGeselecteerdeAuto();
+      if (!auto) return;
+      const ja = await ConfirmModal.toon({
+        titel: 'Reset deze auto?',
+        tekst: `Alle ritten, tankbeurten, onderhoud, vaste kosten en betalingen voor "${auto.naam}" worden verwijderd. De auto zelf blijft bestaan.`,
+        bevestigLabel: 'Verwijder',
+        gevaarlijk: true,
+      });
+      if (!ja) return;
+      this._db.resetAuto(auto.id);
+      this._refreshAlles();
+      Utils.toast('Auto gereset ✓');
+    });
+  }
+
+  _bindDbUpdated() {
+    if (this._dbUpdatedGebonden) return;
+    this._dbUpdatedGebonden = true;
+    let timer = null;
+    window.addEventListener('db:updated', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => this._refreshAlles(), 100);
+    });
+  }
+
+  _refreshAlles() {
+    this._rittenController.render();
+    this._tankController.render();
+    this._tankController.laadStandaard();
+    this._onderhoudController.render();
+    this._vasteKosten.render();
+    this._betalingen.render();
+    this._stats.updateSaldo();
+    this._stats.updateOverzicht();
+    this._stats.updateInstellingen?.();
+    this._bottomSheet?.updateQuickStats();
   }
 
   // ── iOS snelkoppeling ─────────────────────────────────────────────────────
@@ -275,6 +447,16 @@ export class App {
     const btnTankstations = document.getElementById('btn-tankstations');
     if (btnTankstations) {
       btnTankstations.addEventListener('click', () => this._toggleTankstations());
+    }
+  }
+
+  async _locateMe() {
+    try {
+      const gps = await this._geo.getGps();
+      this._kaart.setLocatie(gps);
+      this._kaart.setView(gps.lat, gps.lng, 16);
+    } catch {
+      Utils.toast('Locatie niet beschikbaar', 'err');
     }
   }
 
@@ -364,8 +546,8 @@ export class App {
 
     if (tab === 'kaart') this._kaart.invalidateSize();
     if (tab === 'saldo') { this._stats.updateSaldo(); this._tankController.render(); this._tankController.laadStandaard(); }
-    if (tab === 'overzicht') { this._stats.updateOverzicht(); this._onderhoudController.render(); }
-    if (tab === 'instellingen') this._stats.updateInstellingen();
+    if (tab === 'overzicht') { this._stats.updateOverzicht(); this._onderhoudController.render(); this._vasteKosten.render(); }
+    if (tab === 'instellingen') { this._stats.updateInstellingen(); this._betalingen.render(); }
     if (tab === 'ritten') this._rittenController.render();
   }
 

@@ -1,0 +1,85 @@
+/* ── CONFIRM MODAL — generieke bevestigingssheet
+   #modal-confirm — hergebruikt .modal + .modal-sheet (modal.css).
+   Twee knoppen: annuleer (secundair) + bevestig (primair óf gevaar).
+   Bij <root data-gevaarlijk='true'> krijgt de bevestig-knop var(--gevaar).
+   ─────────────────────────────────────────── */
+
+#modal-confirm .cm-sheet {
+  gap: var(--ruimte-3);
+  padding: 24px;
+  padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+}
+
+.cm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.36);
+  opacity: 0;
+  transition: opacity 0.22s ease-out;
+  pointer-events: none;
+}
+
+#modal-confirm.is-open .cm-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cm-titel {
+  font-family: var(--serif);
+  font-size: var(--font-md);
+  font-weight: var(--weight-nadruk);
+  color: var(--tekst);
+  margin-bottom: 2px;
+  text-align: center;
+}
+
+.cm-tekst {
+  font-size: var(--font-sm);
+  color: var(--tekst-zwak);
+  line-height: 1.55;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.cm-acties {
+  display: flex;
+  gap: 10px;
+  margin-top: var(--ruimte-1);
+}
+
+.cm-annuleer,
+.cm-bevestig {
+  flex: 1;
+  padding: 13px;
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.cm-annuleer:active,
+.cm-bevestig:active {
+  opacity: 0.82;
+  transform: scale(0.99);
+}
+
+.cm-annuleer {
+  background: var(--surface);
+  color: var(--tekst);
+  border: 1px solid var(--rand);
+}
+
+.cm-bevestig {
+  background: var(--primair);
+  color: #ffffff;
+}
+
+/* Wanneer de modal als gevaarlijk gemarkeerd is — destructieve actie */
+#modal-confirm[data-gevaarlijk='true'] .cm-bevestig {
+  background: var(--gevaar);
+}

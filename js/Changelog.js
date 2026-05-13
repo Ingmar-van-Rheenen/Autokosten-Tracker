@@ -7,6 +7,39 @@ const SEEN_KEY = 'tanklog_changelog_seen';
 
 export const VERSIES = [
   {
+    versie: 7,
+    label: '3.1',
+    datum: '2026-05-12',
+    items: [
+      'Kaart v2: tiles wisselen mee met thema (licht/donker)',
+      'Locate-me knop rechtsboven op de kaart',
+      'Eigen locatie-marker met accuracy-cirkel en heading-pijl',
+      'Route tekent zich vloeiend in na een rit-suggestie',
+      'Tankstations krijgen hun eigen merk-kleur (Shell, BP, Esso, …)',
+      'Tankstations clusteren bij uitgezoomd zicht',
+      'Track tijdens rit kleurt mee met je snelheid',
+      'Kaart-tiles werken offline (recent bezochte gebieden)',
+      'Optioneel: Stadia Maps API-key voor mooiere tiles',
+      'Klassiek-thema vervangt Automatisch — originele v2-look',
+    ],
+  },
+  {
+    versie: 6,
+    label: '3.0',
+    datum: '2026-05-11',
+    items: [
+      'Donkere modus + lichte modus (auto/licht/donker)',
+      'Vaste kosten (verzekering, wegenbelasting, apk, parkeren)',
+      'Betalingen-geschiedenis tussen jou en je auto-deler',
+      'Live route op de kaart tijdens een rit + elapsed-tijd',
+      'Km-stand bij rit en tankbeurt',
+      'Bon-foto opslaan bij een tankbeurt',
+      'Afrekenen-sheet met WhatsApp + Tikkie + bunq + Revolut',
+      'Periode-filter op stats (maand / jaar / alles)',
+      'Swipe-naar-links om te verwijderen met undo',
+    ],
+  },
+  {
     versie: 5,
     label: '1.5',
     datum: '7 mei 2026',

@@ -355,7 +355,6 @@ export class AutoManager {
 
   _bindEvents() {
     document.getElementById('btn-add-auto').addEventListener('click', () => this.openModal());
-    document.getElementById('modal-sluit').addEventListener('click', () => this.sluitModal());
 
     document.getElementById('auto-brandstof-inp')?.addEventListener('change', (e) => {
       this._updateModalLabels(e.target.value);
@@ -370,7 +369,6 @@ export class AutoManager {
     document.getElementById('bs-auto-naam').addEventListener('click', () => this._toonWisselPicker());
 
     // Wissel-picker events
-    document.getElementById('modal-wissel-sluit').addEventListener('click', () => this._sluitWisselPicker());
     document.getElementById('modal-auto-wissel').addEventListener('click', (e) => {
       if (e.target === document.getElementById('modal-auto-wissel')) this._sluitWisselPicker();
     });

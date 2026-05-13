@@ -1,0 +1,95 @@
+/* ── SWIPE-TO-DELETE ANIMATIES ────────────
+   Layout-primitieven (.item-swipeable / .item-swipe-content /
+   .item-swipe-actions) staan in items.css. Hier alleen de
+   reveal-keyframes en de undo-toast slide-in.
+   ─────────────────────────────────────────── */
+
+@keyframes swipe-actie-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(20%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.item-swipe-actief .item-swipe-actions {
+  animation: swipe-actie-reveal 0.18s ease-out both;
+}
+
+/* ── Undo-toast — delete-specifieke variant ─
+   Utils.toast handelt basis-positie/timing af; deze klasse
+   voegt een undo-actie en gevaar-accent toe.
+   ─────────────────────────────────────────── */
+.item-undo-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-elev);
+  color: var(--tekst);
+  border: 1px solid var(--rand);
+  border-left: 4px solid var(--gevaar);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: undo-toast-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  font-size: 0.88rem;
+}
+
+@keyframes undo-toast-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes undo-toast-uit {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+.item-undo-toast.uit {
+  animation: undo-toast-uit 0.2s ease-in both;
+}
+
+.item-undo-toast-tekst {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-undo-toast-btn {
+  background: transparent;
+  border: none;
+  color: var(--primair);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.item-undo-toast-btn:hover,
+.item-undo-toast-btn:active {
+  background: var(--surface);
+}

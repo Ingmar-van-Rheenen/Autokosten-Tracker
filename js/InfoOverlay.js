@@ -19,20 +19,57 @@ const CONFIGS = {
     btn: 'Begrepen',
     visual: _kmVisual,
   },
+  kaart: {
+    chip: 'INFO',
+    chipKleur: '#7ab87a',
+    titel: 'Stadia Maps',
+    tekst: 'Stadia heeft mooiere kaart-tiles dan de standaard CartoCDN — beter contrast, fijnere typografie, strakkere stijl.\n\nGratis te registreren (200.000 requests/maand voor persoonlijk gebruik). Op localhost werkt het al zonder key — voor productie: stadiamaps.com → registreer → kopieer key → plak hier.',
+    btn: 'Begrepen',
+    visual: _kaartVisual,
+  },
 };
 
 function _smartVisual() {
   return `
     <div class="io-smart-scene">
-      <div class="io-gps-wrap">
-        <div class="io-gps-ring" style="animation-delay:0s"></div>
-        <div class="io-gps-ring" style="animation-delay:0.85s"></div>
-        <div class="io-gps-ring" style="animation-delay:1.7s"></div>
-        <div class="io-gps-center">
-          <svg viewBox="0 0 24 28" width="20" height="23" fill="currentColor">
-            <path d="M12 0C7.58 0 4 3.58 4 8c0 6 8 18 8 18s8-12 8-18c0-4.42-3.58-8-8-8zm0 11.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 4.5 12 4.5s3.5 1.57 3.5 3.5S13.93 11.5 12 11.5z"/>
-          </svg>
-        </div>
+      <div class="io-smart-route">
+        <svg viewBox="0 0 240 100" width="100%" height="100" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <!-- Het pad waarover de cursor loopt. pathLength=100 normaliseert
+                 stroke-dash-berekeningen zodat dasharray:100 = volledige lengte. -->
+            <path id="io-smart-pad"
+              d="M16 78 C 50 78, 60 22, 100 32 S 160 86, 200 50 S 232 24, 232 24"
+              fill="none" pathLength="100"/>
+          </defs>
+
+          <!-- Achtergrondroute (dashed, lichtgrijs) -->
+          <use href="#io-smart-pad"
+            stroke="rgba(255,255,255,0.18)" stroke-width="2.5"
+            stroke-linecap="round" stroke-dasharray="1.2 2.4"/>
+
+          <!-- Groene gevulde polyline die meeloopt met de cursor -->
+          <use href="#io-smart-pad" class="io-smart-fill"
+            stroke="#7ab87a" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Start- en eindpunt -->
+          <circle cx="16" cy="78" r="3.5" fill="#5e9464"/>
+          <circle cx="232" cy="24" r="3.5" fill="rgba(255,255,255,0.5)"/>
+
+          <!-- Cursor met GPS-pulsen — beweegt langs het pad -->
+          <g class="io-smart-cursor">
+            <g class="io-smart-ring-wrap io-smart-ring-1">
+              <circle r="8" fill="rgba(122,184,122,0.32)"/>
+            </g>
+            <g class="io-smart-ring-wrap io-smart-ring-2">
+              <circle r="8" fill="rgba(122,184,122,0.22)"/>
+            </g>
+            <circle r="5" fill="#7ab87a" stroke="#fff" stroke-width="2"/>
+            <animateMotion dur="3.6s" repeatCount="indefinite" calcMode="linear">
+              <mpath href="#io-smart-pad"/>
+            </animateMotion>
+          </g>
+        </svg>
       </div>
 
       <div class="io-smart-cards">
@@ -58,6 +95,61 @@ function _smartVisual() {
           <div class="io-sc-lbl">SCHERM</div>
           <div class="io-sc-val" style="color:#f59e0b">AAN</div>
         </div>
+      </div>
+    </div>`;
+}
+
+function _kaartVisual() {
+  return `
+    <div class="io-kaart-scene">
+      <div class="io-kaart-tegel">
+        <!-- Stylized mini-map: roads + pins + route -->
+        <svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+          <!-- Achtergrond tile-pattern -->
+          <defs>
+            <linearGradient id="ioKaartBg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#dee5e3"/>
+              <stop offset="100%" stop-color="#c9d3cf"/>
+            </linearGradient>
+            <linearGradient id="ioKaartBgDark" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2a3850"/>
+              <stop offset="100%" stop-color="#1f2a3e"/>
+            </linearGradient>
+          </defs>
+          <rect width="200" height="140" rx="12" fill="url(#ioKaartBg)" class="io-kaart-bg"/>
+
+          <!-- Wegen -->
+          <path d="M0 95 Q60 88 110 92 T 200 84" stroke="rgba(255,255,255,0.55)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M40 0 Q42 40 60 70 T 90 140" stroke="rgba(255,255,255,0.45)" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M120 0 Q132 50 156 80 T 200 130" stroke="rgba(255,255,255,0.35)" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+          <!-- Route polyline met draw-in animatie -->
+          <path class="io-kaart-route"
+            d="M28 110 Q60 90 95 95 T 175 50"
+            stroke="#5e9464" stroke-width="3" fill="none"
+            stroke-linecap="round" stroke-dasharray="200" stroke-dashoffset="200"/>
+
+          <!-- Start/Eind pins -->
+          <circle cx="28" cy="110" r="6" fill="#4e7d52" stroke="#fff" stroke-width="2"/>
+          <circle cx="175" cy="50" r="6" fill="#c94040" stroke="#fff" stroke-width="2"/>
+
+          <!-- Merk-pins (tankstations) — verschijnen na elkaar -->
+          <g class="io-kaart-pin" style="animation-delay:0.5s">
+            <circle cx="75" cy="60" r="4.5" fill="#DD1D21" stroke="#fff" stroke-width="1.5"/>
+          </g>
+          <g class="io-kaart-pin" style="animation-delay:0.85s">
+            <circle cx="125" cy="105" r="4.5" fill="#006F51" stroke="#fff" stroke-width="1.5"/>
+          </g>
+          <g class="io-kaart-pin" style="animation-delay:1.2s">
+            <circle cx="155" cy="25" r="4.5" fill="#FF6900" stroke="#fff" stroke-width="1.5"/>
+          </g>
+
+          <!-- Eigen locatie met accuracy-cirkel + pulse -->
+          <g class="io-kaart-locatie" style="transform-origin:60px 95px">
+            <circle cx="60" cy="95" r="18" fill="rgba(94,148,100,0.18)" class="io-kaart-acc"/>
+            <circle cx="60" cy="95" r="6" fill="#5e9464" stroke="#fff" stroke-width="2.5"/>
+          </g>
+        </svg>
       </div>
     </div>`;
 }

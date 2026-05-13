@@ -1,0 +1,261 @@
+/* ── VASTE KOSTEN — LIJST + SHEET ──────────
+   Hergebruikt de bestaande lijst-card stijl (.item-lijst pattern)
+   en de modal-sheet container uit modal.css.
+   ─────────────────────────────────────────── */
+
+/* ── Lijst ──────────────────────────────── */
+#vk-lijst {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+  margin: 0;
+}
+
+.vk-kaart {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.vk-kaart-icoon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--primair);
+}
+
+.vk-kaart-icoon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.vk-kaart-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vk-kaart-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--tekst);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vk-kaart-meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--tekst-zwak);
+  letter-spacing: 0.04em;
+}
+
+.vk-kaart-bedrag {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--tekst);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.vk-kaart-edit {
+  background: none;
+  border: none;
+  color: var(--tekst-zwak);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, background 0.15s;
+}
+
+.vk-kaart-edit:hover,
+.vk-kaart-edit:active {
+  color: var(--primair);
+  background: var(--surface);
+}
+
+.vk-kaart-edit svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* ── Knop "+ Toevoegen" boven lijst ────── */
+.vk-toevoeg-rij {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 6px;
+}
+
+.vk-toevoeg-btn {
+  background: var(--primair);
+  color: #ffffff;
+  border: none;
+  border-radius: 100px;
+  padding: 8px 14px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.vk-toevoeg-btn:active {
+  opacity: 0.8;
+}
+
+/* ── Sheet / formulier ────────────────── */
+#sheet-vaste-kost .modal-sheet {
+  gap: 14px;
+}
+
+.vk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vk-form-rij {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vk-form-lbl {
+  font-size: 0.78rem;
+  color: var(--tekst-zwak);
+  font-weight: 600;
+}
+
+.vk-form-input,
+.vk-form-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--rand);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: var(--sans);
+  color: var(--tekst);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.18s, background 0.18s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.vk-form-input:focus,
+.vk-form-select:focus {
+  border-color: var(--primair);
+  background: var(--bg-elev);
+}
+
+/* ── Frequentie radio (segmented control) ── */
+.vk-freq-rij {
+  display: flex;
+  gap: 8px;
+  background: var(--surface);
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.vk-freq-rij label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--tekst-zwak);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vk-freq-rij input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vk-freq-rij input[type='radio']:checked + span,
+.vk-freq-rij label:has(input[type='radio']:checked) {
+  background: var(--bg-elev);
+  color: var(--tekst);
+  font-weight: 700;
+}
+
+/* Actie-knoppen onderin sheet */
+.vk-sheet-acties {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.vk-sheet-acties .vk-btn-opslaan {
+  flex: 2;
+  padding: 13px;
+  background: var(--primair);
+  color: #ffffff;
+  border: none;
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vk-sheet-acties .vk-btn-annuleer {
+  flex: 1;
+  padding: 13px;
+  background: var(--surface);
+  color: var(--tekst-zwak);
+  border: 1px solid var(--rand);
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.vk-sheet-acties .vk-btn-verwijder {
+  flex: 1;
+  padding: 13px;
+  background: transparent;
+  color: var(--gevaar);
+  border: 1.5px solid var(--gevaar);
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}

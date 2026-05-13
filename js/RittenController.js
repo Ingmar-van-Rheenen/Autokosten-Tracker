@@ -62,7 +62,6 @@ export class RittenController {
   // ── Edit modal ────────────────────────────────────────────────────────────
 
   _bindModalEvents() {
-    document.getElementById('modal-rit-sluit').addEventListener('click', () => this._sluitModal());
     document.getElementById('modal-rit').addEventListener('click', (e) => {
       if (e.target === document.getElementById('modal-rit')) this._sluitModal();
     });
@@ -111,13 +110,21 @@ export class RittenController {
 
   _bindActies(el) {
     el.querySelectorAll('.item-deel').forEach((btn) => {
-      btn.addEventListener('click', () => this._onDeel?.(btn.dataset.id));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this._onDeel?.(btn.dataset.id); });
     });
     el.querySelectorAll('.item-edit').forEach((btn) => {
-      btn.addEventListener('click', () => this._openModal(btn.dataset.id));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this._openModal(btn.dataset.id); });
     });
     el.querySelectorAll('.item-del').forEach((btn) => {
-      btn.addEventListener('click', () => this._vraagVerwijder(btn));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this._vraagVerwijder(btn); });
+    });
+
+    // v3: swipe-naar-links-om-te-verwijderen op elk rit-item (mobile-first)
+    el.querySelectorAll('.item-acties[data-id]').forEach((acties) => {
+      const li = acties.closest('li');
+      const id = acties.getAttribute('data-id');
+      if (!li || !id) return;
+      Utils.bindSwipeToDelete(li, () => this._verwijderMetUndo(id, li));
     });
   }
 
@@ -133,12 +140,45 @@ export class RittenController {
   }
 
   _verwijder(id) {
-    const d = this._db.load();
-    d.ritten = d.ritten.filter((r) => r.id !== id);
-    this._db.save(d);
+    if (typeof this._db.deleteRit === 'function') {
+      this._db.deleteRit(id);
+    } else {
+      const d = this._db.load();
+      d.ritten = d.ritten.filter((r) => r.id !== id);
+      this._db.save(d);
+    }
     this.render();
     this._onUpdate();
     Utils.toast('Rit verwijderd');
+  }
+
+  // v3: swipe-delete met undo. Verwijdert direct; restored bij undo.
+  _verwijderMetUndo(id, _liEl) {
+    const d = this._db.load();
+    const rit = d.ritten.find((r) => r.id === id);
+    if (!rit) return;
+    const snapshot = JSON.parse(JSON.stringify(rit));
+
+    if (typeof this._db.deleteRit === 'function') {
+      this._db.deleteRit(id);
+    } else {
+      d.ritten = d.ritten.filter((r) => r.id !== id);
+      this._db.save(d);
+    }
+    this.render();
+    this._onUpdate();
+
+    Utils.undoToast('Rit verwijderd', () => {
+      if (typeof this._db.addRit === 'function') this._db.addRit(snapshot);
+      else {
+        const dd = this._db.load();
+        dd.ritten.unshift(snapshot);
+        this._db.save(dd);
+      }
+      this.render();
+      this._onUpdate();
+      Utils.toast('Rit hersteld ✓');
+    });
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

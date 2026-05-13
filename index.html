@@ -34,11 +34,21 @@
 <body>
 
   <!-- SCHERM 1: SPLASH -->
-  <div id="screen-splash" class="screen">
+  <div id="screen-splash" class="screen splash-v2" data-tijd="dag">
+    <!-- Achtergrond-lagen (lucht, hemellichaam, decoraties) -->
+    <div class="splash-sky"></div>
+    <div class="splash-celestial" id="splash-celestial"></div>
+    <div class="splash-stars" id="splash-stars"></div>
+    <div class="splash-clouds" id="splash-clouds"></div>
+    <div class="splash-mountains"></div>
+
+    <!-- Voorgrond: begroeting, titel, car-scene, route-tracking, loader -->
     <div class="splash-inner">
+      <div class="splash-greeting" id="splash-greeting">Welkom</div>
       <div class="splash-title">TANKLOG</div>
       <div class="splash-sub">auto · km · kosten</div>
       <div class="splash-stage" id="splash-car-scene"></div>
+
       <div class="splash-loader">
         <div class="splash-spinner"></div>
         <div class="splash-loader-text">LOCATIE OPHALEN</div>
@@ -139,6 +149,10 @@
     </div>
   </div>
 
+  <!-- Leaflet.markercluster (lazy, alleen geladen wanneer tankstations worden getoond) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+
   <!-- SCHERM 3: HOOFD APP -->
   <div id="screen-app" class="screen hidden">
     <div class="app-tabs">
@@ -146,6 +160,14 @@
       <!-- TAB: KAART -->
       <div id="tab-kaart" class="app-tab active">
         <div id="map"></div>
+        <div class="kaart-controls">
+          <button id="kaart-locate-me" class="kaart-control-btn" type="button" aria-label="Centreer op mijn locatie">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+            </svg>
+          </button>
+        </div>
         <div id="rit-pill" class="rit-pill hidden">
           <span class="rit-pill-dot"></span>
           <span class="rit-pill-tag">RIT BEZIG</span>
@@ -225,6 +247,7 @@
 
           <div id="bs-bezig" class="bs-state hidden">
             <div class="bs-rit-naam" id="bs-rit-naam">Rit bezig…</div>
+            <span id="bs-elapsed" class="bs-elapsed" aria-live="polite">00:00</span>
             <div class="bs-stats">
               <div class="bs-stat">
                 <div class="bs-stat-val" id="bs-km">—</div>
@@ -254,6 +277,9 @@
               </svg>
               Waarom dit veld?
             </button>
+            <label class="form-lbl form-lbl--inline" for="rit-km-stand">Km-stand (optioneel)</label>
+            <input type="number" id="rit-km-stand" class="form-input km-stand-input" step="1" min="0"
+              placeholder="bijv. 124530" />
             <input type="text" id="rit-notitie" class="notitie-input"
               placeholder="Notitie (optioneel, bijv. winkelen)" />
             <div class="confirm-btns">
@@ -282,22 +308,7 @@
             <div class="saldo-hero-lbl">SALDO</div>
             <div id="saldo-val" class="saldo-hero-val">€ —</div>
             <div id="saldo-uitleg" class="saldo-hero-uitleg"></div>
-          </div>
-          <div class="tab-sectie-label">RIT PLANNER</div>
-          <div class="form-kaart">
-            <label class="form-lbl">Vertrekpunt</label>
-            <div class="planner-locatie-rij">
-              <input type="text" id="plan-van" class="form-input" placeholder="Adres of straat" autocomplete="off" />
-              <button id="plan-gps-btn" class="plan-gps-btn" title="Gebruik huidige locatie">⊙</button>
-            </div>
-            <label class="form-lbl">Bestemming</label>
-            <div class="planner-stop-rij">
-              <input type="text" id="plan-bestemming" class="form-input" placeholder="Bestemming" autocomplete="off" />
-            </div>
-            <div id="plan-stops"></div>
-            <button id="plan-add-stop" class="btn-form-sec plan-add-stop-btn">+ Tussenstop toevoegen</button>
-            <button id="plan-bereken" class="btn-form-primary">Bereken route</button>
-            <div id="plan-resultaat" class="plan-resultaat hidden"></div>
+            <button id="afreken-knop" class="btn-form-sec saldo-afreken-knop" type="button">Afrekenen →</button>
           </div>
           <div class="tab-sectie-label" id="tank-sectie-lbl">TANKBEURT TOEVOEGEN</div>
           <div class="form-kaart">
@@ -307,6 +318,16 @@
             <div id="tank-prijs-suggestie" class="tank-prijs-suggestie hidden"></div>
             <input type="number" id="tank-prijs" class="form-input" step="0.001" min="0" placeholder="bijv. 2.10" />
             <div class="tank-totaal-rij">Totaal: <strong id="tank-totaal">€ —</strong></div>
+            <label class="form-lbl" for="tank-km-stand">Km-stand (optioneel)</label>
+            <input type="number" id="tank-km-stand" class="form-input" step="1" min="0" placeholder="bijv. 124530" />
+            <label class="form-lbl">Bon (foto, optioneel)</label>
+            <label class="bon-upload" id="tank-bon-knop">
+              <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span id="tank-bon-label">Foto kiezen</span>
+              <input type="file" id="tank-bon" accept="image/*" capture="environment" />
+            </label>
+            <label class="form-lbl" for="tank-notitie">Notitie (optioneel)</label>
+            <input type="text" id="tank-notitie" class="form-input" placeholder="bijv. Shell A12" />
             <button id="btn-tank" class="btn-form-primary">Opslaan</button>
           </div>
           <div class="tab-sectie-label">TANKBEURTEN</div>
@@ -314,13 +335,21 @@
         </div>
       </div>
 
-      <!-- TAB: OVERZICHT -->
+      <!-- TAB: OVERZICHT (STATS) -->
       <div id="tab-overzicht" class="app-tab hidden">
         <div class="tab-scroll">
           <div class="tab-kop">
-            <div class="tab-kop-label">OVERZICHT</div>
+            <div class="tab-kop-label">STATS</div>
             <h2 class="tab-kop-titel">Alles op een rij</h2>
           </div>
+
+          <!-- Periode-filter pills -->
+          <div class="periode-filter" role="group" aria-label="Periode">
+            <button data-periode="maand" aria-pressed="true">Deze maand</button>
+            <button data-periode="jaar" aria-pressed="false">Dit jaar</button>
+            <button data-periode="alles" aria-pressed="false">Alles</button>
+          </div>
+
           <div class="stats-grid">
             <div class="stat-blok">
               <div class="stat-val" id="ov-km">—</div>
@@ -341,8 +370,36 @@
           </div>
           <div class="tab-sectie-label">KM PER MAAND</div>
           <div class="grafiek-sectie">
-            <div class="grafiek-kaart" id="grafiek-km"></div>
+            <div class="grafiek-kaart">
+              <canvas id="grafiek-canvas" width="600" height="240" aria-label="Maandelijkse kosten"></canvas>
+            </div>
           </div>
+
+          <!-- VASTE KOSTEN -->
+          <div class="tab-sectie-label">VASTE KOSTEN</div>
+          <ul id="vk-lijst" class="vk-lijst item-lijst"></ul>
+          <div class="vk-toevoeg-rij">
+            <button id="vk-toevoegen-knop" class="vk-toevoeg-btn">+ Toevoegen</button>
+          </div>
+
+          <!-- RIT PLANNER (verplaatst van Tank-tab) -->
+          <div class="tab-sectie-label">RIT PLANNER</div>
+          <div class="form-kaart">
+            <label class="form-lbl">Vertrekpunt</label>
+            <div class="planner-locatie-rij">
+              <input type="text" id="plan-van" class="form-input" placeholder="Adres of straat" autocomplete="off" />
+              <button id="plan-gps-btn" class="plan-gps-btn" title="Gebruik huidige locatie">⊙</button>
+            </div>
+            <label class="form-lbl">Bestemming</label>
+            <div class="planner-stop-rij">
+              <input type="text" id="plan-bestemming" class="form-input" placeholder="Bestemming" autocomplete="off" />
+            </div>
+            <div id="plan-stops"></div>
+            <button id="plan-add-stop" class="btn-form-sec plan-add-stop-btn">+ Tussenstop toevoegen</button>
+            <button id="plan-bereken" class="btn-form-primary">Bereken route</button>
+            <div id="plan-resultaat" class="plan-resultaat hidden"></div>
+          </div>
+
           <div class="tab-sectie-label">ONDERHOUD</div>
           <div class="form-kaart">
             <label class="form-lbl">Type</label>
@@ -369,6 +426,52 @@
             <div class="tab-kop-label">INSTELLINGEN</div>
             <h2 class="tab-kop-titel">Voorkeuren</h2>
           </div>
+
+          <!-- THEMA -->
+          <div class="tab-sectie-label">THEMA</div>
+          <div class="form-kaart">
+            <div class="thema-toggle" role="radiogroup" aria-label="Thema">
+              <label class="thema-optie">
+                <input type="radio" name="thema" value="klassiek" />
+                <span>Klassiek</span>
+              </label>
+              <label class="thema-optie">
+                <input type="radio" name="thema" value="licht" />
+                <span>Licht</span>
+              </label>
+              <label class="thema-optie">
+                <input type="radio" name="thema" value="donker" />
+                <span>Donker</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- KAART (Stadia API) -->
+          <div class="tab-sectie-label">KAART</div>
+          <div class="form-kaart">
+            <div class="form-lbl-rij">
+              <label class="form-lbl" for="stadia-key-inp">Stadia Maps API-key (optioneel, mooiere tiles)</label>
+              <button class="smart-info-btn" id="btn-stadia-info" type="button" aria-label="Meer info over Stadia Maps">
+                <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <circle cx="10" cy="10" r="8"/>
+                  <path d="M10 9v5M10 6.5v.5"/>
+                </svg>
+              </button>
+            </div>
+            <input
+              type="text"
+              id="stadia-key-inp"
+              class="form-input"
+              placeholder="leeg = CartoCDN (geen key nodig)"
+              autocomplete="off"
+              spellcheck="false"
+              data-1p-ignore
+              data-lpignore="true"
+              data-form-type="other"
+            />
+            <button id="btn-stadia-save" class="btn-form-primary">Opslaan</button>
+          </div>
+
           <div class="tab-sectie-label">AUTO</div>
           <div class="form-kaart" id="auto-inst-form"></div>
           <div class="tab-sectie-label">NAAM</div>
@@ -401,16 +504,53 @@
             <label class="form-lbl">Revolut gebruikersnaam</label>
             <div class="tikkie-key-rij">
               <span class="revolut-prefix">revolut.me/</span>
-              <input type="text" id="revolut-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" />
+              <input type="text" id="revolut-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" />
             </div>
             <div class="form-kaart-scheiding"></div>
             <label class="form-lbl">bunq gebruikersnaam</label>
             <div class="tikkie-key-rij">
               <span class="revolut-prefix">bunq.me/</span>
-              <input type="text" id="betaalverzoek-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" />
+              <input type="text" id="betaalverzoek-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" />
+            </div>
+            <div class="form-kaart-scheiding"></div>
+            <label class="form-lbl">Tikkie-handle</label>
+            <div class="tikkie-key-rij">
+              <span class="revolut-prefix">tikkie.me/</span>
+              <input type="text" id="tikkie-handle-inp" class="form-input" placeholder="jouwhandle" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" />
             </div>
             <button id="btn-betaalverzoek-save" class="btn-form-primary">Opslaan</button>
           </div>
+
+          <div class="tab-sectie-label">BETALINGEN</div>
+          <div class="form-kaart" id="bet-form-kaart">
+            <label class="form-lbl" for="bet-bedrag">Bedrag (€)</label>
+            <input type="number" id="bet-bedrag" class="form-input" step="0.01" min="0" placeholder="bijv. 25.00" />
+            <div class="bet-form-grid">
+              <div>
+                <label class="form-lbl" for="bet-van">Van</label>
+                <input type="text" id="bet-van" class="form-input" placeholder="bijv. Ik" />
+              </div>
+              <div>
+                <label class="form-lbl" for="bet-naar">Naar</label>
+                <input type="text" id="bet-naar" class="form-input" placeholder="bijv. Mama" />
+              </div>
+            </div>
+            <label class="form-lbl" for="bet-methode">Methode</label>
+            <select id="bet-methode" class="form-input">
+              <option value="tikkie">Tikkie</option>
+              <option value="bunq">bunq</option>
+              <option value="revolut">Revolut</option>
+              <option value="cash">Cash</option>
+              <option value="overschrijving">Overschrijving</option>
+              <option value="overig">Overig</option>
+            </select>
+            <label class="form-lbl" for="bet-datum">Datum</label>
+            <input type="date" id="bet-datum" class="form-input" />
+            <label class="form-lbl" for="bet-notitie">Notitie (optioneel)</label>
+            <input type="text" id="bet-notitie" class="form-input" placeholder="bijv. tikkie 3 mei" />
+            <button id="btn-bet-opslaan" class="btn-form-primary">Toevoegen</button>
+          </div>
+          <ul id="bet-lijst" class="item-lijst" style="margin-top:8px;margin-bottom:16px"></ul>
           <div class="tab-sectie-label">SNELKOPPELING</div>
           <div class="shortcut-kaart">
             <div class="shortcut-intro">
@@ -458,6 +598,7 @@
           <div class="form-kaart">
             <button class="btn-form-sec" onclick="exportData()">↓ Exporteer JSON</button>
             <button class="btn-form-sec" onclick="importData()">↑ Importeer JSON</button>
+            <button id="reset-auto-knop" class="btn-form-sec">Reset deze auto</button>
             <button id="btn-reset" class="btn-form-danger" onclick="resetData()">Verwijder alle data</button>
             <input type="file" id="import-file" accept=".json" class="hidden" />
           </div>
@@ -474,7 +615,7 @@
             stroke-width="2" fill="none" />
           <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2" />
         </svg>
-        <span>KAART</span>
+        <span>RIT</span>
       </button>
       <button class="nav-btn" data-tab="ritten">
         <svg viewBox="0 0 24 24" fill="none">
@@ -489,7 +630,7 @@
           <path d="M3 10h18" stroke="currentColor" stroke-width="2" />
           <path d="M7 15h2M15 15h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
-        <span>SALDO</span>
+        <span>TANK</span>
       </button>
       <button class="nav-btn" data-tab="overzicht">
         <svg viewBox="0 0 24 24" fill="none">
@@ -498,7 +639,7 @@
           <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
           <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
         </svg>
-        <span>OVERZICHT</span>
+        <span>STATS</span>
       </button>
       <button class="nav-btn" data-tab="instellingen">
         <svg viewBox="0 0 24 24" fill="none">
@@ -608,7 +749,6 @@
       <div class="modal-handel"></div>
       <div class="modal-kop">
         <h3 class="modal-titel">Auto toevoegen</h3>
-        <button class="modal-sluit" id="modal-sluit">✕</button>
       </div>
       <label class="form-lbl">Naam</label>
       <input type="text" id="auto-naam-inp" class="form-input" placeholder="bijv. Auto van Mama" />
@@ -637,7 +777,6 @@
       <div class="modal-handel"></div>
       <div class="modal-kop">
         <h3 class="modal-titel">Kies auto</h3>
-        <button class="modal-sluit" id="modal-wissel-sluit">✕</button>
       </div>
       <div id="wissel-lijst" class="wissel-lijst"></div>
       <button id="btn-wissel-add" class="btn-form-sec">+ Nieuwe auto toevoegen</button>
@@ -650,7 +789,6 @@
       <div class="modal-handel"></div>
       <div class="modal-kop">
         <h3 class="modal-titel">Rit bewerken</h3>
-        <button class="modal-sluit" id="modal-rit-sluit">✕</button>
       </div>
       <label class="form-lbl">Afstand (km)</label>
       <input type="number" id="rit-edit-km" class="form-input" step="0.1" min="0" />
@@ -666,7 +804,6 @@
       <div class="modal-handel"></div>
       <div class="modal-kop">
         <h3 class="modal-titel">Rit splitsen</h3>
-        <button class="modal-sluit" id="modal-deel-sluit">✕</button>
       </div>
       <div class="deel-rit-blok">
         <div class="deel-rit-naam" id="deel-rit-naam">Rit</div>
@@ -709,6 +846,108 @@
         Stuur via WhatsApp
       </a>
       <button id="deel-kopieer" class="btn-form-sec">Kopieer bericht</button>
+    </div>
+  </div>
+
+  <!-- MODAL: BEVESTIGEN (vervangt browser-confirm) -->
+  <div id="modal-confirm" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cm-backdrop"></div>
+    <div class="modal-sheet cm-sheet">
+      <div class="modal-handel"></div>
+      <h3 class="cm-titel">Weet je het zeker?</h3>
+      <p class="cm-tekst"></p>
+      <div class="cm-acties">
+        <button type="button" class="btn-form-sec cm-annuleer">Annuleer</button>
+        <button type="button" class="btn-form-primary cm-bevestig">Bevestig</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AFREKENEN -->
+  <div id="modal-afreken" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-sheet">
+      <div class="modal-handel"></div>
+      <div class="modal-kop">
+        <h3 class="modal-titel">Afrekenen</h3>
+      </div>
+      <div class="afreken-saldo">
+        <div class="afreken-saldo-lbl" id="afreken-saldo-lbl">Saldo</div>
+        <div class="afreken-saldo-val" id="afreken-saldo-val">€ 0,00</div>
+        <div class="afreken-saldo-uitleg" id="afreken-saldo-uitleg"></div>
+      </div>
+      <div class="afreken-knoppen">
+        <a id="afreken-whatsapp" class="afreken-btn afreken-btn--whatsapp" href="#" target="_blank" rel="noopener">
+          <span class="afreken-btn-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+          </span>
+          <span>WhatsApp</span>
+        </a>
+        <a id="afreken-tikkie" class="afreken-btn afreken-btn--tikkie hidden" href="#" target="_blank" rel="noopener">
+          <span>Tikkie</span>
+        </a>
+        <a id="afreken-bunq" class="afreken-btn afreken-btn--bunq hidden" href="#" target="_blank" rel="noopener">
+          <span>bunq</span>
+        </a>
+        <a id="afreken-revolut" class="afreken-btn afreken-btn--revolut hidden" href="#" target="_blank" rel="noopener">
+          <span>Revolut</span>
+        </a>
+      </div>
+      <div class="afreken-methode-rij">
+        <label class="afreken-methode-lbl" for="afreken-methode">Methode</label>
+        <select id="afreken-methode" class="afreken-methode-select">
+          <option value="tikkie">Tikkie</option>
+          <option value="bunq">bunq</option>
+          <option value="revolut">Revolut</option>
+          <option value="cash">Cash</option>
+          <option value="overschrijving">Overschrijving</option>
+          <option value="overig">Overig</option>
+        </select>
+      </div>
+      <button id="afreken-markeer" class="afreken-bevestig">Markeer als afgerekend</button>
+    </div>
+  </div>
+
+  <!-- SHEET: VASTE KOST TOEVOEGEN / BEWERKEN -->
+  <div id="sheet-vaste-kost" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-backdrop" id="vk-backdrop"></div>
+    <div class="modal-sheet vk-sheet">
+      <div class="modal-handel"></div>
+      <div class="modal-kop">
+        <h3 class="modal-titel" id="vk-modal-titel">Vaste kost</h3>
+      </div>
+      <label class="form-lbl" for="vk-label">Naam</label>
+      <input type="text" id="vk-label" class="form-input" placeholder="bijv. Autoverzekering" />
+      <label class="form-lbl" for="vk-type">Type</label>
+      <select id="vk-type" class="form-input">
+        <option value="verzekering">Verzekering</option>
+        <option value="wegenbelasting">Wegenbelasting</option>
+        <option value="apk">APK</option>
+        <option value="onderhoud">Onderhoud</option>
+        <option value="parkeren">Parkeervergunning</option>
+        <option value="overig">Overig</option>
+      </select>
+      <label class="form-lbl" for="vk-bedrag">Bedrag (€)</label>
+      <input type="number" id="vk-bedrag" class="form-input" step="0.01" min="0" placeholder="bijv. 45.00" />
+      <div class="vk-freq-rij" role="radiogroup" aria-label="Frequentie">
+        <label>
+          <input type="radio" name="vk-frequentie" value="maandelijks" checked />
+          <span>Maandelijks</span>
+        </label>
+        <label>
+          <input type="radio" name="vk-frequentie" value="jaarlijks" />
+          <span>Jaarlijks</span>
+        </label>
+      </div>
+      <label class="form-lbl" for="vk-start-datum">Begindatum</label>
+      <input type="date" id="vk-start-datum" class="form-input" />
+      <label class="form-lbl" for="vk-eind-datum">Einddatum (optioneel)</label>
+      <input type="date" id="vk-eind-datum" class="form-input" />
+      <label class="form-lbl" for="vk-notitie">Notitie (optioneel)</label>
+      <input type="text" id="vk-notitie" class="form-input" placeholder="bijv. polisnummer" />
+      <div class="vk-sheet-acties">
+        <button type="button" class="vk-btn-verwijder hidden" id="vk-verwijder">Verwijder</button>
+        <button type="button" class="vk-btn-opslaan" id="vk-opslaan">Opslaan</button>
+      </div>
     </div>
   </div>
 

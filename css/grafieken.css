@@ -17,3 +17,54 @@
   letter-spacing: 0.2em;
   margin-bottom: 14px;
 }
+
+/* ── v3: CANVAS GRAFIEK ──────────────────── */
+#grafiek-canvas {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* ── v3: PER-AUTO STATS GRID ─────────────────────────────────
+   2-koloms grid van kerncijfers per auto. Label klein boven,
+   waarde groot mono onder. Subtiele highlight bij hover/tap. */
+.per-auto-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.per-auto-stats-grid .stat-cel {
+  background: var(--white);
+  padding: 16px 14px 14px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  align-items: center;
+}
+
+.per-auto-stats-grid .stat-label {
+  font-family: var(--sans);
+  color: var(--txt-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 400;
+  order: 2;
+}
+
+.per-auto-stats-grid .stat-waarde {
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--green);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  order: 1;
+}

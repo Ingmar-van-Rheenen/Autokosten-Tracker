@@ -39,48 +39,125 @@
 
 .tab-sectie-label {
   font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--txt-muted);
-  letter-spacing: 0.18em;
-  padding: 22px 24px 8px;
+  font-size: var(--font-xs);
+  color: var(--tekst-zwak);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: var(--weight-nadruk);
+  padding: 24px 24px 10px;
 }
 
-/* ── SALDO HERO ──────────────────────────── */
+/* ── SALDO HERO ──────────────────────────────────────────────
+   v3: marquee oppervlak boven Tank-tab. Thema-aware gradient,
+   subtiele radiale highlight links-boven, hero-typografie. */
 .saldo-hero {
-  background: var(--dark);
-  /* Extend dark bg tot in de notch zodat status bar matcht met saldo container */
-  padding: calc(36px + env(safe-area-inset-top)) 24px 30px;
+  position: relative;
+  overflow: hidden;
+  background: var(--saldo-hero-bg-top, #1b2537);
+  padding: calc(36px + env(safe-area-inset-top)) 24px 28px;
   text-align: center;
+  isolation: isolate;
 }
+
+/* Thema-specifieke kleuren voor de hero (definieer indien overschreven) */
+html[data-thema='licht'] .saldo-hero {
+  --saldo-hero-bg-top: #1b2537;
+  --saldo-hero-bg-bot: #2a3850;
+  --saldo-hero-tekst: #ffffff;
+  --saldo-hero-tekst-zwak: rgba(255, 255, 255, 0.55);
+  --saldo-hero-knop-bg: rgba(255, 255, 255, 0.08);
+  --saldo-hero-knop-border: rgba(255, 255, 255, 0.18);
+}
+html[data-thema='donker'] .saldo-hero {
+  --saldo-hero-bg-top: #0e1421;
+  --saldo-hero-bg-bot: #19233a;
+  --saldo-hero-tekst: #ffffff;
+  --saldo-hero-tekst-zwak: rgba(255, 255, 255, 0.55);
+  --saldo-hero-knop-bg: rgba(255, 255, 255, 0.06);
+  --saldo-hero-knop-border: rgba(255, 255, 255, 0.14);
+}
+html[data-thema='auto'] .saldo-hero {
+  --saldo-hero-bg-top: #1b2537;
+  --saldo-hero-bg-bot: #2a3850;
+  --saldo-hero-tekst: #ffffff;
+  --saldo-hero-tekst-zwak: rgba(255, 255, 255, 0.55);
+  --saldo-hero-knop-bg: rgba(255, 255, 255, 0.08);
+  --saldo-hero-knop-border: rgba(255, 255, 255, 0.18);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-thema='auto'] .saldo-hero {
+    --saldo-hero-bg-top: #0e1421;
+    --saldo-hero-bg-bot: #19233a;
+    --saldo-hero-knop-bg: rgba(255, 255, 255, 0.06);
+    --saldo-hero-knop-border: rgba(255, 255, 255, 0.14);
+  }
+}
+
+.saldo-hero > * { position: relative; z-index: 1; }
 
 .saldo-hero-lbl {
   font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--txt-dark-m);
+  font-size: var(--font-xs);
+  color: var(--saldo-hero-tekst-zwak);
   letter-spacing: 0.32em;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  font-weight: var(--weight-nadruk);
 }
 
 .saldo-hero-val {
   font-family: var(--mono);
-  font-size: 3rem;
-  font-weight: 700;
-  color: var(--txt-dark);
+  font-size: var(--font-hero);
+  font-weight: var(--weight-kop);
+  color: var(--saldo-hero-tekst);
   margin-bottom: 8px;
-  transition: color 0.3s;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  transition: color 0.3s ease-out;
 }
 
 .saldo-hero-val.positief {
-  color: var(--green-lite);
+  color: #7ed4a0;
 }
 
 .saldo-hero-val.negatief {
-  color: #e07070;
+  color: #ff8a8a;
 }
 
 .saldo-hero-uitleg {
-  font-size: 0.78rem;
-  color: var(--txt-dark-m);
+  font-size: var(--font-sm);
+  color: var(--saldo-hero-tekst-zwak);
+  font-weight: var(--weight-body);
+}
+
+/* v3: Afrekenen-knop op de saldo-hero (donker oppervlak) */
+.saldo-afreken-knop {
+  margin-top: 16px;
+  background: var(--saldo-hero-knop-bg);
+  color: var(--saldo-hero-tekst);
+  border: 1px solid var(--saldo-hero-knop-border);
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  font-family: var(--mono);
+  font-size: var(--font-xs);
+  letter-spacing: 0.14em;
+  font-weight: var(--weight-nadruk);
+  cursor: pointer;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, transform 0.1s, border-color 0.15s;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.saldo-afreken-knop:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+}
+.saldo-afreken-knop:active {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(0.97);
 }
 
 /* ── STATS GRID ──────────────────────────── */
@@ -88,7 +165,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  padding: 16px 24px;
+  padding: 0 16px 16px;
 }
 
 .stat-blok {
@@ -110,4 +187,44 @@
 .stat-lbl {
   font-size: 0.72rem;
   color: var(--txt-muted);
+}
+
+/* ── v3: PERIODE FILTER — iOS segmented control ─────────────
+   Eén capsule, drie segmenten. Het actieve segment heeft een
+   solide pill-pluim, inactieve segmenten zijn ondoorzichtig. */
+.periode-filter {
+  display: flex;
+  margin: 4px 16px 12px;
+  padding: 4px;
+  gap: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--rand);
+}
+
+.periode-filter button {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--tekst-zwak);
+  font-family: var(--mono);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-nadruk);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s ease-out, color 0.18s ease-out, transform 0.1s;
+  white-space: nowrap;
+}
+
+.periode-filter button:active {
+  transform: scale(0.96);
+}
+
+.periode-filter button[aria-pressed='true'] {
+  background: var(--green);
+  color: var(--white);
+  box-shadow: var(--schaduw-1);
 }

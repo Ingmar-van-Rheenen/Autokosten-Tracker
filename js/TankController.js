@@ -55,7 +55,7 @@ export class TankController {
       <li>
         <div>
           <div class="item-naam">${t.liters.toFixed(2).replace('.', ',')} ${elektrisch ? 'kWh' : 'liter'}</div>
-          <div class="item-sub">${Utils.datumStr(t.datum)} · €${t.prijs_per_liter.toFixed(elektrisch ? 2 : 3)}/${elektrisch ? 'kWh' : 'L'}</div>
+          <div class="item-sub">${Utils.datumStr(t.datum)} · €${t.prijs_per_liter.toFixed(elektrisch ? 2 : 3)}/${elektrisch ? 'kWh' : 'L'}${t.km_stand ? ' · km ' + t.km_stand : ''}${t.notitie ? ' · ' + Utils.esc(t.notitie) : ''}</div>
         </div>
         <div class="item-acties" data-id="${t.id}">
           <span class="item-val">€ ${t.totaal.toFixed(2).replace('.', ',')}</span>
@@ -65,7 +65,44 @@ export class TankController {
     ).join('');
 
     el.querySelectorAll('.item-del').forEach((btn) => {
-      btn.addEventListener('click', () => this._vraagVerwijder(btn));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this._vraagVerwijder(btn); });
+    });
+
+    // v3: swipe-naar-links-om-te-verwijderen op elke tankbeurt
+    el.querySelectorAll('.item-acties[data-id]').forEach((acties) => {
+      const li = acties.closest('li');
+      const id = acties.getAttribute('data-id');
+      if (!li || !id) return;
+      Utils.bindSwipeToDelete(li, () => this._verwijderMetUndo(id));
+    });
+  }
+
+  // v3: swipe-delete met undo voor tankbeurten
+  _verwijderMetUndo(id) {
+    const d = this._db.load();
+    const tank = d.tankbeurten.find((t) => t.id === id);
+    if (!tank) return;
+    const snapshot = JSON.parse(JSON.stringify(tank));
+
+    if (typeof this._db.deleteTankbeurt === 'function') {
+      this._db.deleteTankbeurt(id);
+    } else {
+      d.tankbeurten = d.tankbeurten.filter((t) => t.id !== id);
+      this._db.save(d);
+    }
+    this.render();
+    this._onUpdate();
+
+    Utils.undoToast('Tankbeurt verwijderd', () => {
+      if (typeof this._db.addTankbeurt === 'function') this._db.addTankbeurt(snapshot);
+      else {
+        const dd = this._db.load();
+        dd.tankbeurten.unshift(snapshot);
+        this._db.save(dd);
+      }
+      this.render();
+      this._onUpdate();
+      Utils.toast('Tankbeurt hersteld ✓');
     });
   }
 
@@ -73,6 +110,16 @@ export class TankController {
     document.getElementById('tank-liters').addEventListener('input', () => this._updateTotaal());
     document.getElementById('tank-prijs').addEventListener('input', () => this._updateTotaal());
     document.getElementById('btn-tank').addEventListener('click', () => this._voegToe());
+
+    // v3: bon-upload label sync
+    const bonInp = document.getElementById('tank-bon');
+    const bonLabel = document.getElementById('tank-bon-label');
+    if (bonInp && bonLabel) {
+      bonInp.addEventListener('change', () => {
+        const file = bonInp.files && bonInp.files[0];
+        bonLabel.textContent = file ? '✓ Foto gekozen' : 'Foto kiezen';
+      });
+    }
 
     const suggestieEl = document.getElementById('tank-prijs-suggestie');
     if (suggestieEl) {
@@ -93,7 +140,7 @@ export class TankController {
       l > 0 && p > 0 ? '€ ' + (l * p).toFixed(2).replace('.', ',') : '€ —';
   }
 
-  _voegToe() {
+  async _voegToe() {
     const liters = parseFloat(document.getElementById('tank-liters').value);
     const prijs = parseFloat(document.getElementById('tank-prijs').value);
     if (!liters || liters <= 0 || !prijs || prijs <= 0) {
@@ -103,19 +150,47 @@ export class TankController {
 
     const auto = this._db.getGeselecteerdeAuto();
     const elektrisch = auto?.type === 'elektrisch';
-    const d = this._db.load();
-    d.tankbeurten.unshift({
+
+    // v3: optionele bon-foto, km-stand en notitie
+    const bonInp = document.getElementById('tank-bon');
+    const kmInp = document.getElementById('tank-km-stand');
+    const notInp = document.getElementById('tank-notitie');
+
+    let bonFoto = null;
+    if (bonInp && bonInp.files && bonInp.files[0] && typeof Utils.formatBon === 'function') {
+      try { bonFoto = await Utils.formatBon(bonInp.files[0]); } catch { bonFoto = null; }
+    }
+    const kmStand = kmInp && kmInp.value ? parseInt(kmInp.value, 10) : null;
+    const notitie = notInp && notInp.value ? notInp.value.trim() : null;
+
+    const payload = {
       id: Utils.uid(),
       auto_id: auto?.id,
       datum: new Date().toISOString(),
       liters,
       prijs_per_liter: prijs,
       totaal: parseFloat((liters * prijs).toFixed(2)),
-    });
-    this._db.save(d);
+      bon_foto: bonFoto,
+      km_stand: Number.isFinite(kmStand) ? kmStand : null,
+      notitie,
+    };
+
+    // Voorkeur: addTankbeurt (emit db:updated) — fallback naar save() voor compat
+    if (typeof this._db.addTankbeurt === 'function') {
+      this._db.addTankbeurt(payload);
+    } else {
+      const d = this._db.load();
+      d.tankbeurten.unshift(payload);
+      this._db.save(d);
+    }
 
     document.getElementById('tank-liters').value = '';
     document.getElementById('tank-totaal').textContent = '€ —';
+    if (bonInp) bonInp.value = '';
+    const bonLabel = document.getElementById('tank-bon-label');
+    if (bonLabel) bonLabel.textContent = 'Foto kiezen';
+    if (kmInp) kmInp.value = '';
+    if (notInp) notInp.value = '';
 
     this.render();
     this._onUpdate();
@@ -134,9 +209,13 @@ export class TankController {
   }
 
   _verwijder(id) {
-    const d = this._db.load();
-    d.tankbeurten = d.tankbeurten.filter((t) => t.id !== id);
-    this._db.save(d);
+    if (typeof this._db.deleteTankbeurt === 'function') {
+      this._db.deleteTankbeurt(id);
+    } else {
+      const d = this._db.load();
+      d.tankbeurten = d.tankbeurten.filter((t) => t.id !== id);
+      this._db.save(d);
+    }
     this.render();
     this._onUpdate();
     Utils.toast('Tankbeurt verwijderd');

@@ -27,6 +27,9 @@ export class RitController {
     this._watchId = null;
     this._wakeLock = null;
     this._laasteGpsPos = null;
+    this._track = [];           // v3: GPS-polyline (alleen bij smart-tracking)
+    this._startTijdMs = null;   // v3: voor elapsed-timer
+    this._elapsedIntervalId = null;
 
     this._bindEvents();
   }
@@ -90,6 +93,13 @@ export class RitController {
 
     if (this._db.getSmartTracking()) {
       this._acquireWakeLock();
+
+      // v3: start de live polyline + track-buffer bij het beginpunt
+      this._track = this._ritStart ? [[this._ritStart.lat, this._ritStart.lng]] : [];
+      if (this._ritStart && typeof this._kaart.startLivePolyline === 'function') {
+        this._kaart.startLivePolyline(this._ritStart);
+      }
+
       this._watchId = navigator.geolocation.watchPosition(
         (pos) => {
           if (this._state !== 'bezig') return;
@@ -99,6 +109,10 @@ export class RitController {
             if (delta >= MIN_GPS_DELTA_KM) {
               this._ritKm = (this._ritKm || 0) + delta;
               this._laasteGpsPos = nieuw;
+              this._track.push([nieuw.lat, nieuw.lng]);
+              if (typeof this._kaart.voegLivePuntToe === 'function') {
+                this._kaart.voegLivePuntToe(nieuw);
+              }
               this._slaStateOp();
               this._updateBsStats();
             }
@@ -115,7 +129,7 @@ export class RitController {
         try {
           const pos = await this._geo.getGps();
           if (this._laasteGpsPos) {
-            const delta = haversine(this._laasteGpsPos, pos);
+            const delta = Utils.haversine(this._laasteGpsPos, pos);
             if (delta >= MIN_GPS_DELTA_KM) {
               this._ritKm = (this._ritKm || 0) + delta;
               this._laasteGpsPos = pos;
@@ -128,6 +142,20 @@ export class RitController {
         } catch { /* GPS tijdelijk niet beschikbaar */ }
       }, LIVE_INTERVAL_MS);
     }
+
+    // v3: elapsed-timer in #bs-elapsed (mm:ss). Start vanaf NU.
+    this._startTijdMs = Date.now();
+    this._tickElapsed();
+    this._elapsedIntervalId = setInterval(() => this._tickElapsed(), 1000);
+  }
+
+  _tickElapsed() {
+    const el = document.getElementById('bs-elapsed');
+    if (!el || !this._startTijdMs) return;
+    const sec = Math.max(0, Math.floor((Date.now() - this._startTijdMs) / 1000));
+    const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+    const ss = String(sec % 60).padStart(2, '0');
+    el.textContent = mm + ':' + ss;
   }
 
   _stopLiveTracking() {
@@ -138,6 +166,15 @@ export class RitController {
     if (this._watchId !== null) {
       navigator.geolocation.clearWatch(this._watchId);
       this._watchId = null;
+    }
+    if (this._elapsedIntervalId) {
+      clearInterval(this._elapsedIntervalId);
+      this._elapsedIntervalId = null;
+    }
+    // v3: rond live polyline af en bewaar verzameld track
+    if (typeof this._kaart.stopLivePolyline === 'function') {
+      const gestopt = this._kaart.stopLivePolyline();
+      if (Array.isArray(gestopt) && gestopt.length > this._track.length) this._track = gestopt;
     }
     this._releaseWakeLock();
     this._laasteGpsPos = null;
@@ -280,8 +317,14 @@ export class RitController {
     if (!auto) { Utils.toast('Geen auto geselecteerd.', 'err'); return; }
 
     const notitie = document.getElementById('rit-notitie').value.trim();
-    const d = this._db.load();
-    d.ritten.unshift({
+    const kmStandRaw = document.getElementById('rit-km-stand')?.value;
+    const kmStand = kmStandRaw ? parseInt(kmStandRaw, 10) : null;
+
+    // v3: bewaar polyline alleen bij smart-tracking (storage-zuinig)
+    const gpsTrack = (this._db.getSmartTracking() && Array.isArray(this._track) && this._track.length > 1)
+      ? this._track.slice() : null;
+
+    const rit = {
       id: Utils.uid(),
       auto_id: auto.id,
       datum: new Date().toISOString(),
@@ -290,9 +333,18 @@ export class RitController {
       km: parseFloat(afstand.toFixed(2)),
       bestemming: this._bestemming ?? null,
       notitie: notitie || null,
-    });
+      km_stand: Number.isFinite(kmStand) ? kmStand : null,
+      gps_track: gpsTrack,
+    };
+
     try {
-      this._db.save(d);
+      if (typeof this._db.addRit === 'function') {
+        this._db.addRit(rit);
+      } else {
+        const d = this._db.load();
+        d.ritten.unshift(rit);
+        this._db.save(d);
+      }
     } catch {
       return; // QuotaExceeded — alert al getoond door Database.save
     }
@@ -313,6 +365,12 @@ export class RitController {
     this._ritEind = null;
     this._ritKm = null;
     this._bestemming = null;
+    this._track = [];
+    this._startTijdMs = null;
+    const kmStandEl = document.getElementById('rit-km-stand');
+    if (kmStandEl) kmStandEl.value = '';
+    const elapsedEl = document.getElementById('bs-elapsed');
+    if (elapsedEl) elapsedEl.textContent = '00:00';
     this._kaart.reset();
     this._setState('idle');
     this._slaStateOp();
