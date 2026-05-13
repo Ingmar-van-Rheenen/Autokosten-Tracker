@@ -21,6 +21,7 @@ import { ConfirmModal } from './ConfirmModal.js';
 import { VasteKostenController } from './VasteKostenController.js';
 import { BetalingenController } from './BetalingenController.js';
 import { AfrekenController } from './AfrekenController.js';
+import { DesktopDashboard } from './DesktopDashboard.js';
 
 const SCHERMEN = ['screen-splash', 'screen-intro', 'screen-auto', 'screen-app'];
 const TAB_VOLGORDE = ['kaart', 'ritten', 'saldo', 'overzicht', 'instellingen'];
@@ -318,6 +319,15 @@ export class App {
     this._bindDbUpdated();
     this._vasteKosten.render();
     this._betalingen.render();
+
+    // Desktop dashboard (≥1280px) — render altijd, CSS regelt zichtbaarheid
+    this._desktopDashboard = new DesktopDashboard(this._db, {
+      afreken: this._afreken,
+      vasteKosten: this._vasteKosten,
+      stats: this._stats,
+      autoManager: this._autoManager,
+    });
+    this._desktopDashboard.init();
   }
 
   // ── v3 wire-ups voor Instellingen-tab + globale db:updated listener ───────

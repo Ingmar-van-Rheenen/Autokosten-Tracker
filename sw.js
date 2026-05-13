@@ -59,6 +59,7 @@ const ASSETS = [
   '/js/VasteKostenController.js',
   '/js/BetalingenController.js',
   '/js/AfrekenController.js',
+  '/js/DesktopDashboard.js',
   '/js/ThemaController.js',
   '/js/ConfirmModal.js',
   '/icons/icon-192.png',
