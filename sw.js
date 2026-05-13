@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v43';
+const CACHE = 'tanklog-v44';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -34,6 +34,7 @@ const ASSETS = [
   '/css/afreken.css',
   '/css/confirm-modal.css',
   '/css/swipe.css',
+  '/css/desktop.css',
   '/js/main.js',
   '/js/CarScene.js',
   '/js/SplashScene.js',

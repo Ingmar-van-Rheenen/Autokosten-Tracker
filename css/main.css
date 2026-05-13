@@ -80,3 +80,6 @@
 
 /* 26. Swipe-to-delete primitieven */
 @import './swipe.css';
+
+/* 27. Desktop dashboard (≥1280px) */
+@import './desktop.css';

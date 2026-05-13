@@ -5,7 +5,7 @@
   z-index: 10;
 }
 
-/* Desktop centering */
+/* Tablet centering — 390px gecentreerd, zoals een phone-frame */
 @media (min-width: 500px) {
   .screen {
     left: 50%;
@@ -13,5 +13,18 @@
     transform: translateX(-50%);
     width: 390px;
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Desktop breakpoint: #screen-app vult het hele scherm zodat het
+   dashboard-grid kan ontvouwen. Andere schermen (splash, intro,
+   auto-select) blijven 390px gecentreerd. */
+@media (min-width: 1280px) {
+  #screen-app.screen {
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    box-shadow: none;
   }
 }
