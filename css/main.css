@@ -44,6 +44,8 @@
 @import './features/betalingen.css';
 @import './features/afreken.css';
 
+@import './features/sync.css';
+
 /* ── 6. DESKTOP DASHBOARD (≥1280px) ──────────────────────────────── */
 @import './desktop/layout.css';
 @import './desktop/widgets/saldo.css';

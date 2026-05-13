@@ -1,0 +1,188 @@
+/* ── SYNC SECTIE — instellingen-tab ──────────────────────────────── */
+
+.sync-info {
+  font-size: 0.85rem;
+  color: var(--txt-muted);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  max-width: 56ch;
+}
+
+.sync-knoppen-rij {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 360px) {
+  .sync-knoppen-rij { grid-template-columns: 1fr; }
+}
+
+.sync-knop {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  background: var(--cream);
+  border: 1.5px solid var(--cream-2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  color: var(--txt);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sync-knop:hover,
+.sync-knop:active {
+  border-color: var(--green);
+  background: var(--white);
+}
+
+.sync-knop-titel {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.sync-knop-sub {
+  font-size: 0.78rem;
+  color: var(--txt-muted);
+  line-height: 1.4;
+}
+
+/* ── PAIRING PANEEL — actief tijdens host/gast flow ─────────────── */
+.sync-paneel {
+  margin-top: 16px;
+  padding: 18px 16px;
+  background: var(--cream);
+  border: 1.5px solid var(--cream-2);
+  border-radius: 12px;
+}
+
+.sync-paneel.hidden { display: none; }
+
+.sync-status {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--txt);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.sync-status.hidden { display: none; }
+
+.sync-status.fout {
+  color: var(--red);
+}
+
+/* Toon-code (host) — grote 6-cijferige code */
+.sync-code-toon {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.sync-code-toon.hidden { display: none; }
+
+.sync-code-lbl {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--txt-muted);
+  margin-bottom: 8px;
+}
+
+.sync-code-cijfers {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 2.4rem;
+  letter-spacing: 0.32em;
+  color: var(--green);
+  display: inline-block;
+  padding: 8px 0;
+}
+
+/* Code-input (gast) */
+.sync-code-input {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.sync-code-input.hidden { display: none; }
+
+#sync-code-inp {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: 0.24em;
+  text-align: center;
+  padding: 14px 0;
+  background: var(--white);
+  border: 1.5px solid var(--cream-2);
+  border-radius: 10px;
+  color: var(--txt);
+  outline: none;
+}
+
+#sync-code-inp:focus {
+  border-color: var(--green);
+}
+
+#sync-code-inp::placeholder {
+  color: var(--txt-muted);
+  letter-spacing: 0.24em;
+}
+
+/* Annuleer-knop */
+.sync-annuleer {
+  margin-top: 8px;
+}
+
+.sync-annuleer.hidden { display: none; }
+
+/* ── DARK THEMA / KLASSIEK — donker paneel binnen Tank-sectie ──── */
+html[data-thema='donker'] .sync-knop,
+html[data-thema='klassiek'] .sync-knop {
+  background: #232f44;
+  border-color: #35445e;
+  color: #dce8f4;
+}
+
+html[data-thema='donker'] .sync-knop:hover,
+html[data-thema='klassiek'] .sync-knop:hover,
+html[data-thema='donker'] .sync-knop:active,
+html[data-thema='klassiek'] .sync-knop:active {
+  background: #2a3850;
+  border-color: var(--green);
+}
+
+html[data-thema='donker'] .sync-knop-sub,
+html[data-thema='klassiek'] .sync-knop-sub {
+  color: #8a9ab0;
+}
+
+html[data-thema='donker'] .sync-paneel,
+html[data-thema='klassiek'] .sync-paneel {
+  background: #232f44;
+  border-color: #35445e;
+}
+
+html[data-thema='donker'] .sync-status,
+html[data-thema='klassiek'] .sync-status {
+  color: #dce8f4;
+}
+
+html[data-thema='donker'] #sync-code-inp,
+html[data-thema='klassiek'] #sync-code-inp {
+  background: #1b2537;
+  border-color: #35445e;
+  color: #dce8f4;
+}
