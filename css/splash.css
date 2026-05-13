@@ -3,8 +3,8 @@
    GPS-functionaliteit van de app visualiseert. ──────────────────── */
 
 #screen-splash {
-  position: fixed;
-  inset: 0;
+  /* Positionering komt van .screen — op mobiel full-screen, op desktop
+     een 390px gecentreerde kolom. Hier alleen de interne layout. */
   display: flex;
   align-items: center;
   justify-content: center;
