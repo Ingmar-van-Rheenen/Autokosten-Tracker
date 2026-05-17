@@ -1,6 +1,10 @@
 # Editor
 .vscode/sftp.json
 
+# Deployment credentials — gebruik .env.deploy.example als template
+.env.deploy
+.env.deploy.local
+
 # OS
 .DS_Store
 Thumbs.db

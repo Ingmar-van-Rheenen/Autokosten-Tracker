@@ -73,4 +73,26 @@ For GPS to work, serve over HTTPS or `localhost` (browser requirement).
 
 ## Deployment
 
-Static files — deploy to GitHub Pages, Netlify, or Vercel as-is.
+Static files — production deploy gaat via FTP naar aaPanel op
+`auto.ingmarvanrheenen.nl`.
+
+**Eerste setup:**
+
+```bash
+cp .env.deploy.example .env.deploy
+# Vul FTP_USER, FTP_PASS, FTP_REMOTE_DIR in
+chmod +x deploy.sh
+```
+
+**Deploy:**
+
+```bash
+./deploy.sh
+```
+
+Het script uploadt alleen tracked git files (`git ls-files`), skipt
+deploy-tooling (CLAUDE.md, deploy.sh, .env.deploy.example, .claude/,
+design/). Credentials staan in `.env.deploy` dat gitignored is.
+
+Voor andere hosts kan deze app ook 1-op-1 op GitHub Pages, Netlify of
+Vercel — geen build step nodig.
