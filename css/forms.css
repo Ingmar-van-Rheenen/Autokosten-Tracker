@@ -25,6 +25,9 @@
 
 .form-input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 12px 14px;
   border: 1.5px solid var(--cream-2);
   border-radius: 10px;
@@ -34,6 +37,27 @@
   background: var(--cream);
   outline: none;
   transition: border-color 0.18s, background 0.18s;
+}
+
+/* iOS Safari: input[type=date] heeft een intrinsieke min-width gebaseerd
+   op het content-formaat, waardoor het buiten de container kan vallen op
+   smalle schermen. -webkit-appearance:none + min-width:0 forceert dat de
+   input zich houdt aan de width: 100% van .form-input. */
+.form-input[type='date'],
+.form-input[type='time'],
+.form-input[type='datetime-local'] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Native kalender-icoon iets compacter zodat de datum-tekst niet wordt
+   afgekapt op smalle iPhones. */
+.form-input[type='date']::-webkit-calendar-picker-indicator {
+  margin-left: 4px;
+  padding: 0;
+  opacity: 0.7;
 }
 
 .form-input:focus {
