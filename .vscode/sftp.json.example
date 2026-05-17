@@ -1,0 +1,24 @@
+{
+    "name": "auto.ingmar (aaPanel)",
+    "host": "85.9.216.223",
+    "protocol": "ftp",
+    "port": 21,
+    "username": "Ingmar_van_Rheene_upanel_a9is3r",
+    "password": "f7a8c31fcb06f8",
+    "remotePath": "/",
+    "uploadOnSave": true,
+    "syncMode": "full",
+    "watcher": {
+        "files": "**/*",
+        "autoUpload": true,
+        "autoDelete": false
+    },
+    "ignore": [
+        ".vscode",
+        ".git",
+        "node_modules",
+        ".DS_Store",
+        ".docs",
+        "CLAUDE"
+    ]
+}
