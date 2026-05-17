@@ -1,0 +1,63 @@
+/* ── MINI-LIJST — shared styles voor ritten + tankbeurten widgets ──
+   Beide widgets gebruiken dezelfde rij-opbouw (naam + sub + value).
+   Gedefinieerd in één file om DRY te blijven. */
+@media (min-width: 1280px) {
+  .dash-mini-lijst {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .dash-mini-rij {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--dark-border);
+  }
+
+  .dash-mini-rij:last-child {
+    border-bottom: none;
+  }
+
+  .dash-mini-naam {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--txt-dark);
+  }
+
+  .dash-mini-sub {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--txt-dark-m);
+    margin-top: 2px;
+  }
+
+  .dash-mini-val {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--green-lite);
+  }
+
+  .dash-mini-leeg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--txt-dark-m);
+    text-align: center;
+    padding: 24px 12px;
+  }
+}

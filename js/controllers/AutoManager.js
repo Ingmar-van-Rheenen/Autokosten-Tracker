@@ -1,6 +1,6 @@
 // ── AutoManager ───────────────────────────────────────────────────────────────
 // Beheert auto-selectie, de modal voor nieuw auto toevoegen, en de kaarten-weergave.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 const AUTO_EMOJIS = ['🚗', '🚙', '🏎️', '🚐', '🚕', '🚌'];
 

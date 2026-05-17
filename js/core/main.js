@@ -1,8 +1,8 @@
 // ── main.js ───────────────────────────────────────────────────────────────────
 // Entrypoint: wacht op volledige DOM-laad en start de App.
 import { App } from './App.js';
-import { CarScene } from './CarScene.js';
-import { SplashScene } from './SplashScene.js';
+import { CarScene } from '../scenes/CarScene.js';
+import { SplashScene } from '../scenes/SplashScene.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {

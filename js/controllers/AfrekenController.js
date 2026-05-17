@@ -1,7 +1,7 @@
 // ── AfrekenController ─────────────────────────────────────────────────────────
 // Toont het huidige saldo + deeplinks naar WhatsApp / Tikkie / bunq / Revolut.
 // Bij "Markeer als afgerekend" → registreert een Betaling die het saldo nullt.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 const WHATSAPP_TEKST_TEGOED = (bedrag, link) =>
   `Hé! Ik heb nog € ${bedrag} tegoed voor de auto 🚗${link ? ' — ' + link : ''}`;

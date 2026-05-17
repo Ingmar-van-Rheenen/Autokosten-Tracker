@@ -1,0 +1,48 @@
+/* ── QUICK ACTIONS WIDGET — 3 snel-toevoegen knoppen ────────────── */
+@media (min-width: 1280px) {
+  .w-actions {
+    padding: 14px 18px;
+  }
+
+  .dash-acties-rij {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    height: 100%;
+  }
+
+  .dash-actie-knop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--dark-3);
+    border: 1px solid var(--dark-border);
+    border-radius: 100px;
+    color: var(--txt-dark);
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    transition: background 0.15s ease-out, border-color 0.15s ease-out, color 0.15s ease-out;
+  }
+
+  .dash-actie-knop:hover {
+    background: var(--green-bg);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .dash-actie-icoon {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--green-lite);
+  }
+
+  .dash-actie-knop:hover .dash-actie-icoon {
+    color: var(--green);
+  }
+}

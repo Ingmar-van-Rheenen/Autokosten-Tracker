@@ -1,5 +1,5 @@
 // ── DeelController ────────────────────────────────────────────────────────────
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 
 export class DeelController {

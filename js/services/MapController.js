@@ -1,7 +1,7 @@
 // ── MapController ─────────────────────────────────────────────────────────────
 // Beheert de Leaflet-kaart, markers en routelijn.
 // Leaflet wordt als globale (`L`) geladen via een <script>-tag in index.html.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 // Bekende merkkleuren voor tankstation-pins.
 // Keys worden case-insensitive vergeleken; gebruik het hoofdmerk als prefix.

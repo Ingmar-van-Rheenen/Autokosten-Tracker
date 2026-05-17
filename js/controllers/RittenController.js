@@ -1,6 +1,6 @@
 // ── RittenController ──────────────────────────────────────────────────────────
 // Beheert het renderen, bewerken en verwijderen van ritten.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 export class RittenController {
   constructor(db, onUpdate, onDeel) {

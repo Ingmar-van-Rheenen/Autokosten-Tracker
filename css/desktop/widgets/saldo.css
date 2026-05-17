@@ -1,0 +1,56 @@
+/* ── SALDO WIDGET ───────────────────────────────────────────────────
+   De hero-tegel. Subtiele verticale gradient om hem visueel te
+   verheffen boven de andere widgets, zonder regelrecht decoratief
+   te worden. */
+@media (min-width: 1280px) {
+  .w-saldo {
+    background: linear-gradient(180deg, var(--dark-2) 0%, var(--dark) 100%);
+  }
+
+  .dash-saldo-val {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(2.6rem, 4vw, 3.6rem);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--green-lite);
+    margin-bottom: 10px;
+  }
+
+  .dash-saldo-val.negatief { color: var(--red); }
+  .dash-saldo-val.neutraal { color: var(--txt-dark); }
+
+  .dash-saldo-uitleg {
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    color: var(--txt-dark-m);
+    margin-bottom: 26px;
+    max-width: 42ch;
+  }
+
+  .dash-saldo-mini {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding-top: 18px;
+    border-top: 1px solid var(--dark-border);
+    margin-top: auto;
+  }
+
+  .dash-saldo-mini .mini-lbl {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--txt-dark-m);
+    margin-bottom: 4px;
+  }
+
+  .dash-saldo-mini .mini-val {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--txt-dark);
+    letter-spacing: -0.01em;
+  }
+}

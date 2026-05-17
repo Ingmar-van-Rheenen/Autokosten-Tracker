@@ -1,7 +1,7 @@
 // ── DataManager ───────────────────────────────────────────────────────────────
 // Beheert export, import en reset van de volledige dataset.
-import { Utils } from './Utils.js';
-import { ConfirmModal } from './ConfirmModal.js';
+import { Utils } from '../core/Utils.js';
+import { ConfirmModal } from '../ui/ConfirmModal.js';
 
 export class DataManager {
   constructor(db) {

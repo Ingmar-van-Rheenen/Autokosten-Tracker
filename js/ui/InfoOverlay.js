@@ -1,6 +1,6 @@
 // ── InfoOverlay ───────────────────────────────────────────────────────────────
 // Gedeeld volledig-scherm info-overlay component
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 const CONFIGS = {
   smart: {

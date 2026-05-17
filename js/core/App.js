@@ -1,26 +1,27 @@
 // ── App ───────────────────────────────────────────────────────────────────────
 import { Utils } from './Utils.js';
 import { Database } from './Database.js';
-import { GeoService } from './GeoService.js';
-import { MapController } from './MapController.js';
-import { RitController } from './RitController.js';
-import { RittenController } from './RittenController.js';
-import { TankController } from './TankController.js';
-import { StatsController } from './StatsController.js';
-import { AutoManager } from './AutoManager.js';
-import { DataManager } from './DataManager.js';
-import { OnderhoudController } from './OnderhoudController.js';
-import { PlannerController } from './PlannerController.js';
-import { DeelController } from './DeelController.js';
-import { BottomSheetController } from './BottomSheetController.js';
-import { PrijsService } from './PrijsService.js';
-import { InfoOverlay } from './InfoOverlay.js';
-import { Changelog } from './Changelog.js';
-import { ThemaController } from './ThemaController.js';
-import { ConfirmModal } from './ConfirmModal.js';
-import { VasteKostenController } from './VasteKostenController.js';
-import { BetalingenController } from './BetalingenController.js';
-import { AfrekenController } from './AfrekenController.js';
+import { GeoService } from '../services/GeoService.js';
+import { MapController } from '../services/MapController.js';
+import { PrijsService } from '../services/PrijsService.js';
+import { RitController } from '../controllers/RitController.js';
+import { RittenController } from '../controllers/RittenController.js';
+import { TankController } from '../controllers/TankController.js';
+import { StatsController } from '../controllers/StatsController.js';
+import { AutoManager } from '../controllers/AutoManager.js';
+import { DataManager } from '../controllers/DataManager.js';
+import { OnderhoudController } from '../controllers/OnderhoudController.js';
+import { PlannerController } from '../controllers/PlannerController.js';
+import { DeelController } from '../controllers/DeelController.js';
+import { BottomSheetController } from '../controllers/BottomSheetController.js';
+import { VasteKostenController } from '../controllers/VasteKostenController.js';
+import { BetalingenController } from '../controllers/BetalingenController.js';
+import { AfrekenController } from '../controllers/AfrekenController.js';
+import { InfoOverlay } from '../ui/InfoOverlay.js';
+import { Changelog } from '../ui/Changelog.js';
+import { ThemaController } from '../ui/ThemaController.js';
+import { ConfirmModal } from '../ui/ConfirmModal.js';
+import { DesktopDashboard } from '../desktop/DesktopDashboard.js';
 
 const SCHERMEN = ['screen-splash', 'screen-intro', 'screen-auto', 'screen-app'];
 const TAB_VOLGORDE = ['kaart', 'ritten', 'saldo', 'overzicht', 'instellingen'];
@@ -318,6 +319,15 @@ export class App {
     this._bindDbUpdated();
     this._vasteKosten.render();
     this._betalingen.render();
+
+    // Desktop dashboard (≥1280px) — render altijd, CSS regelt zichtbaarheid
+    this._desktopDashboard = new DesktopDashboard(this._db, {
+      afreken: this._afreken,
+      vasteKosten: this._vasteKosten,
+      stats: this._stats,
+      autoManager: this._autoManager,
+    });
+    this._desktopDashboard.init();
   }
 
   // ── v3 wire-ups voor Instellingen-tab + globale db:updated listener ───────

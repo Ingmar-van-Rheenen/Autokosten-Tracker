@@ -1,6 +1,6 @@
 // ── PlannerController ─────────────────────────────────────────────────────────
 // Berekent de geschatte kosten en saldo-impact van een geplande rit.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 export class PlannerController {
   constructor(db, geo) {

@@ -607,6 +607,145 @@
 
     </div>
 
+    <!-- ── DESKTOP DASHBOARD (≥1280px) ──────────────────────────────
+         Verborgen op mobiel; vervangt de tab-interface op desktop.
+         Widgets worden gevuld door js/DesktopDashboard.js via db:updated. -->
+    <div id="desktop-dashboard">
+      <header class="dash-header">
+        <div class="dash-merk">
+          <span class="dash-merk-dot"></span>
+          <span>TANKLOG</span>
+        </div>
+        <div class="dash-auto">
+          <span id="dash-auto-naam" class="dash-auto-naam">—</span>
+          <span> · </span>
+          <span id="dash-auto-merk">—</span>
+          <button id="dash-wissel-knop" class="widget-actie" style="margin-left: 16px;">Wissel auto →</button>
+        </div>
+      </header>
+
+      <div class="dash-grid" id="dash-grid">
+
+        <!-- 1. SALDO HERO (6×3) -->
+        <article class="widget w-saldo" data-widget="saldo">
+          <div class="widget-kop">
+            <span class="widget-lbl">Saldo</span>
+            <button class="widget-actie" data-actie="afrekenen">Afrekenen →</button>
+          </div>
+          <div class="dash-saldo-val" id="dash-saldo-val">€&nbsp;—</div>
+          <div class="dash-saldo-uitleg" id="dash-saldo-uitleg">Geen data</div>
+          <div class="dash-saldo-mini" id="dash-saldo-mini">
+            <div>
+              <div class="mini-lbl">Gereden</div>
+              <div class="mini-val" id="dash-saldo-km">—</div>
+            </div>
+            <div>
+              <div class="mini-lbl">Brandstof</div>
+              <div class="mini-val" id="dash-saldo-brand">—</div>
+            </div>
+            <div>
+              <div class="mini-lbl">Vaste lasten</div>
+              <div class="mini-val" id="dash-saldo-vast">—</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2. TREND CHART (6×3) -->
+        <article class="widget w-trend" data-widget="trend">
+          <div class="widget-kop">
+            <span class="widget-lbl">Kosten per maand</span>
+            <span class="widget-meta">6 maanden</span>
+          </div>
+          <canvas id="dash-trend-canvas" class="dash-canvas" width="600" height="220" aria-label="Maandelijkse kosten"></canvas>
+        </article>
+
+        <!-- 3. RECENTE RITTEN (3×3) -->
+        <article class="widget w-ritten" data-widget="ritten">
+          <div class="widget-kop">
+            <span class="widget-lbl">Recente ritten</span>
+            <button class="widget-actie" data-actie="expand">Open</button>
+          </div>
+          <ul class="dash-mini-lijst" id="dash-ritten-lijst"></ul>
+        </article>
+
+        <!-- 4. RECENTE TANKBEURTEN (3×3) -->
+        <article class="widget w-tank" data-widget="tank">
+          <div class="widget-kop">
+            <span class="widget-lbl">Recente tankbeurten</span>
+            <button class="widget-actie" data-actie="expand">Open</button>
+          </div>
+          <ul class="dash-mini-lijst" id="dash-tank-lijst"></ul>
+        </article>
+
+        <!-- 5. VASTE KOSTEN (4×2) -->
+        <article class="widget w-vk" data-widget="vk">
+          <div class="widget-kop">
+            <span class="widget-lbl">Vaste kosten</span>
+            <button class="widget-actie" data-actie="expand">Open</button>
+          </div>
+          <ul class="dash-vk-lijst" id="dash-vk-lijst"></ul>
+        </article>
+
+        <!-- 6. PER-AUTO STATS (4×2) -->
+        <article class="widget w-stats" data-widget="stats">
+          <div class="widget-kop">
+            <span class="widget-lbl">Auto-stats</span>
+          </div>
+          <div class="dash-stats-grid" id="dash-stats-grid"></div>
+        </article>
+
+        <!-- 7. KAART THUMBNAIL (4×2) -->
+        <article class="widget w-kaart" data-widget="kaart">
+          <div class="widget-kop">
+            <span class="widget-lbl">Laatste rit</span>
+            <button class="widget-actie" data-actie="expand">Open</button>
+          </div>
+          <div class="dash-kaart-wrap" id="dash-kaart-wrap">
+            <svg id="dash-kaart-svg" viewBox="0 0 320 120" preserveAspectRatio="xMidYMid slice"></svg>
+            <div class="dash-kaart-meta">
+              <span id="dash-kaart-datum">—</span>
+              <span class="dash-kaart-km" id="dash-kaart-km">—</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 8. QUICK ACTIONS (6×1) -->
+        <article class="widget w-actions" data-widget="actions">
+          <div class="dash-acties-rij">
+            <button class="dash-actie-knop" data-actie="nieuwe-rit">
+              <span class="dash-actie-icoon">↗</span>
+              <span class="dash-actie-lbl">Rit toevoegen</span>
+            </button>
+            <button class="dash-actie-knop" data-actie="nieuwe-tank">
+              <span class="dash-actie-icoon">⛽</span>
+              <span class="dash-actie-lbl">Tankbeurt</span>
+            </button>
+            <button class="dash-actie-knop" data-actie="nieuwe-vk">
+              <span class="dash-actie-icoon">+</span>
+              <span class="dash-actie-lbl">Vaste kost</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- 9. THEMA + INSTELLINGEN SHORTCUT (6×1) -->
+        <article class="widget w-themas" data-widget="themas">
+          <div class="dash-themas-rij">
+            <span class="widget-lbl">Thema</span>
+            <div class="dash-thema-toggle" role="radiogroup" aria-label="Thema">
+              <button class="dash-thema-knop" data-thema="klassiek">Klassiek</button>
+              <button class="dash-thema-knop" data-thema="licht">Licht</button>
+              <button class="dash-thema-knop" data-thema="donker">Donker</button>
+            </div>
+            <button class="widget-actie" data-actie="instellingen">Alle instellingen →</button>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Klik-vanger om expanded widget te sluiten -->
+      <div class="dash-backdrop" id="dash-backdrop" aria-hidden="true"></div>
+    </div>
+
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
       <button class="nav-btn active" data-tab="kaart">
@@ -955,7 +1094,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- App entrypoint als ES module -->
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/core/main.js"></script>
 </body>
 
 </html>

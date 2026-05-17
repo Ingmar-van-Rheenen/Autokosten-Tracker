@@ -2,8 +2,8 @@
 // Beheert terugkerende vaste kosten per auto (verzekering, wegenbelasting, apk,
 // onderhoud-abonnement, parkeervergunning, overig). Frequentie maandelijks
 // of jaarlijks. Renders #vk-lijst en bedient #sheet-vaste-kost.
-import { Utils } from './Utils.js';
-import { ConfirmModal } from './ConfirmModal.js';
+import { Utils } from '../core/Utils.js';
+import { ConfirmModal } from '../ui/ConfirmModal.js';
 
 const TYPE_LABELS = {
   verzekering: 'Verzekering',

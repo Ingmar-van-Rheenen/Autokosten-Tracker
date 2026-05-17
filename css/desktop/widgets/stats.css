@@ -1,0 +1,43 @@
+/* ── STATS WIDGET — 2×2 grid van kerncijfers ──────────────────── */
+@media (min-width: 1280px) {
+  .dash-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 14px;
+    flex: 1;
+  }
+
+  .dash-stat-cel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .dash-stat-cel-lbl {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--txt-dark-m);
+    margin-bottom: 6px;
+  }
+
+  .dash-stat-cel-val {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--txt-dark);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .dash-stat-cel-sub {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green-lite);
+    margin-top: 4px;
+  }
+}

@@ -1,82 +1,56 @@
-/* ── AUTOKOSTEN TRACKER – MAIN CSS ENTRY POINT ──────────────────── */
-/* Importeer alle deelbestanden in logische volgorde                  */
+/* ── AUTOKOSTEN TRACKER – MAIN CSS ENTRY POINT ────────────────────── */
+/* Importeert alle stylesheet-modules in laad-volgorde.                  */
+/* Folder-structuur weerspiegelt de rol van elk bestand:                 */
+/*   base/       — design tokens, reset, print                           */
+/*   screens/    — full-screen states (splash, intro, app-shell)         */
+/*   tabs/       — content per mobiele tab                               */
+/*   components/ — herbruikbare UI primitieven (forms, modals, overlays) */
+/*   features/   — feature-specifieke styling (v3)                       */
+/*   desktop/    — dashboard-grid en widgets (≥1280px)                   */
 
-/* 1. Tokens & reset */
-@import './tokens.css';
+/* ── 1. BASE ─────────────────────────────────────────────────────── */
+@import './base/tokens.css';
+@import './base/print.css';
 
-/* 2. Animaties & keyframes */
-@import './animations.css';
+/* ── 2. SCREENS ──────────────────────────────────────────────────── */
+@import './screens/screens.css';
+@import './screens/splash.css';
+@import './screens/intro.css';
+@import './screens/auto-select.css';
+@import './screens/app-layout.css';
 
-/* 3. Rijdende auto component */
-@import './car-scene.css';
+/* ── 3. TABS ─────────────────────────────────────────────────────── */
+@import './tabs/kaart-tab.css';
+@import './tabs/content-tabs.css';
+@import './tabs/items.css';
+@import './tabs/grafieken.css';
+@import './tabs/planner.css';
 
-/* 4. Scherm-container */
-@import './screens.css';
+/* ── 4. COMPONENTS ───────────────────────────────────────────────── */
+@import './components/animations.css';
+@import './components/car-scene.css';
+@import './components/forms.css';
+@import './components/modal.css';
+@import './components/confirm-modal.css';
+@import './components/info-overlay.css';
+@import './components/changelog.css';
+@import './components/swipe.css';
+@import './components/controls.css';
+@import './components/shortcut.css';
+@import './components/pwa.css';
 
-/* 5. Splash scherm */
-@import './splash.css';
+/* ── 5. FEATURES (v3) ────────────────────────────────────────────── */
+@import './features/vaste-kosten.css';
+@import './features/betalingen.css';
+@import './features/afreken.css';
 
-/* 6. Intro / onboarding scherm */
-@import './intro.css';
-
-/* 7. Auto-selectie scherm */
-@import './auto-select.css';
-
-/* 8. App-layout & bottom navigatie */
-@import './app-layout.css';
-
-/* 9. Kaart-tab (map, bottom sheet, rit-knoppen) */
-@import './kaart-tab.css';
-
-/* 10. Content tabs (scroll, kop, saldo hero, stats) */
-@import './content-tabs.css';
-
-/* 11. Formulieren & buttons */
-@import './forms.css';
-
-/* 12. Item-lijsten & maand-headers */
-@import './items.css';
-
-/* 13. Modals (auto toevoegen, wissel, deel) */
-@import './modal.css';
-
-/* 14. PWA install overlay & toast */
-@import './pwa.css';
-
-/* 15. Rit planner */
-@import './planner.css';
-
-/* 16. SVG grafieken */
-@import './grafieken.css';
-
-/* 17. Snelkoppeling kaart */
-@import './shortcut.css';
-
-/* 18. Info overlay */
-@import './info-overlay.css';
-
-/* 19. Changelog overlay */
-@import './changelog.css';
-
-/* 20. Toggle, km-info-link, tikkie-key */
-@import './controls.css';
-
-/* 21. Print */
-@import './print.css';
-
-/* ── v3 TOEVOEGINGEN ─────────────────────── */
-
-/* 22. Vaste kosten (lijst + sheet) */
-@import './vaste-kosten.css';
-
-/* 23. Betalingen (lijst + form) */
-@import './betalingen.css';
-
-/* 24. Afreken-sheet (saldo + deeplinks) */
-@import './afreken.css';
-
-/* 25. Confirm modal (2-knops bottom sheet) */
-@import './confirm-modal.css';
-
-/* 26. Swipe-to-delete primitieven */
-@import './swipe.css';
+/* ── 6. DESKTOP DASHBOARD (≥1280px) ──────────────────────────────── */
+@import './desktop/layout.css';
+@import './desktop/widgets/saldo.css';
+@import './desktop/widgets/trend.css';
+@import './desktop/widgets/mini-lijst.css';
+@import './desktop/widgets/vaste-kosten.css';
+@import './desktop/widgets/stats.css';
+@import './desktop/widgets/kaart.css';
+@import './desktop/widgets/quick-actions.css';
+@import './desktop/widgets/thema.css';

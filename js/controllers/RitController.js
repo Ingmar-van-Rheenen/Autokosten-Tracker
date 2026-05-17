@@ -1,6 +1,6 @@
 // ── RitController ─────────────────────────────────────────────────────────────
 // Beheert de volledige rit-staat machine: idle → bezig → confirm → idle
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 /** @typedef {'idle'|'bezig'|'confirm'} RitState */
 

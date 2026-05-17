@@ -1,6 +1,6 @@
 // ── OnderhoudController ───────────────────────────────────────────────────────
 // Beheert het registreren en weergeven van onderhoudskosten per auto.
-import { Utils } from './Utils.js';
+import { Utils } from '../core/Utils.js';
 
 const TYPE_LABELS = {
   apk: 'APK',
