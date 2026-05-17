@@ -594,6 +594,55 @@
               </div>
             </div>
           </div>
+          <!-- SYNC: deel data tussen telefoon + desktop -->
+          <div class="tab-sectie-label">DEVICES SYNCEN</div>
+          <div class="form-kaart">
+            <p class="sync-info">
+              Tanklog slaat alles lokaal op. Wil je dezelfde data ook op je
+              andere apparaat? Stuur 'm via AirDrop / Mail / Messages, of
+              verbind beide apparaten direct met een 6-cijferige code.
+            </p>
+
+            <div class="sync-knoppen-rij">
+              <button class="sync-knop" id="sync-deel-knop" type="button">
+                <span class="sync-knop-titel">Deel als bestand</span>
+                <span class="sync-knop-sub">AirDrop, Mail, Messages</span>
+              </button>
+              <button class="sync-knop" id="sync-host-knop" type="button">
+                <span class="sync-knop-titel">Verstuur via code</span>
+                <span class="sync-knop-sub">Toon code op dit device</span>
+              </button>
+              <button class="sync-knop" id="sync-gast-knop" type="button" style="grid-column: 1 / -1;">
+                <span class="sync-knop-titel">Ontvang via code</span>
+                <span class="sync-knop-sub">Typ code van ander device</span>
+              </button>
+            </div>
+
+            <div id="sync-paneel" class="sync-paneel hidden">
+              <div id="sync-status" class="sync-status hidden"></div>
+
+              <div id="sync-code-toon" class="sync-code-toon hidden">
+                <div class="sync-code-lbl">Code op andere device</div>
+                <div class="sync-code-cijfers">······</div>
+              </div>
+
+              <div id="sync-code-input" class="sync-code-input hidden">
+                <input
+                  type="text"
+                  id="sync-code-inp"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="6"
+                  placeholder="······"
+                  autocomplete="off"
+                />
+                <button id="sync-verbind-knop" class="btn-form-primary" type="button">Verbind</button>
+              </div>
+
+              <button id="sync-annuleer-knop" class="btn-form-sec sync-annuleer hidden" type="button">Annuleer</button>
+            </div>
+          </div>
+
           <div class="tab-sectie-label">DATA</div>
           <div class="form-kaart">
             <button class="btn-form-sec" onclick="exportData()">↓ Exporteer JSON</button>
@@ -1092,6 +1141,9 @@
 
   <!-- Leaflet JS (globaal beschikbaar als `L`) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- PeerJS (publieke broker) voor device-sync via WebRTC -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
 
   <!-- App entrypoint als ES module -->
   <script type="module" src="js/core/main.js"></script>

@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v47';
+const CACHE = 'tanklog-v48';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -78,12 +78,15 @@ const ASSETS = [
   '/js/desktop/widgets/KaartWidget.js',
   '/js/desktop/widgets/QuickActionsWidget.js',
   '/js/desktop/widgets/ThemaWidget.js',
+  '/css/features/sync.css',
+  '/js/controllers/SyncController.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
+  'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
   'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;600&display=swap',
 ];
 

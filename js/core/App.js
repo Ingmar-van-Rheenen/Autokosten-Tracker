@@ -17,6 +17,7 @@ import { BottomSheetController } from '../controllers/BottomSheetController.js';
 import { VasteKostenController } from '../controllers/VasteKostenController.js';
 import { BetalingenController } from '../controllers/BetalingenController.js';
 import { AfrekenController } from '../controllers/AfrekenController.js';
+import { SyncController } from '../controllers/SyncController.js';
 import { InfoOverlay } from '../ui/InfoOverlay.js';
 import { Changelog } from '../ui/Changelog.js';
 import { ThemaController } from '../ui/ThemaController.js';
@@ -41,6 +42,7 @@ export class App {
     this._vasteKosten = new VasteKostenController(this._db);
     this._betalingen = new BetalingenController(this._db);
     this._afreken = new AfrekenController(this._db);
+    this._sync = null; // init() lazy in _toonApp zodra dataManager bestaat
 
     this._ritController = new RitController(
       this._db, this._geo, this._kaart, () => this._onRitUpdate()
@@ -328,6 +330,10 @@ export class App {
       autoManager: this._autoManager,
     });
     this._desktopDashboard.init();
+
+    // Device-sync (Web Share + WebRTC paring via PeerJS)
+    this._sync = new SyncController(this._db, this._dataManager);
+    this._sync.init();
   }
 
   // ── v3 wire-ups voor Instellingen-tab + globale db:updated listener ───────
