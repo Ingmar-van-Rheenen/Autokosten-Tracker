@@ -490,9 +490,14 @@ export class MapController {
   /** Pulserende locatie-dot met optionele heading-pijl. */
   _locatieIcon() {
     const heading = Number.isFinite(this._heading) ? this._heading : null;
+    // De wrapper is 32×32 (zelfde size als .locatie-marker) en draait rond
+    // zijn eigen midden — dat is exact het midden van de dot. De pijl zit
+    // bovenin de wrapper, dus bij rotatie loopt 'ie netjes om de gebruiker.
     const pijlHtml = heading !== null
-      ? `<div class="locatie-heading" style="transform:translate(-50%,-100%) rotate(${heading}deg)">
-           <svg viewBox="0 0 12 14" width="12" height="14"><path d="M6 0 L11 12 L6 9 L1 12 Z" fill="#5e9464"/></svg>
+      ? `<div class="locatie-heading-wrap" style="transform:rotate(${heading}deg)">
+           <div class="locatie-heading">
+             <svg viewBox="0 0 12 14" width="12" height="14"><path d="M6 0 L11 12 L6 9 L1 12 Z" fill="#5e9464"/></svg>
+           </div>
          </div>`
       : '';
 
