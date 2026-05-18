@@ -36,12 +36,31 @@
 
 <body>
 
-  <!-- ── DOM-secties komen uit partials/. js/core/Partials.js fetcht
-       elke file en vervangt de placeholder met outerHTML zodat de
-       wrapper-div verdwijnt. ───────────────────────────────────── -->
+  <!-- ── SPLASH inline zodat hij direct zichtbaar is bij first paint
+       (vóór partials geladen zijn). De statustekst wordt door
+       Partials.load() bijgewerkt met de voortgang. ───────────── -->
+  <div id="screen-splash" class="screen splash-v2" data-tijd="dag">
+    <div class="splash-sky"></div>
+    <div class="splash-celestial" id="splash-celestial"></div>
+    <div class="splash-stars" id="splash-stars"></div>
+    <div class="splash-clouds" id="splash-clouds"></div>
+    <div class="splash-mountains"></div>
+    <div class="splash-inner">
+      <div class="splash-greeting" id="splash-greeting">Welkom</div>
+      <div class="splash-title">TANKLOG</div>
+      <div class="splash-sub">auto · km · kosten</div>
+      <div class="splash-stage" id="splash-car-scene"></div>
+      <div class="splash-loader">
+        <div class="splash-spinner"></div>
+        <div class="splash-loader-text">APP VOORBEREIDEN…</div>
+      </div>
+    </div>
+  </div>
 
-  <!-- Scherm 1-3: splash → intro → auto-select -->
-  <div data-partial="splash"></div>
+  <!-- ── Overige DOM-secties komen uit partials/. js/core/Partials.js
+       fetcht elke file en vervangt de placeholder met outerHTML
+       zodat de DOM-structuur identiek blijft. ───────────────── -->
+
   <div data-partial="intro"></div>
   <div data-partial="auto-select"></div>
 
@@ -76,7 +95,8 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
 
-  <!-- App entrypoint als ES module — laadt eerst partials, dan App.init() -->
+  <!-- App entrypoint als ES module — splash is direct zichtbaar,
+       Partials.load() update de loader-tekst tijdens fetchen. -->
   <script type="module" src="js/core/main.js"></script>
 </body>
 </html>
