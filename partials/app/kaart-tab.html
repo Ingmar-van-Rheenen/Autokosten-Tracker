@@ -1,0 +1,132 @@
+<!-- TAB: KAART -->
+<div id="tab-kaart" class="app-tab active">
+  <div id="map"></div>
+  <div class="kaart-controls">
+    <button id="kaart-locate-me" class="kaart-control-btn" type="button" aria-label="Centreer op mijn locatie">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      </svg>
+    </button>
+  </div>
+  <div id="rit-pill" class="rit-pill hidden">
+    <span class="rit-pill-dot"></span>
+    <span class="rit-pill-tag">RIT BEZIG</span>
+    <span id="pill-km" class="rit-pill-km">0.0 km</span>
+  </div>
+  <div class="bottom-sheet" id="bottom-sheet">
+    <div class="bs-handle" id="bs-handle"></div>
+
+    <!-- Uitklapbare stats + acties -->
+    <div class="bs-expanded" id="bs-expanded">
+
+      <!-- Stats grid: saldo / km / kosten -->
+      <div class="bs-stats-grid">
+        <div class="bs-stats-tile">
+          <span class="bs-stats-val" id="bs-q-saldo">—</span>
+          <span class="bs-stats-lbl">saldo</span>
+        </div>
+        <div class="bs-stats-tile">
+          <span class="bs-stats-val" id="bs-q-km">—</span>
+          <span class="bs-stats-lbl">km / maand</span>
+        </div>
+        <div class="bs-stats-tile">
+          <span class="bs-stats-val" id="bs-q-kosten">—</span>
+          <span class="bs-stats-lbl">kosten / maand</span>
+        </div>
+      </div>
+
+      <!-- Laatste rit -->
+      <div class="bs-laatste-rit hidden" id="bs-laatste-rit">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="4" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/>
+          <path d="M1 4h10l2 6H3z"/>
+        </svg>
+        <span id="bs-lr-tekst">—</span>
+      </div>
+
+      <!-- Actie knoppen -->
+      <div class="bs-acties">
+        <button id="btn-tankstations" class="bs-actie-btn">
+          <svg class="ts-icon" viewBox="0 0 22 26" width="16" height="16" fill="none">
+            <rect x="1" y="4" width="13" height="20" rx="2.5" fill="currentColor"/>
+            <rect x="3" y="7" width="9" height="5.5" rx="1.5" fill="rgba(0,0,0,0.3)"/>
+            <path d="M14 8 Q19.5 8 19.5 13.5 L19.5 19.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <rect x="17.5" y="18.5" width="5" height="2.5" rx="1.2" fill="currentColor"/>
+          </svg>
+          <svg class="ts-spinner hidden" viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="42 14"/>
+          </svg>
+          <span class="bs-actie-lbl">Tankstations</span>
+        </button>
+        <button class="bs-actie-btn bs-shortcut" data-tab="saldo">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>
+          </svg>
+          <span class="bs-actie-lbl">Tankbeurt</span>
+        </button>
+        <button class="bs-actie-btn bs-shortcut" data-tab="overzicht" data-scroll-to="planner-sectie">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h18M3 6h18M3 18h12"/>
+            <path d="M17 15l4 3-4 3"/>
+          </svg>
+          <span class="bs-actie-lbl">Planner</span>
+        </button>
+      </div>
+
+    </div>
+
+    <div class="bs-auto-row">
+      <span class="bs-auto-naam" id="bs-auto-naam" role="button" tabindex="0">—</span>
+      <button class="bs-wissel" id="btn-wissel">Wissel →</button>
+    </div>
+
+    <div id="bs-idle" class="bs-state">
+      <div class="bs-idle-hint">Klaar voor de rit</div>
+      <button id="btn-start" class="btn-rit btn-start">START RIT</button>
+    </div>
+
+    <div id="bs-bezig" class="bs-state hidden">
+      <div class="bs-rit-naam" id="bs-rit-naam">Rit bezig…</div>
+      <span id="bs-elapsed" class="bs-elapsed" aria-live="polite">00:00</span>
+      <div class="bs-stats">
+        <div class="bs-stat">
+          <div class="bs-stat-val" id="bs-km">—</div>
+          <div class="bs-stat-lbl">km</div>
+        </div>
+        <div class="bs-stat">
+          <div class="bs-stat-val" id="bs-kosten">—</div>
+          <div class="bs-stat-lbl">kosten</div>
+        </div>
+        <div class="bs-stat">
+          <div class="bs-stat-val" id="bs-saldo">—</div>
+          <div class="bs-stat-lbl">saldo</div>
+        </div>
+      </div>
+      <button id="btn-stop" class="btn-rit btn-stop">STOP RIT</button>
+    </div>
+
+    <div id="bs-confirm" class="bs-state hidden">
+      <div class="bs-rit-naam">Rit opslaan?</div>
+      <div class="confirm-row">
+        <span class="confirm-km" id="confirm-km">— km</span>
+        <input type="number" id="km-override" class="km-input" step="0.1" min="0" placeholder="Aanpassen" />
+      </div>
+      <button class="km-info-link" id="btn-km-info">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 5.2v.4"/>
+        </svg>
+        Waarom dit veld?
+      </button>
+      <label class="form-lbl form-lbl--inline" for="rit-km-stand">Km-stand (optioneel)</label>
+      <input type="number" id="rit-km-stand" class="form-input km-stand-input" step="1" min="0"
+        placeholder="bijv. 124530" />
+      <input type="text" id="rit-notitie" class="notitie-input"
+        placeholder="Notitie (optioneel, bijv. winkelen)" />
+      <div class="confirm-btns">
+        <button id="btn-opslaan" class="btn-rit btn-save">Opslaan ✓</button>
+        <button id="btn-annuleer" class="btn-rit btn-cancel">Annuleer</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v50';
+const CACHE = 'tanklog-v51';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -46,6 +46,27 @@ const ASSETS = [
   '/js/core/App.js',
   '/js/core/Utils.js',
   '/js/core/Database.js',
+  '/js/core/Partials.js',
+  '/partials/splash.html',
+  '/partials/intro.html',
+  '/partials/auto-select.html',
+  '/partials/bottom-nav.html',
+  '/partials/app/kaart-tab.html',
+  '/partials/app/ritten-tab.html',
+  '/partials/app/saldo-tab.html',
+  '/partials/app/overzicht-tab.html',
+  '/partials/app/instellingen-tab.html',
+  '/partials/desktop/dashboard.html',
+  '/partials/overlays/changelog.html',
+  '/partials/overlays/info.html',
+  '/partials/overlays/install.html',
+  '/partials/modals/auto-toevoegen.html',
+  '/partials/modals/auto-wisselen.html',
+  '/partials/modals/rit-bewerken.html',
+  '/partials/modals/rit-splitsen.html',
+  '/partials/modals/bevestigen.html',
+  '/partials/modals/afrekenen.html',
+  '/partials/sheets/vaste-kost.html',
   '/js/services/GeoService.js',
   '/js/services/MapController.js',
   '/js/services/PrijsService.js',

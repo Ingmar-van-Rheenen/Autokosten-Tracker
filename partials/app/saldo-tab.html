@@ -1,0 +1,33 @@
+<!-- TAB: SALDO -->
+<div id="tab-saldo" class="app-tab hidden">
+  <div class="tab-scroll">
+    <div class="saldo-hero">
+      <div class="saldo-hero-lbl">SALDO</div>
+      <div id="saldo-val" class="saldo-hero-val">€ —</div>
+      <div id="saldo-uitleg" class="saldo-hero-uitleg"></div>
+      <button id="afreken-knop" class="btn-form-sec saldo-afreken-knop" type="button">Afrekenen →</button>
+    </div>
+    <div class="tab-sectie-label" id="tank-sectie-lbl">TANKBEURT TOEVOEGEN</div>
+    <div class="form-kaart">
+      <label class="form-lbl" id="tank-liters-lbl">Aantal liters</label>
+      <input type="number" id="tank-liters" class="form-input" step="0.01" min="0" placeholder="bijv. 35.5" />
+      <label class="form-lbl" id="tank-prijs-lbl">Prijs per liter (€)</label>
+      <div id="tank-prijs-suggestie" class="tank-prijs-suggestie hidden"></div>
+      <input type="number" id="tank-prijs" class="form-input" step="0.001" min="0" placeholder="bijv. 2.10" />
+      <div class="tank-totaal-rij">Totaal: <strong id="tank-totaal">€ —</strong></div>
+      <label class="form-lbl" for="tank-km-stand">Km-stand (optioneel)</label>
+      <input type="number" id="tank-km-stand" class="form-input" step="1" min="0" placeholder="bijv. 124530" />
+      <label class="form-lbl">Bon (foto, optioneel)</label>
+      <label class="bon-upload" id="tank-bon-knop">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="tank-bon-label">Foto kiezen</span>
+        <input type="file" id="tank-bon" accept="image/*" capture="environment" />
+      </label>
+      <label class="form-lbl" for="tank-notitie">Notitie (optioneel)</label>
+      <input type="text" id="tank-notitie" class="form-input" placeholder="bijv. Shell A12" />
+      <button id="btn-tank" class="btn-form-primary">Opslaan</button>
+    </div>
+    <div class="tab-sectie-label">TANKBEURTEN</div>
+    <ul id="tank-lijst" class="item-lijst"></ul>
+  </div>
+</div>

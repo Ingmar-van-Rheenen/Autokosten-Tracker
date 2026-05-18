@@ -1,0 +1,79 @@
+<!-- SCHERM INTRO (eenmalig bij eerste installatie) -->
+<div id="screen-intro" class="screen hidden">
+  <div class="intro-wrap">
+    <button class="intro-skip" id="intro-skip">Overslaan</button>
+
+    <div class="intro-slides">
+
+      <!-- SLIDE 0: Welkom -->
+      <div class="intro-slide actief" data-slide="0">
+        <div class="intro-visual">
+          <div class="intro-car-scene" id="intro-car-scene"></div>
+        </div>
+        <div class="intro-app-naam">TANKLOG</div>
+        <h2 class="intro-kop">Rij slim,<br>betaal eerlijk.</h2>
+        <p class="intro-sub">Bijhoud ritten, brandstof en kosten — automatisch en overzichtelijk.</p>
+      </div>
+
+      <!-- SLIDE 1: GPS meten -->
+      <div class="intro-slide" data-slide="1">
+        <div class="intro-visual">
+          <svg class="intro-map-svg" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="130" rx="16" fill="#141f2e" />
+            <rect x="80" y="0" width="40" height="130" fill="#1e2d42" />
+            <rect x="0" y="50" width="200" height="30" fill="#1e2d42" />
+            <line x1="100" y1="0" x2="100" y2="47" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+            <line x1="100" y1="83" x2="100" y2="130" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+            <line x1="0" y1="65" x2="77" y2="65" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+            <line x1="123" y1="65" x2="200" y2="65" stroke="#3d5a3e" stroke-width="1.5" stroke-dasharray="5,7" />
+            <rect x="8" y="6" width="58" height="36" rx="4" fill="#1a2940" />
+            <rect x="134" y="6" width="58" height="36" rx="4" fill="#1a2940" />
+            <rect x="8" y="88" width="58" height="36" rx="4" fill="#1a2940" />
+            <rect x="134" y="88" width="58" height="36" rx="4" fill="#1a2940" />
+            <circle class="gps-ring gps-ring-1" cx="100" cy="65" r="14" fill="none" stroke="#4e7d52" stroke-width="2" />
+            <circle class="gps-ring gps-ring-2" cx="100" cy="65" r="14" fill="none" stroke="#4e7d52" stroke-width="1.5" />
+            <g class="gps-pin-group">
+              <path d="M100,22 C89,22 80,31 80,42 C80,57 100,75 100,75 C100,75 120,57 120,42 C120,31 111,22 100,22Z" fill="#4e7d52" />
+              <circle cx="100" cy="42" r="9" fill="#141f2e" />
+            </g>
+          </svg>
+        </div>
+        <h2 class="intro-kop">Automatisch<br>meten</h2>
+        <p class="intro-sub">Start een rit en Tanklog volgt de kilometers live via GPS.</p>
+      </div>
+
+      <!-- SLIDE 2: Verdelen -->
+      <div class="intro-slide" data-slide="2">
+        <div class="intro-visual">
+          <div class="intro-deal-preview">
+            <div class="intro-deal-rit">Rit naar Amsterdam · 47 km</div>
+            <div class="intro-deal-pp-lbl">Per persoon (1/3)</div>
+            <div class="intro-deal-bedrag">€ 2,16</div>
+            <div class="intro-deal-knoppen">
+              <span class="intro-deal-wa-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.253 2 2 6.253 2 11.5c0 1.887.535 3.644 1.459 5.132L2 22l5.545-1.424A9.457 9.457 0 0 0 11.5 21C16.747 21 21 16.747 21 11.5S16.747 2 11.5 2z" fill-opacity=".4"/></svg>
+                WhatsApp
+              </span>
+              <span class="intro-deal-rev-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.924 4.124A6.5 6.5 0 0 0 14.5 0H4v24h4v-9h4.382l4.4 9H21l-4.7-9.5A6.5 6.5 0 0 0 20.924 4.124ZM14.5 11H8V4h6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+                Revolut
+              </span>
+            </div>
+          </div>
+        </div>
+        <h2 class="intro-kop">Eerlijk<br>verdelen</h2>
+        <p class="intro-sub">Stuur na elke rit een betaalverzoek via WhatsApp of Revolut.</p>
+      </div>
+
+    </div>
+
+    <div class="intro-footer">
+      <div class="intro-dots" id="intro-dots">
+        <span class="intro-dot actief"></span>
+        <span class="intro-dot"></span>
+        <span class="intro-dot"></span>
+      </div>
+      <button class="intro-volgende-btn" id="intro-volgende">Volgende →</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,84 @@
+<!-- TAB: OVERZICHT (STATS) -->
+<div id="tab-overzicht" class="app-tab hidden">
+  <div class="tab-scroll">
+    <div class="tab-kop">
+      <div class="tab-kop-label">STATS</div>
+      <h2 class="tab-kop-titel">Alles op een rij</h2>
+    </div>
+
+    <!-- Periode-filter pills -->
+    <div class="periode-filter" role="group" aria-label="Periode">
+      <button data-periode="maand" aria-pressed="true">Deze maand</button>
+      <button data-periode="jaar" aria-pressed="false">Dit jaar</button>
+      <button data-periode="alles" aria-pressed="false">Alles</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-blok">
+        <div class="stat-val" id="ov-km">—</div>
+        <div class="stat-lbl">km gereden</div>
+      </div>
+      <div class="stat-blok">
+        <div class="stat-val" id="ov-ritten">—</div>
+        <div class="stat-lbl">ritten</div>
+      </div>
+      <div class="stat-blok">
+        <div class="stat-val" id="ov-betaald">—</div>
+        <div class="stat-lbl">betaald</div>
+      </div>
+      <div class="stat-blok">
+        <div class="stat-val" id="ov-kosten">—</div>
+        <div class="stat-lbl">brandstof</div>
+      </div>
+    </div>
+    <div class="tab-sectie-label">KM PER MAAND</div>
+    <div class="grafiek-sectie">
+      <div class="grafiek-kaart">
+        <canvas id="grafiek-canvas" width="600" height="240" aria-label="Maandelijkse kosten"></canvas>
+      </div>
+    </div>
+
+    <!-- VASTE KOSTEN -->
+    <div class="tab-sectie-label">VASTE KOSTEN</div>
+    <ul id="vk-lijst" class="vk-lijst item-lijst"></ul>
+    <div class="vk-toevoeg-rij">
+      <button id="vk-toevoegen-knop" class="vk-toevoeg-btn">+ Toevoegen</button>
+    </div>
+
+    <!-- RIT PLANNER (verplaatst van Tank-tab) -->
+    <div class="tab-sectie-label" id="planner-sectie">RIT PLANNER</div>
+    <div class="form-kaart">
+      <label class="form-lbl">Vertrekpunt</label>
+      <div class="planner-locatie-rij">
+        <input type="text" id="plan-van" class="form-input" placeholder="Adres of straat" autocomplete="off" />
+        <button id="plan-gps-btn" class="plan-gps-btn" title="Gebruik huidige locatie">⊙</button>
+      </div>
+      <label class="form-lbl">Bestemming</label>
+      <div class="planner-stop-rij">
+        <input type="text" id="plan-bestemming" class="form-input" placeholder="Bestemming" autocomplete="off" />
+      </div>
+      <div id="plan-stops"></div>
+      <button id="plan-add-stop" class="btn-form-sec plan-add-stop-btn">+ Tussenstop toevoegen</button>
+      <button id="plan-bereken" class="btn-form-primary">Bereken route</button>
+      <div id="plan-resultaat" class="plan-resultaat hidden"></div>
+    </div>
+
+    <div class="tab-sectie-label">ONDERHOUD</div>
+    <div class="form-kaart">
+      <label class="form-lbl">Type</label>
+      <select id="ond-type" class="onderhoud-type-select">
+        <option value="apk">APK</option>
+        <option value="banden">Banden</option>
+        <option value="olie">Olieverversing</option>
+        <option value="remmen">Remmen</option>
+        <option value="overig">Overig</option>
+      </select>
+      <label class="form-lbl">Kosten (€)</label>
+      <input type="number" id="ond-kosten" class="form-input" step="0.01" min="0" placeholder="bijv. 89.50" />
+      <label class="form-lbl">Opmerking (optioneel)</label>
+      <input type="text" id="ond-opmerking" class="form-input" placeholder="bijv. Michelin Energy Saver" />
+      <button id="btn-ond-save" class="btn-form-primary">Toevoegen</button>
+    </div>
+    <ul id="ond-lijst" class="item-lijst" style="margin-top:8px;margin-bottom:16px"></ul>
+  </div>
+</div>

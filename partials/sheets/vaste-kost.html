@@ -1,0 +1,43 @@
+<!-- SHEET: VASTE KOST TOEVOEGEN / BEWERKEN -->
+<div id="sheet-vaste-kost" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-backdrop" id="vk-backdrop"></div>
+  <div class="modal-sheet vk-sheet">
+    <div class="modal-handel"></div>
+    <div class="modal-kop">
+      <h3 class="modal-titel" id="vk-modal-titel">Vaste kost</h3>
+    </div>
+    <label class="form-lbl" for="vk-label">Naam</label>
+    <input type="text" id="vk-label" class="form-input" placeholder="bijv. Autoverzekering" />
+    <label class="form-lbl" for="vk-type">Type</label>
+    <select id="vk-type" class="form-input">
+      <option value="verzekering">Verzekering</option>
+      <option value="wegenbelasting">Wegenbelasting</option>
+      <option value="apk">APK</option>
+      <option value="onderhoud">Onderhoud</option>
+      <option value="parkeren">Parkeervergunning</option>
+      <option value="overig">Overig</option>
+    </select>
+    <label class="form-lbl" for="vk-bedrag">Bedrag (€)</label>
+    <input type="number" id="vk-bedrag" class="form-input" step="0.01" min="0" placeholder="bijv. 45.00" />
+    <div class="vk-freq-rij" role="radiogroup" aria-label="Frequentie">
+      <label>
+        <input type="radio" name="vk-frequentie" value="maandelijks" checked />
+        <span>Maandelijks</span>
+      </label>
+      <label>
+        <input type="radio" name="vk-frequentie" value="jaarlijks" />
+        <span>Jaarlijks</span>
+      </label>
+    </div>
+    <label class="form-lbl" for="vk-start-datum">Begindatum</label>
+    <input type="date" id="vk-start-datum" class="form-input" />
+    <label class="form-lbl" for="vk-eind-datum">Einddatum (optioneel)</label>
+    <input type="date" id="vk-eind-datum" class="form-input" />
+    <label class="form-lbl" for="vk-notitie">Notitie (optioneel)</label>
+    <input type="text" id="vk-notitie" class="form-input" placeholder="bijv. polisnummer" />
+    <div class="vk-sheet-acties">
+      <button type="button" class="vk-btn-verwijder hidden" id="vk-verwijder">Verwijder</button>
+      <button type="button" class="vk-btn-opslaan" id="vk-opslaan">Opslaan</button>
+    </div>
+  </div>
+</div>

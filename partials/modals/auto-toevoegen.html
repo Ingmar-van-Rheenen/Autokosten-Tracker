@@ -1,0 +1,27 @@
+<!-- MODAL: AUTO TOEVOEGEN -->
+<div id="modal-auto" class="modal hidden">
+  <div class="modal-sheet">
+    <div class="modal-handel"></div>
+    <div class="modal-kop">
+      <h3 class="modal-titel">Auto toevoegen</h3>
+    </div>
+    <label class="form-lbl">Naam</label>
+    <input type="text" id="auto-naam-inp" class="form-input" placeholder="bijv. Auto van Mama" />
+    <label class="form-lbl">Merk &amp; model</label>
+    <input type="text" id="auto-merk-inp" class="form-input" placeholder="bijv. Volkswagen Polo" />
+    <label class="form-lbl">Brandstoftype</label>
+    <select id="auto-brandstof-inp" class="form-input">
+      <option value="E10">Benzine (Euro 95 / E10)</option>
+      <option value="E5">Super (Euro 98 / E5)</option>
+      <option value="diesel">Diesel</option>
+      <option value="lpg">LPG / Autogas</option>
+      <option value="cng">CNG / Aardgas</option>
+      <option value="elektrisch">⚡ Elektrisch (EV)</option>
+    </select>
+    <label class="form-lbl" id="auto-kml-lbl">Verbruik (km per liter)</label>
+    <input type="number" id="auto-kml-inp" class="form-input" step="0.1" min="1" placeholder="bijv. 14" />
+    <label class="form-lbl" id="auto-prijs-lbl">Standaard brandstofprijs (€/L)</label>
+    <input type="number" id="auto-prijs-inp" class="form-input" step="0.001" min="0" placeholder="bijv. 2.10" />
+    <button id="btn-auto-save" class="btn-form-primary">Toevoegen</button>
+  </div>
+</div>

@@ -1,0 +1,233 @@
+<div id="tab-instellingen" class="app-tab hidden">
+  <div class="tab-scroll">
+    <div class="tab-kop">
+      <div class="tab-kop-label">INSTELLINGEN</div>
+      <h2 class="tab-kop-titel">Voorkeuren</h2>
+    </div>
+
+    <!-- THEMA -->
+    <div class="tab-sectie-label">THEMA</div>
+    <div class="form-kaart">
+      <div class="thema-toggle" role="radiogroup" aria-label="Thema">
+        <label class="thema-optie">
+          <input type="radio" name="thema" value="klassiek" />
+          <span>Klassiek</span>
+        </label>
+        <label class="thema-optie">
+          <input type="radio" name="thema" value="licht" />
+          <span>Licht</span>
+        </label>
+        <label class="thema-optie">
+          <input type="radio" name="thema" value="donker" />
+          <span>Donker</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- KAART (Stadia API) -->
+    <div class="tab-sectie-label">KAART</div>
+    <div class="form-kaart">
+      <div class="form-lbl-rij">
+        <label class="form-lbl" for="stadia-key-inp">Stadia Maps API-key (optioneel, mooiere tiles)</label>
+        <button class="smart-info-btn" id="btn-stadia-info" type="button" aria-label="Meer info over Stadia Maps">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="10" cy="10" r="8"/>
+            <path d="M10 9v5M10 6.5v.5"/>
+          </svg>
+        </button>
+      </div>
+      <input
+        type="text"
+        id="stadia-key-inp"
+        class="form-input"
+        placeholder="leeg = CartoCDN (geen key nodig)"
+        autocomplete="off"
+        spellcheck="false"
+        data-1p-ignore
+        data-lpignore="true"
+        data-form-type="other"
+      />
+      <button id="btn-stadia-save" class="btn-form-primary">Opslaan</button>
+    </div>
+
+    <div class="tab-sectie-label">AUTO</div>
+    <div class="form-kaart" id="auto-inst-form"></div>
+    <div class="tab-sectie-label">NAAM</div>
+    <div class="form-kaart">
+      <label class="form-lbl">Jouw naam (voor begroeting)</label>
+      <input type="text" id="inst-naam" class="form-input" placeholder="bijv. Ingmar" />
+      <button id="btn-naam" class="btn-form-primary">Opslaan</button>
+    </div>
+    <div class="tab-sectie-label">TRACKING</div>
+    <div class="form-kaart">
+      <div class="smart-toggle-rij">
+        <div class="smart-toggle-info-col">
+          <div class="smart-toggle-naam">Slimme km-meting</div>
+          <div class="smart-toggle-sub">Volgt GPS continu — scherm blijft aan</div>
+        </div>
+        <button class="smart-info-btn" id="btn-smart-info" aria-label="Meer info">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="10" cy="10" r="8"/>
+            <path d="M10 9v5M10 6.5v.5"/>
+          </svg>
+        </button>
+        <label class="toggle-switch">
+          <input type="checkbox" id="chk-smart-tracking" />
+          <span class="toggle-knop"></span>
+        </label>
+      </div>
+    </div>
+    <div class="tab-sectie-label">BETAALVERZOEK</div>
+    <div class="form-kaart">
+      <label class="form-lbl">Revolut gebruikersnaam</label>
+      <div class="tikkie-key-rij">
+        <span class="revolut-prefix">revolut.me/</span>
+        <input type="text" id="revolut-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" />
+      </div>
+      <div class="form-kaart-scheiding"></div>
+      <label class="form-lbl">bunq gebruikersnaam</label>
+      <div class="tikkie-key-rij">
+        <span class="revolut-prefix">bunq.me/</span>
+        <input type="text" id="betaalverzoek-username-inp" class="form-input" placeholder="jouwusername" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" />
+      </div>
+      <div class="form-kaart-scheiding"></div>
+      <label class="form-lbl">Tikkie-handle</label>
+      <div class="tikkie-key-rij">
+        <span class="revolut-prefix">tikkie.me/</span>
+        <input type="text" id="tikkie-handle-inp" class="form-input" placeholder="jouwhandle" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" />
+      </div>
+      <button id="btn-betaalverzoek-save" class="btn-form-primary">Opslaan</button>
+    </div>
+
+    <div class="tab-sectie-label">BETALINGEN</div>
+    <div class="form-kaart" id="bet-form-kaart">
+      <label class="form-lbl" for="bet-bedrag">Bedrag (€)</label>
+      <input type="number" id="bet-bedrag" class="form-input" step="0.01" min="0" placeholder="bijv. 25.00" />
+      <div class="bet-form-grid">
+        <div>
+          <label class="form-lbl" for="bet-van">Van</label>
+          <input type="text" id="bet-van" class="form-input" placeholder="bijv. Ik" />
+        </div>
+        <div>
+          <label class="form-lbl" for="bet-naar">Naar</label>
+          <input type="text" id="bet-naar" class="form-input" placeholder="bijv. Mama" />
+        </div>
+      </div>
+      <label class="form-lbl" for="bet-methode">Methode</label>
+      <select id="bet-methode" class="form-input">
+        <option value="tikkie">Tikkie</option>
+        <option value="bunq">bunq</option>
+        <option value="revolut">Revolut</option>
+        <option value="cash">Cash</option>
+        <option value="overschrijving">Overschrijving</option>
+        <option value="overig">Overig</option>
+      </select>
+      <label class="form-lbl" for="bet-datum">Datum</label>
+      <input type="date" id="bet-datum" class="form-input" />
+      <label class="form-lbl" for="bet-notitie">Notitie (optioneel)</label>
+      <input type="text" id="bet-notitie" class="form-input" placeholder="bijv. tikkie 3 mei" />
+      <button id="btn-bet-opslaan" class="btn-form-primary">Toevoegen</button>
+    </div>
+    <ul id="bet-lijst" class="item-lijst" style="margin-top:8px;margin-bottom:16px"></ul>
+    <div class="tab-sectie-label">SNELKOPPELING</div>
+    <div class="shortcut-kaart">
+      <div class="shortcut-intro">
+        <div class="shortcut-icoon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div>
+          <div class="shortcut-intro-titel">Rit starten in één tik</div>
+          <div class="shortcut-intro-sub">Maak een snelkoppeling op je beginscherm of vergrendelscherm die direct de rit-flow opent.</div>
+        </div>
+      </div>
+      <div class="shortcut-platforms">
+        <div class="shortcut-platform">
+          <div class="shortcut-platform-kop">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            iPhone / iPad
+          </div>
+          <div class="shortcut-stappen">
+            <div class="shortcut-stap"><span class="shortcut-nr">1</span><span>Open de <strong>Opdrachten</strong>-app en tik op <strong>+</strong></span></div>
+            <div class="shortcut-stap"><span class="shortcut-nr">2</span><span><strong>Voeg actie toe</strong> → <strong>Safari</strong> → <strong>Open URL</strong></span></div>
+            <div class="shortcut-stap"><span class="shortcut-nr">3</span><span>Plak de URL hieronder, sla op en voeg toe aan vergrendelscherm</span></div>
+          </div>
+        </div>
+        <div class="shortcut-platform shortcut-platform--border">
+          <div class="shortcut-platform-kop">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341a5.53 5.53 0 0 1-5.53 5.53 5.53 5.53 0 0 1-5.53-5.53 5.53 5.53 0 0 1 5.53-5.53 5.53 5.53 0 0 1 5.53 5.53zm-5.53-13.18A13.18 13.18 0 0 0 .813 15.341h3.36a9.82 9.82 0 0 1 9.82-9.82 9.82 9.82 0 0 1 9.82 9.82h3.36A13.18 13.18 0 0 0 11.993 2.161z"/></svg>
+            Android / Desktop
+          </div>
+          <div class="shortcut-stappen">
+            <div class="shortcut-stap"><span class="shortcut-nr">1</span><span>Kopieer de URL hieronder</span></div>
+            <div class="shortcut-stap"><span class="shortcut-nr">2</span><span>Open Chrome → plak URL → tik op <strong>⋮</strong> → <strong>Toevoegen aan beginscherm</strong></span></div>
+            <div class="shortcut-stap"><span class="shortcut-nr">3</span><span>Kies een naam en tik op <strong>Toevoegen</strong></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="shortcut-url-blok">
+        <div class="shortcut-url-lbl">Snelkoppeling-URL</div>
+        <div class="shortcut-url-rij">
+          <code class="shortcut-url" id="shortcut-url"></code>
+          <button class="shortcut-kopieer" id="btn-shortcut-kopieer">Kopieer</button>
+        </div>
+      </div>
+    </div>
+    <!-- SYNC: deel data tussen telefoon + desktop -->
+    <div class="tab-sectie-label">DEVICES SYNCEN</div>
+    <div class="form-kaart">
+      <p class="sync-info">
+        Tanklog slaat alles lokaal op. Wil je dezelfde data ook op je
+        andere apparaat? Stuur 'm via AirDrop / Mail / Messages, of
+        verbind beide apparaten direct met een 6-cijferige code.
+      </p>
+
+      <div class="sync-knoppen-rij">
+        <button class="sync-knop" id="sync-deel-knop" type="button">
+          <span class="sync-knop-titel">Deel als bestand</span>
+          <span class="sync-knop-sub">AirDrop, Mail, Messages</span>
+        </button>
+        <button class="sync-knop" id="sync-host-knop" type="button">
+          <span class="sync-knop-titel">Verstuur via code</span>
+          <span class="sync-knop-sub">Toon code op dit device</span>
+        </button>
+        <button class="sync-knop" id="sync-gast-knop" type="button" style="grid-column: 1 / -1;">
+          <span class="sync-knop-titel">Ontvang via code</span>
+          <span class="sync-knop-sub">Typ code van ander device</span>
+        </button>
+      </div>
+
+      <div id="sync-paneel" class="sync-paneel hidden">
+        <div id="sync-status" class="sync-status hidden"></div>
+
+        <div id="sync-code-toon" class="sync-code-toon hidden">
+          <div class="sync-code-lbl">Code op andere device</div>
+          <div class="sync-code-cijfers">······</div>
+        </div>
+
+        <div id="sync-code-input" class="sync-code-input hidden">
+          <input
+            type="text"
+            id="sync-code-inp"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            placeholder="······"
+            autocomplete="off"
+          />
+          <button id="sync-verbind-knop" class="btn-form-primary" type="button">Verbind</button>
+        </div>
+
+        <button id="sync-annuleer-knop" class="btn-form-sec sync-annuleer hidden" type="button">Annuleer</button>
+      </div>
+    </div>
+
+    <div class="tab-sectie-label">DATA</div>
+    <div class="form-kaart">
+      <button class="btn-form-sec" onclick="exportData()">↓ Exporteer JSON</button>
+      <button class="btn-form-sec" onclick="importData()">↑ Importeer JSON</button>
+      <button id="reset-auto-knop" class="btn-form-sec">Reset deze auto</button>
+      <button id="btn-reset" class="btn-form-danger" onclick="resetData()">Verwijder alle data</button>
+      <input type="file" id="import-file" accept=".json" class="hidden" />
+    </div>
+  </div>
+</div>
