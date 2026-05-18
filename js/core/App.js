@@ -624,36 +624,38 @@ export class App {
     });
   }
 
-  /** Toon de modal met platform-specifieke install-stappen. */
+  /** Toon de install-stappen overlay (zelfde stijl als InfoOverlay). */
   _toonInstallStappen(actiefPlatform = 'ios') {
-    const modal = document.getElementById('modal-install-stappen');
-    if (!modal) return;
+    const overlay = document.getElementById('install-stappen-overlay');
+    if (!overlay) return;
 
     const wisselPlatform = (platform) => {
-      modal.querySelectorAll('.install-platform-tab').forEach((tab) => {
+      overlay.querySelectorAll('.install-platform-tab').forEach((tab) => {
         const aan = tab.dataset.platform === platform;
         tab.classList.toggle('actief', aan);
         tab.setAttribute('aria-selected', aan ? 'true' : 'false');
       });
-      modal.querySelectorAll('.install-stappen-paneel').forEach((p) => {
+      overlay.querySelectorAll('.install-stappen-paneel').forEach((p) => {
         p.classList.toggle('hidden', p.dataset.paneel !== platform);
       });
     };
     wisselPlatform(actiefPlatform);
 
-    modal.querySelectorAll('.install-platform-tab').forEach((tab) => {
+    overlay.querySelectorAll('.install-platform-tab').forEach((tab) => {
       tab.addEventListener('click', () => wisselPlatform(tab.dataset.platform));
     });
 
-    const sluitModal = () => {
-      modal.classList.add('hidden');
-      modal.setAttribute('aria-hidden', 'true');
+    const sluit = () => {
+      overlay.classList.remove('zichtbaar');
+      setTimeout(() => overlay.classList.add('hidden'), 320);
     };
-    document.getElementById('install-stappen-sluit')?.addEventListener('click', sluitModal, { once: true });
-    document.getElementById('install-stappen-backdrop')?.addEventListener('click', sluitModal, { once: true });
+    document.getElementById('install-stappen-sluit')?.addEventListener('click', sluit, { once: true });
+    document.getElementById('install-stappen-backdrop')?.addEventListener('click', sluit, { once: true });
 
-    modal.classList.remove('hidden');
-    modal.setAttribute('aria-hidden', 'false');
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => overlay.classList.add('zichtbaar'));
+    });
   }
 
   // ── Snelle auto-wissel ────────────────────────────────────────────────────
