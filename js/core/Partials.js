@@ -2,13 +2,17 @@
 // Laadt HTML-fragmenten uit /partials/ en injecteert ze in placeholders.
 //
 // LET OP: VS Code Live Server injecteert een hot-reload <script> blok in
-// élke HTML-response. Bij een volledige pagina komt dat netjes vóór </body>;
-// bij een partial (zonder </body>) injecteert hij MIDDEN in de HTML —
-// vaak in een <svg> element — waardoor de HTML5-parser de boom verkeerd
-// opbouwt en alle elementen na het injectie-punt verloren gaan. We strippen
-// het injectie-blok daarom voor we de partial parsen.
-
-const LIVE_SERVER_RE = /<!--\s*Code injected by live-server\s*-->[\s\S]*?<\/script>\s*/gi;
+// elke HTML-response. Bij een partial (geen </body>) injecteert hij dat
+// vaak midden in de markup, soms binnen een <svg>, waardoor de parser de
+// boom verkeerd opbouwt en elementen erna verloren gaan.
+//
+// Robuuste aanpak:
+//   1. fetch met `cache: 'no-store'` om browser-cache te omzeilen.
+//   2. Parse de hele HTML met DOMParser in document-modus (i.p.v.
+//      <template>.innerHTML) — DOMParser bouwt een echt document op met
+//      head/body en is veel forgivender voor rogue scripts.
+//   3. Verwijder alle <script>-tags uit het geparste document voor we het
+//      in onze DOM hangen — partials horen geen scripts te bevatten.
 
 export class Partials {
   static async load() {
@@ -28,10 +32,7 @@ export class Partials {
       try {
         const res = await fetch(`partials/${naam}.html`, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        let html = await res.text();
-        // Strip Live Server hot-reload injectie zodat de partial-parser
-        // een schone HTML-tree krijgt.
-        html = html.replace(LIVE_SERVER_RE, '');
+        const html = await res.text();
         klaar++;
         setStatus(`BESTANDEN LADEN… ${klaar}/${totaal}`);
         return { mount, html, naam };
@@ -44,11 +45,25 @@ export class Partials {
     }));
 
     setStatus('INTERFACE OPBOUWEN…');
-    for (const { mount, html } of ingeladen) {
+    const parser = new DOMParser();
+    for (const { mount, html, naam } of ingeladen) {
       if (!mount.isConnected || !html) continue;
-      const tpl = document.createElement('template');
-      tpl.innerHTML = html;
-      mount.replaceWith(tpl.content);
+
+      // Parse als compleet HTML-document — DOMParser is robuust tegen
+      // rogue <script>-injecties (zoals die van Live Server) omdat hij
+      // alles netjes in body/head plaatst.
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Strip alle scripts — partials horen er geen te bevatten, en
+      // Live Server's hot-reload script breekt anders de structuur.
+      doc.querySelectorAll('script').forEach((s) => s.remove());
+
+      // Verzamel alle body-children in een fragment en injecteer.
+      const fragment = document.createDocumentFragment();
+      while (doc.body.firstChild) {
+        fragment.appendChild(doc.body.firstChild);
+      }
+      mount.replaceWith(fragment);
     }
   }
 }

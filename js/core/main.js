@@ -7,9 +7,9 @@ import { Partials } from './Partials.js';
 import { CarScene } from '../scenes/CarScene.js';
 import { SplashScene } from '../scenes/SplashScene.js';
 
-// Detecteer development-mode: localhost / 127.0.0.1 / Live Server (poort 5500
-// of 5501) / file:// → geen Service Worker registreren en eventuele oude
-// registratie + caches opruimen. Anders blijft een oude SW oude JS serveren.
+// Detecteer development-mode: localhost / 127.0.0.1 / 0.0.0.0 / file:// →
+// geen Service Worker registreren + eventuele oude SW + caches opruimen.
+// location.hostname bevat GEEN poortnummer, dus check alleen op host.
 const IS_DEV =
   ['localhost', '127.0.0.1', '0.0.0.0'].includes(location.hostname) ||
   location.protocol === 'file:';
@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) {
     if (IS_DEV) {
       // Dev: unregister bestaande SW + wis caches zodat we altijd verse
-      // bestanden krijgen. Geen reload — App.init() draait direct.
+      // bestanden krijgen.
       try {
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map((r) => r.unregister()));
