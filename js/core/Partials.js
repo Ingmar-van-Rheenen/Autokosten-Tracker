@@ -1,9 +1,14 @@
 // ── Partials ──────────────────────────────────────────────────────────────────
-const PARTIALS_VERSION = 'v9-diag';
+// Laadt HTML-fragmenten uit /partials/ en injecteert ze in placeholders.
+//
+// Partials hebben extensie `.partial` (niet `.html`) zodat VS Code Live
+// Server hun content niet aanraakt — Live Server injecteert een
+// hot-reload <script> in elke HTML-response, en doet dat soms midden in
+// de markup (zonder </body> als anchor), wat de partial onbruikbaar maakt.
+// Een onbekende extensie krijgt geen injectie.
 
 export class Partials {
   static async load() {
-    console.log(`[Partials] ${PARTIALS_VERSION} actief`);
     const mounts = Array.from(document.querySelectorAll('[data-partial]'));
     if (!mounts.length) return;
 
@@ -18,7 +23,7 @@ export class Partials {
     const ingeladen = await Promise.all(mounts.map(async (mount) => {
       const naam = mount.getAttribute('data-partial');
       try {
-        const res = await fetch(`partials/${naam}.html`, { cache: 'no-store' });
+        const res = await fetch(`partials/${naam}.partial`, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const html = await res.text();
         klaar++;
@@ -34,33 +39,9 @@ export class Partials {
 
     setStatus('INTERFACE OPBOUWEN…');
     const parser = new DOMParser();
-    for (const { mount, html, naam } of ingeladen) {
+    for (const { mount, html } of ingeladen) {
       if (!mount.isConnected || !html) continue;
-
-      if (naam === 'app/kaart-tab') {
-        // 1. Raw HTML check
-        const heeftBtnStart = html.includes('btn-start');
-        const heeftInjectie = html.includes('Code injected by live-server');
-        const injectieIndex = html.indexOf('Code injected by live-server');
-        console.log(`[diag] kaart-tab raw: ${html.length} bytes, btn-start in raw: ${heeftBtnStart}, live-server injectie: ${heeftInjectie}${heeftInjectie ? ` (idx ${injectieIndex})` : ''}`);
-        if (heeftInjectie) {
-          // Toon ~200 chars rond het injectie-punt
-          console.log(`[diag] context rond injectie:`, JSON.stringify(html.slice(Math.max(0, injectieIndex - 100), injectieIndex + 200)));
-        }
-      }
-
       const doc = parser.parseFromString(html, 'text/html');
-      const scriptsGevonden = doc.querySelectorAll('script').length;
-      doc.querySelectorAll('script').forEach((s) => s.remove());
-
-      if (naam === 'app/kaart-tab') {
-        console.log(`[diag] kaart-tab na DOMParser+stripScripts:`,
-          `${scriptsGevonden} scripts geremoved,`,
-          `body heeft ${doc.body.children.length} top-level kids,`,
-          `btn-start in body:`, !!doc.body.querySelector('#btn-start'),
-          `alle id's:`, Array.from(doc.body.querySelectorAll('[id]')).map((e) => e.id));
-      }
-
       const fragment = document.createDocumentFragment();
       while (doc.body.firstChild) {
         fragment.appendChild(doc.body.firstChild);
