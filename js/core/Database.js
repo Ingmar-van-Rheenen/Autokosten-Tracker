@@ -85,11 +85,14 @@ export class Database {
   // ── Algemene instellingen ───────────────────────────────────────────────────
 
   getThema() {
-    return this.load().thema ?? 'auto';
+    const t = this.load().thema;
+    // 'auto' was de v2-default — migreer naar 'klassiek' bij uitlezen.
+    if (t === 'auto' || !t) return 'klassiek';
+    return t;
   }
 
   setThema(thema) {
-    if (!['auto', 'licht', 'donker'].includes(thema)) return;
+    if (!['klassiek', 'licht', 'donker'].includes(thema)) return;
     const d = this.load();
     d.thema = thema;
     this._schrijf(d);
@@ -451,7 +454,7 @@ export class Database {
   _leegV3() {
     return {
       versie: 3,
-      thema: 'auto',
+      thema: 'klassiek',
       naam: '',
       autos: [],
       geselecteerd: null,
@@ -476,7 +479,9 @@ export class Database {
     // Toekomstige v4-saves blijven v4; alleen ontbrekende/oudere velden
     // worden op 3 gezet om silent-downgrade-corruptie te voorkomen.
     if (typeof data.versie !== 'number' || data.versie < 3) data.versie = 3;
-    if (!['auto', 'licht', 'donker'].includes(data.thema)) data.thema = 'auto';
+    // 'auto' is een v2-restant en wordt naar 'klassiek' gemigreerd.
+    if (data.thema === 'auto') data.thema = 'klassiek';
+    if (!['klassiek', 'licht', 'donker'].includes(data.thema)) data.thema = 'klassiek';
     if (typeof data.naam !== 'string') data.naam = '';
     if (!Array.isArray(data.autos)) data.autos = [];
     if (data.geselecteerd === undefined) data.geselecteerd = null;
@@ -546,7 +551,7 @@ export class Database {
     if (!v2 || typeof v2 !== 'object') return this._leegV3();
     return {
       versie: 3,
-      thema: 'auto',
+      thema: 'klassiek',
       naam: v2.naam ?? '',
       autos: Array.isArray(v2.autos) ? v2.autos : [],
       geselecteerd: v2.geselecteerd ?? null,

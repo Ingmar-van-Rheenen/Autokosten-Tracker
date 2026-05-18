@@ -114,6 +114,14 @@ html[data-thema='licht'] {
   --txt: #1b2537;
   --txt-muted: #7a8a9a;
 
+  /* Dashboard-tokens — licht thema heeft een crème dashboard */
+  --dark: #f0ebe0;
+  --dark-2: #faf6ec;
+  --dark-3: #ffffff;
+  --dark-border: #d8d2c2;
+  --txt-dark: #1b2537;
+  --txt-dark-m: #7a8a9a;
+
   /* v3-tokens */
   --bg: #f0ebe0;
   --bg-elev: #ffffff;
@@ -140,6 +148,14 @@ html[data-thema='donker'] {
   --red: #ef5555;
   --txt: #dce8f4;
   --txt-muted: #8a9ab0;
+
+  /* Dashboard-tokens — donker thema iets dieper dan klassiek */
+  --dark: #0f1623;
+  --dark-2: #1a2333;
+  --dark-3: #232d40;
+  --dark-border: #2c3850;
+  --txt-dark: #e8f0fa;
+  --txt-dark-m: #6a7890;
 
   /* v3-tokens */
   --bg: #1b2537;

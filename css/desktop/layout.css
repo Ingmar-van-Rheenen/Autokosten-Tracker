@@ -150,13 +150,25 @@
     pointer-events: none;
   }
 
+  /* Geëxpandeerd widget wordt over de viewport gepind — voorheen bleef
+     hij op zijn originele grid-positie staan waardoor de gebruiker
+     handmatig moest scrollen om hem te zien. */
   .widget.is-expanded {
-    grid-column: 1 / -1;
-    grid-row: span 8;
-    z-index: 2;
+    position: fixed;
+    inset: 5vh 5vw;
+    z-index: var(--z-modal, 400);
     overflow-y: auto;
     background: var(--dark-2);
+    border: 1px solid var(--dark-border);
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
     padding: 32px 36px;
+    animation: widget-expand-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes widget-expand-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
   }
 
   .widget.is-expanded .widget-kop {
@@ -186,13 +198,22 @@
     background: var(--dark-border);
   }
 
-  /* Onzichtbare backdrop voor klikken buiten expanded widget */
+  /* Backdrop voor klikken buiten expanded widget — moet boven de
+     andere widgets én onder de geëxpandeerde zitten. */
   .dash-backdrop {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: calc(var(--z-modal, 400) - 1);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
     cursor: pointer;
+    animation: dash-backdrop-in 0.18s ease-out;
+  }
+
+  @keyframes dash-backdrop-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   .dash-grid.heeft-expanded ~ .dash-backdrop,

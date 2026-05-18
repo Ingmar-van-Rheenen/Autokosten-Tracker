@@ -184,7 +184,7 @@ export class DataManager {
       };
       return {
         versie: 3,
-        thema: 'auto',
+        thema: 'klassiek',
         naam: raw.naam || '',
         autos: [auto],
         geselecteerd: autoId,
