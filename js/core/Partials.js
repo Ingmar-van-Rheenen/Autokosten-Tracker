@@ -1,5 +1,5 @@
 // ── Partials ──────────────────────────────────────────────────────────────────
-const PARTIALS_VERSION = 'v8-domparser-strip';
+const PARTIALS_VERSION = 'v9-diag';
 
 export class Partials {
   static async load() {
@@ -37,25 +37,35 @@ export class Partials {
     for (const { mount, html, naam } of ingeladen) {
       if (!mount.isConnected || !html) continue;
 
+      if (naam === 'app/kaart-tab') {
+        // 1. Raw HTML check
+        const heeftBtnStart = html.includes('btn-start');
+        const heeftInjectie = html.includes('Code injected by live-server');
+        const injectieIndex = html.indexOf('Code injected by live-server');
+        console.log(`[diag] kaart-tab raw: ${html.length} bytes, btn-start in raw: ${heeftBtnStart}, live-server injectie: ${heeftInjectie}${heeftInjectie ? ` (idx ${injectieIndex})` : ''}`);
+        if (heeftInjectie) {
+          // Toon ~200 chars rond het injectie-punt
+          console.log(`[diag] context rond injectie:`, JSON.stringify(html.slice(Math.max(0, injectieIndex - 100), injectieIndex + 200)));
+        }
+      }
+
       const doc = parser.parseFromString(html, 'text/html');
-      // Strip alle scripts — partials horen er geen te bevatten, en
-      // Live Server's hot-reload script breekt anders de structuur.
+      const scriptsGevonden = doc.querySelectorAll('script').length;
       doc.querySelectorAll('script').forEach((s) => s.remove());
 
-      // Verzamel alle body-children in een fragment en injecteer.
+      if (naam === 'app/kaart-tab') {
+        console.log(`[diag] kaart-tab na DOMParser+stripScripts:`,
+          `${scriptsGevonden} scripts geremoved,`,
+          `body heeft ${doc.body.children.length} top-level kids,`,
+          `btn-start in body:`, !!doc.body.querySelector('#btn-start'),
+          `alle id's:`, Array.from(doc.body.querySelectorAll('[id]')).map((e) => e.id));
+      }
+
       const fragment = document.createDocumentFragment();
       while (doc.body.firstChild) {
         fragment.appendChild(doc.body.firstChild);
       }
       mount.replaceWith(fragment);
-
-      if (naam === 'app/kaart-tab') {
-        console.log(`[Partials] na kaart-tab injectie:`,
-          'btn-start =', !!document.getElementById('btn-start'),
-          'btn-stop =', !!document.getElementById('btn-stop'),
-          'btn-opslaan =', !!document.getElementById('btn-opslaan'),
-          'btn-annuleer =', !!document.getElementById('btn-annuleer'));
-      }
     }
   }
 }
