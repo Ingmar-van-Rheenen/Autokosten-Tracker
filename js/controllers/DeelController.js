@@ -38,8 +38,11 @@ export class DeelController {
     document.getElementById('deel-rit-kosten').textContent =
       `Totale kosten: ${Utils.eur(this._kosten)}`;
 
-    const revolutUsername = this._db.getRevolutUsername();
-    document.getElementById('deel-revolut').classList.toggle('hidden', !revolutUsername);
+    // Knoppen worden in _herbereken bedrag-afhankelijk gevuld; alvast
+    // alle drie verbergen om flicker te voorkomen.
+    document.getElementById('deel-tikkie')?.classList.add('hidden');
+    document.getElementById('deel-bunq')?.classList.add('hidden');
+    document.getElementById('deel-revolut')?.classList.add('hidden');
 
     this._renderPassagiers();
     this._herbereken();
@@ -179,12 +182,46 @@ export class DeelController {
         : '';
     }
 
+    const pp = Utils.eur(perPersoon);
+
+    // Tikkie — handle-pagina; bedrag kan niet in URL, tonen in label
+    const tikkieHandle = (typeof this._db.getTikkieHandle === 'function') ? this._db.getTikkieHandle() : '';
+    const tikkieEl = document.getElementById('deel-tikkie');
+    if (tikkieEl) {
+      if (tikkieHandle) {
+        tikkieEl.href = `https://tikkie.me/${tikkieHandle}`;
+        tikkieEl.textContent = `Betaal via Tikkie · ${pp} p.p.`;
+        tikkieEl.classList.remove('hidden');
+      } else {
+        tikkieEl.classList.add('hidden');
+      }
+    }
+
+    // bunq — bedrag wel in URL
+    const bunqUser = this._db.getBetaalverzoekUsername();
+    const bunqEl = document.getElementById('deel-bunq');
+    if (bunqEl) {
+      if (bunqUser) {
+        const omschrijving = encodeURIComponent(`Ritkosten ${this._rit?.bestemming ?? ''}`.trim());
+        bunqEl.href = `https://bunq.me/${bunqUser}/${perPersoon.toFixed(2)}/${omschrijving}`;
+        bunqEl.textContent = `Betaal via bunq · ${pp} p.p.`;
+        bunqEl.classList.remove('hidden');
+      } else {
+        bunqEl.classList.add('hidden');
+      }
+    }
+
+    // Revolut — bedrag in URL
     const revolutUsername = this._db.getRevolutUsername();
     const revolutEl = document.getElementById('deel-revolut');
-    if (revolutEl && revolutUsername) {
-      revolutEl.href = `https://revolut.me/${revolutUsername}`;
-      revolutEl.textContent = '';
-      revolutEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.924 4.124A6.5 6.5 0 0 0 14.5 0H4v24h4v-9h4.382l4.4 9H21l-4.7-9.5A6.5 6.5 0 0 0 20.924 4.124ZM14.5 11H8V4h6.5a2.5 2.5 0 0 1 0 5Z"/></svg> Betaal via Revolut · ${Utils.eur(perPersoon)} p.p.`;
+    if (revolutEl) {
+      if (revolutUsername) {
+        revolutEl.href = `https://revolut.me/${revolutUsername}/${perPersoon.toFixed(2)}eur`;
+        revolutEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.924 4.124A6.5 6.5 0 0 0 14.5 0H4v24h4v-9h4.382l4.4 9H21l-4.7-9.5A6.5 6.5 0 0 0 20.924 4.124ZM14.5 11H8V4h6.5a2.5 2.5 0 0 1 0 5Z"/></svg> Betaal via Revolut · ${pp} p.p.`;
+        revolutEl.classList.remove('hidden');
+      } else {
+        revolutEl.classList.add('hidden');
+      }
     }
 
     const bericht = this._bouwBericht(perPersoon);

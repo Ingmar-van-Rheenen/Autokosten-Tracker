@@ -361,13 +361,12 @@
 }
 
 /* ── TIKKIE KOPIEER KNOP ─────────────────── */
-.deel-revolut-btn {
+.deel-betaal-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   text-decoration: none;
-  background: #191C1F;
   color: #fff;
   font-family: var(--sans);
   font-weight: 600;
@@ -378,6 +377,11 @@
   transition: background 0.15s;
 }
 
-.deel-revolut-btn:hover {
-  background: #2d3136;
-}
+.deel-tikkie-btn        { background: #e6007e; }
+.deel-tikkie-btn:hover  { background: #b80064; }
+
+.deel-bunq-btn          { background: #2a64f6; }
+.deel-bunq-btn:hover    { background: #1f4dc7; }
+
+.deel-revolut-btn       { background: #191C1F; }
+.deel-revolut-btn:hover { background: #2d3136; }
