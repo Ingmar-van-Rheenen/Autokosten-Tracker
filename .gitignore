@@ -20,3 +20,9 @@ skills-lock.json
 
 # Docs / planning notes
 docs/
+
+# Node / E2E scratch
+node_modules/
+package.json
+package-lock.json
+.e2e-*.js

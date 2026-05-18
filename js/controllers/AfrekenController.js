@@ -27,22 +27,25 @@ export class AfrekenController {
     const betalingen = this._db.getAutoBetalingen(auto.id) || [];
 
     const verschuldigd = ritten.reduce((acc, r) => {
+      const km = Number(r.km || 0);
+      if (!km) return acc;
+      if (auto.type === 'elektrisch') {
+        const kwh100 = Number(auto.kwh_per_100km || 0);
+        const ppk = Number(auto.prijs_per_kwh || 0);
+        if (!kwh100 || !ppk) return acc;
+        return acc + (km / 100) * kwh100 * ppk;
+      }
       const kmpl = Number(auto.km_per_liter || 0);
       const ppl = Number(auto.prijs_per_liter || 0);
       if (!kmpl || !ppl) return acc;
-      return acc + (Number(r.km || 0) / kmpl) * ppl;
+      return acc + (km / kmpl) * ppl;
     }, 0);
     const brandstof = tankbeurten.reduce((acc, t) => acc + Number(t.totaal || 0), 0);
+    const ikIs = this._isIk.bind(this);
     const inUit = betalingen.reduce((acc, b) => {
       const bedrag = Number(b.bedrag || 0);
-      // 'Ik' wordt bepaald via db.naam, of letterlijke string "Ik"
-      const naam = (this._db.load && this._db.load().naam) || 'Ik';
-      if ((b.naar || '').toLowerCase() === (naam || '').toLowerCase() || (b.naar || '').toLowerCase() === 'ik') {
-        return acc - bedrag; // ik kreeg betaald → saldo daalt
-      }
-      if ((b.van || '').toLowerCase() === (naam || '').toLowerCase() || (b.van || '').toLowerCase() === 'ik') {
-        return acc + bedrag; // ik betaalde → saldo stijgt
-      }
+      if (ikIs(b.naar)) return acc - bedrag; // ik kreeg betaald → saldo daalt
+      if (ikIs(b.van)) return acc + bedrag;  // ik betaalde → saldo stijgt
       return acc;
     }, 0);
 
@@ -155,14 +158,15 @@ export class AfrekenController {
       return;
     }
 
-    const naam = (this._db.load && this._db.load().naam) || 'Ik';
+    // Schrijf altijd het sentinel "Ik" weg — naam-veranderingen breken
+    // anders het matchen bij volgend afreken-rondje.
     const ander = (auto.passagiers && auto.passagiers[0]) || 'Auto-deler';
     const methode = document.getElementById('afreken-methode')?.value || 'overig';
 
     // saldo > 0 → ik heb tegoed → ander betaalt aan mij
     // saldo < 0 → ik ben schuld → ik betaal aan ander
-    const van = saldo > 0 ? ander : naam;
-    const naar = saldo > 0 ? naam : ander;
+    const van = saldo > 0 ? ander : 'Ik';
+    const naar = saldo > 0 ? 'Ik' : ander;
 
     this._db.addBetaling({
       id: Utils.uid(),
@@ -177,6 +181,18 @@ export class AfrekenController {
 
     Utils.toast('Afrekening geregistreerd ✓');
     this._sluit();
+  }
+
+  /**
+   * Herken of een van/naar-veld de gebruiker zelf is. Match op het sentinel
+   * "Ik" én — voor oudere records — op de huidige `naam` uit de database.
+   */
+  _isIk(naamVeld) {
+    const v = (naamVeld || '').toLowerCase().trim();
+    if (!v) return false;
+    if (v === 'ik') return true;
+    const eigenNaam = (this._db.load && this._db.load().naam) || '';
+    return !!eigenNaam && v === eigenNaam.toLowerCase().trim();
   }
 
   _bind() {

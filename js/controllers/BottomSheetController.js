@@ -156,9 +156,16 @@ export class BottomSheetController {
     document.querySelectorAll('.bs-shortcut').forEach((btn) => {
       btn.addEventListener('click', () => {
         const tab = btn.dataset.tab;
-        if (tab) {
-          this.collapse();
-          this._navigeerNaarTab(tab);
+        if (!tab) return;
+        this.collapse();
+        this._navigeerNaarTab(tab);
+        const doelId = btn.dataset.scrollTo;
+        if (doelId) {
+          // Wacht tot de tab-animatie de inhoud heeft gemount voordat we scrollen.
+          setTimeout(() => {
+            const doel = document.getElementById(doelId);
+            doel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 340);
         }
       });
     });

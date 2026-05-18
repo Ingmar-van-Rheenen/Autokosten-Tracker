@@ -16,23 +16,31 @@ export class Database {
     try {
       const rawV3 = localStorage.getItem(DB_KEY);
       if (rawV3) {
-        return this._hydrate(JSON.parse(rawV3));
+        const ruw = JSON.parse(rawV3);
+        const ruwStr = JSON.stringify(ruw);
+        const hydrated = this._hydrate(ruw);
+        // Persisteer reparaties (orphans, defaults) eenmalig zodat het niet
+        // elke load opnieuw hoeft te gebeuren en exports zijn schoon.
+        if (JSON.stringify(hydrated) !== ruwStr) this._schrijf(hydrated);
+        return hydrated;
       }
 
       const rawV2 = localStorage.getItem(DB_KEY_V2);
       if (rawV2) {
         const gemigreerd = this._migreerV2NaarV3(JSON.parse(rawV2));
+        const hydrated = this._hydrate(gemigreerd);
         // Non-destructief: v2 key blijft bestaan voor eventuele downgrade.
-        this._schrijf(gemigreerd);
-        return gemigreerd;
+        this._schrijf(hydrated);
+        return hydrated;
       }
 
       const rawV1 = localStorage.getItem(DB_KEY_V1);
       if (rawV1) {
         const v2obj = this._migreerV1NaarV2(JSON.parse(rawV1));
         const v3obj = this._migreerV2NaarV3(v2obj);
-        this._schrijf(v3obj);
-        return v3obj;
+        const hydrated = this._hydrate(v3obj);
+        this._schrijf(hydrated);
+        return hydrated;
       }
     } catch {
       // Corrupte data — start schoon.
@@ -141,7 +149,19 @@ export class Database {
 
   getGeselecteerdeAuto() {
     const d = this.load();
-    return d.autos.find((a) => a.id === d.geselecteerd) || d.autos[0] || null;
+    const gevonden = d.autos.find((a) => a.id === d.geselecteerd);
+    if (gevonden) return gevonden;
+    // Stale geselecteerd-id (auto verwijderd of corrupt) — herstel persistent
+    // zodat nieuwe ritten/tankbeurten een geldig auto_id meekrijgen.
+    const fallback = d.autos[0] || null;
+    if (fallback && d.geselecteerd !== fallback.id) {
+      d.geselecteerd = fallback.id;
+      this._schrijf(d);
+    } else if (!fallback && d.geselecteerd !== null) {
+      d.geselecteerd = null;
+      this._schrijf(d);
+    }
+    return fallback;
   }
 
   getPassagiers(autoId) {
@@ -163,7 +183,7 @@ export class Database {
 
   getAutoRitten(autoId) {
     const d = this.load();
-    return d.ritten.filter((r) => r.auto_id === autoId || !r.auto_id);
+    return d.ritten.filter((r) => r.auto_id === autoId);
   }
 
   addRit(rit) {
@@ -210,7 +230,7 @@ export class Database {
 
   getAutoTankbeurten(autoId) {
     const d = this.load();
-    return d.tankbeurten.filter((t) => t.auto_id === autoId || !t.auto_id);
+    return d.tankbeurten.filter((t) => t.auto_id === autoId);
   }
 
   addTankbeurt(tank) {
@@ -249,7 +269,7 @@ export class Database {
 
   getAutoOnderhoud(autoId) {
     const d = this.load();
-    return (d.onderhoud || []).filter((o) => o.auto_id === autoId || !o.auto_id);
+    return (d.onderhoud || []).filter((o) => o.auto_id === autoId);
   }
 
   // ── Vaste kosten (NEW v3) ──────────────────────────────────────────────────
@@ -439,7 +459,38 @@ export class Database {
       notitie: t.notitie ?? null,
     }));
 
+    this._repareerOrphans(data);
     return data;
+  }
+
+  /**
+   * Eénmalige reparatie voor records zonder auto_id of met een auto_id die
+   * niet (meer) bestaat. Worden toegewezen aan d.geselecteerd of de eerste
+   * auto. Voorkomt dat oude records aan elke auto plakken in get*-filters.
+   * Idempotent — daarna verandert er niets meer.
+   */
+  _repareerOrphans(data) {
+    if (!Array.isArray(data.autos) || !data.autos.length) return;
+    const bestaande = new Set(data.autos.map((a) => a.id));
+    const fallback = bestaande.has(data.geselecteerd) ? data.geselecteerd : data.autos[0].id;
+    const reparaar = (lijst) => {
+      let veranderd = false;
+      const nieuw = (lijst || []).map((it) => {
+        if (!it || typeof it !== 'object') return it;
+        if (!it.auto_id || !bestaande.has(it.auto_id)) {
+          veranderd = true;
+          return { ...it, auto_id: fallback };
+        }
+        return it;
+      });
+      return { lijst: nieuw, veranderd };
+    };
+    const r = reparaar(data.ritten);
+    const t = reparaar(data.tankbeurten);
+    const o = reparaar(data.onderhoud);
+    if (r.veranderd) data.ritten = r.lijst;
+    if (t.veranderd) data.tankbeurten = t.lijst;
+    if (o.veranderd) data.onderhoud = o.lijst;
   }
 
   /**

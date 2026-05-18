@@ -55,8 +55,8 @@ export class DataManager {
       try {
         const tekst = await file.text();
         data = JSON.parse(tekst);
-        if (!Array.isArray(data.autos) || !Array.isArray(data.ritten) || !Array.isArray(data.tankbeurten))
-          throw new Error('Ongeldig formaat');
+        data = this._normaliseerImport(data);
+        if (!data) throw new Error('Ongeldig formaat');
       } catch {
         Utils.toast('Fout bij importeren — ongeldig JSON bestand.', 'err');
         return;
@@ -102,6 +102,12 @@ export class DataManager {
     if (!Array.isArray(data.onderhoud)) data.onderhoud = [];
     if (!Array.isArray(data.vaste_kosten)) data.vaste_kosten = [];
     if (!Array.isArray(data.betalingen)) data.betalingen = [];
+
+    // Repareer geselecteerd: moet wijzen naar een echt bestaande auto.
+    const bestaande = new Set((data.autos || []).map((a) => a?.id).filter(Boolean));
+    if (!bestaande.has(data.geselecteerd)) {
+      data.geselecteerd = data.autos?.[0]?.id ?? null;
+    }
     this._db.save(data);
     Utils.toast('Geïmporteerd ✓');
     setTimeout(() => location.reload(), 800);
@@ -131,8 +137,69 @@ export class DataManager {
 
     if (!huidig.geselecteerd && huidig.autos.length) huidig.geselecteerd = huidig.autos[0].id;
 
+    // Items met onbekend auto_id krijgen het huidige geselecteerd
+    // — voorkomt orphans die anders in geen enkele auto-view verschijnen.
+    const bestaande = new Set(huidig.autos.map((a) => a.id));
+    const fallback = bestaande.has(huidig.geselecteerd) ? huidig.geselecteerd : (huidig.autos[0]?.id ?? null);
+    const fix = (lijst) => (lijst || []).map((it) => {
+      if (!it || typeof it !== 'object') return it;
+      if (!bestaande.has(it.auto_id)) return { ...it, auto_id: fallback };
+      return it;
+    });
+    huidig.ritten = fix(huidig.ritten);
+    huidig.tankbeurten = fix(huidig.tankbeurten);
+    huidig.onderhoud = fix(huidig.onderhoud);
+    huidig.vaste_kosten = fix(huidig.vaste_kosten);
+    huidig.betalingen = fix(huidig.betalingen);
+
     this._db.save(huidig);
     Utils.toast('Samengevoegd ✓');
     setTimeout(() => location.reload(), 800);
+  }
+
+  /**
+   * Accepteer v1- (autokosten_v1), v2- en v3-export-files. Geeft een v3-shape
+   * terug, of `null` als de input niet herkend wordt.
+   */
+  _normaliseerImport(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+
+    // v3 / v2: heeft expliciete autos-array
+    if (Array.isArray(raw.autos)) {
+      if (!Array.isArray(raw.ritten)) return null;
+      if (!Array.isArray(raw.tankbeurten)) return null;
+      return raw;
+    }
+
+    // v1: instellingen + losse ritten/tankbeurten zonder autos
+    if (raw.instellingen && (Array.isArray(raw.ritten) || Array.isArray(raw.tankbeurten))) {
+      const autoId = crypto.randomUUID();
+      const auto = {
+        id: autoId,
+        naam: raw.naam || 'Mijn auto',
+        merk: '',
+        km_per_liter: Number(raw.instellingen.km_per_liter) || 14,
+        prijs_per_liter: Number(raw.instellingen.prijs_per_liter) || 2.10,
+        emoji: '🚗',
+      };
+      return {
+        versie: 3,
+        thema: 'auto',
+        naam: raw.naam || '',
+        autos: [auto],
+        geselecteerd: autoId,
+        ritten: (raw.ritten || []).map((r) => ({ ...r, auto_id: autoId })),
+        tankbeurten: (raw.tankbeurten || []).map((t) => ({ ...t, auto_id: autoId })),
+        onderhoud: [],
+        vaste_kosten: [],
+        betalingen: [],
+        smart_tracking: false,
+        betaalverzoek_username: '',
+        revolut_username: '',
+        tikkie_handle: '',
+      };
+    }
+
+    return null;
   }
 }

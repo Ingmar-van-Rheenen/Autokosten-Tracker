@@ -72,11 +72,11 @@ export class StatsController {
     if (ovBet) ovBet.textContent = '€ ' + betaald.toFixed(2).replace('.', ',');
     if (ovKost) ovKost.textContent = '€ ' + verschuldigd.toFixed(2).replace('.', ',');
 
-    // v3: canvas bar chart + per-auto stats grid
+    // v3: canvas bar chart + per-auto stats grid — chart respecteert
+    // de geselecteerde periode (maand/jaar/alles) voor consistentie met KPIs.
     if (document.getElementById('grafiek-canvas')) {
-      this.renderBarChart(alleRitten, alleTank, alleVk);
+      this.renderBarChart(alleRitten, alleTank, alleVk, this._periode);
     } else {
-      // Backward-compat: oude SVG-grafiek
       this._renderGrafiek(ritten);
     }
     this.renderPerAutoStats(auto, alleRitten, alleTank, alleVk);
@@ -84,7 +84,7 @@ export class StatsController {
 
   // ── Canvas bar chart (v3) ────────────────────────────────────────────────
 
-  renderBarChart(alleRitten, alleTank, alleVk) {
+  renderBarChart(alleRitten, alleTank, alleVk, periode = 'alles') {
     const canvas = document.getElementById('grafiek-canvas');
     if (!canvas || !canvas.getContext) return;
 
@@ -99,24 +99,46 @@ export class StatsController {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cssW, cssH);
 
-    // 6 maanden buckets
+    // Buckets schalen mee met de geselecteerde periode:
+    //   'maand' → 4 weken, 'jaar' → 12 maanden, anders 6 maanden.
     const now = new Date();
     const maanden = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      maanden.push({
-        jaar: d.getFullYear(),
-        maand: d.getMonth(),
-        label: d.toLocaleString('nl-NL', { month: 'short' }).replace('.', ''),
-        brandstof: 0,
-        vast: 0,
-      });
+    if (periode === 'maand') {
+      // 4 weken eindigend op vandaag
+      for (let i = 3; i >= 0; i--) {
+        const eind = new Date(now);
+        eind.setDate(eind.getDate() - i * 7);
+        const begin = new Date(eind);
+        begin.setDate(begin.getDate() - 6);
+        maanden.push({
+          modus: 'week',
+          begin, eind,
+          label: 'W' + (4 - i),
+          brandstof: 0, vast: 0,
+        });
+      }
+    } else {
+      const aantal = periode === 'jaar' ? 12 : 6;
+      for (let i = aantal - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        maanden.push({
+          modus: 'maand',
+          jaar: d.getFullYear(),
+          maand: d.getMonth(),
+          label: d.toLocaleString('nl-NL', { month: 'short' }).replace('.', ''),
+          brandstof: 0,
+          vast: 0,
+        });
+      }
     }
 
     const bucketIdx = (datum) => {
       if (!datum) return -1;
       const d = new Date(datum);
       if (isNaN(d.getTime())) return -1;
+      if (maanden[0]?.modus === 'week') {
+        return maanden.findIndex((m) => d >= m.begin && d <= m.eind);
+      }
       return maanden.findIndex((m) => m.jaar === d.getFullYear() && m.maand === d.getMonth());
     };
 
@@ -131,12 +153,18 @@ export class StatsController {
       const start = v.start_datum ? new Date(v.start_datum) : null;
       const eind = v.eind_datum ? new Date(v.eind_datum) : null;
       maanden.forEach((m) => {
-        const eersteDag = new Date(m.jaar, m.maand, 1);
-        const laatsteDag = new Date(m.jaar, m.maand + 1, 0);
-        if (start && start > laatsteDag) return;
-        if (eind && eind < eersteDag) return;
-        if (v.frequentie === 'jaarlijks') m.vast += bedrag / 12;
-        else m.vast += bedrag;
+        const begin = m.modus === 'week' ? m.begin : new Date(m.jaar, m.maand, 1);
+        const einde = m.modus === 'week' ? m.eind : new Date(m.jaar, m.maand + 1, 0);
+        if (start && start > einde) return;
+        if (eind && eind < begin) return;
+        if (m.modus === 'week') {
+          // Per-week pro-rata: maandelijks/12 → wekelijks (* 12/52), jaarlijks/52
+          if (v.frequentie === 'jaarlijks') m.vast += bedrag / 52;
+          else m.vast += (bedrag * 12) / 52;
+        } else {
+          if (v.frequentie === 'jaarlijks') m.vast += bedrag / 12;
+          else m.vast += bedrag;
+        }
       });
     });
 
