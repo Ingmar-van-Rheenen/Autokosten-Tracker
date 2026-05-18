@@ -4,16 +4,12 @@
 // bijbehorende bestand. Wordt eenmaal aangeroepen voor App.init() zodat
 // elke `document.getElementById(...)` aanwezig is.
 //
-// Tijdens fetch wordt de splash-loader-text bijgewerkt met voortgang
-// zodat de gebruiker geen statische "APP VOORBEREIDEN…" tekst ziet.
-// De service worker (sw.js) precached alle partials, dus na de eerste
-// install zijn ze instant beschikbaar en flitst de progress kort door.
+// Tijdens fetch wordt de splash-loader-text bijgewerkt met voortgang.
+// Bij een failure laten we de placeholder staan + loggen, in plaats van
+// een lege string te injecteren — dat verwijderde voorheen het hele
+// element waardoor App.init() crashte op missing id's.
 
 export class Partials {
-  /**
-   * Vervang alle data-partial placeholders door hun HTML-inhoud.
-   * Resolved zodra alle fetches binnen + ingevoegd zijn.
-   */
   static async load() {
     const mounts = Array.from(document.querySelectorAll('[data-partial]'));
     if (!mounts.length) return;
@@ -26,25 +22,47 @@ export class Partials {
 
     const ingeladen = await Promise.all(mounts.map(async (mount) => {
       const naam = mount.getAttribute('data-partial');
-      if (!naam) return { mount, html: '' };
+      if (!naam) return { mount, html: null, naam };
       try {
         const res = await fetch(`partials/${naam}.html`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const html = await res.text();
+        if (!html || !html.trim()) throw new Error('leeg antwoord');
         klaar++;
         setStatus(`BESTANDEN LADEN… ${klaar}/${totaal}`);
-        return { mount, html };
+        return { mount, html, naam };
       } catch (e) {
         klaar++;
-        console.error(`[Partials] kon partials/${naam}.html niet laden:`, e);
+        console.error(`[Partials] partials/${naam}.html niet geladen — placeholder blijft staan:`, e);
         setStatus(`BESTANDEN LADEN… ${klaar}/${totaal}`);
-        return { mount, html: '' };
+        return { mount, html: null, naam };
       }
     }));
 
+    const mislukt = ingeladen.filter((x) => x.html === null);
+    if (mislukt.length) {
+      // Cache van een eerdere Service Worker bevatte vermoedelijk bad
+      // responses. Probeer eenmalig de SW te unregisteren — bij volgende
+      // refresh werkt het wel. Toon ook visueel aan de gebruiker.
+      setStatus(`${mislukt.length} bestanden faalden — Service Worker resetten`);
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+        }
+        if (window.caches) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        }
+        // Hard reload na korte pauze zodat gebruiker de tekst ziet.
+        setTimeout(() => location.reload(), 800);
+      } catch (e) {
+        console.error('[Partials] SW reset mislukt:', e);
+      }
+      throw new Error(`Partials niet geladen: ${mislukt.map((m) => m.naam).join(', ')}`);
+    }
+
     setStatus('INTERFACE OPBOUWEN…');
-    // Vervang placeholders in volgorde (outerHTML zodat de wrapper-div
-    // zelf weg is en de partial-inhoud op zijn plek staat).
     for (const { mount, html } of ingeladen) {
       if (!mount.isConnected) continue;
       mount.outerHTML = html;
