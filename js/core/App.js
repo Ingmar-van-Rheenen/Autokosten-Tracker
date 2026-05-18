@@ -354,14 +354,9 @@ export class App {
       });
     });
 
-    // Tikkie-handle input
-    const tikkieInp = document.getElementById('tikkie-handle-inp');
-    if (tikkieInp) {
-      tikkieInp.value = this._db.getTikkieHandle() || '';
-      tikkieInp.addEventListener('change', () => {
-        this._db.setTikkieHandle(tikkieInp.value.trim());
-      });
-    }
+    // Tikkie/bunq/revolut inputs worden bediend door
+    // StatsController._renderBetaalverzoekInstelling (auto-save bij blur
+    // + expliciete Opslaan-knop). Hier geen aparte binding meer.
 
     // Stadia Maps API key
     const stadiaInp = document.getElementById('stadia-key-inp');

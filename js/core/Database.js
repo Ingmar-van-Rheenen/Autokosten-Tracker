@@ -573,7 +573,7 @@ export class Database {
       smart_tracking: !!v2.smart_tracking,
       betaalverzoek_username: v2.betaalverzoek_username ?? '',
       revolut_username: v2.revolut_username ?? '',
-      tikkie_handle: '',
+      tikkie_handle: v2.tikkie_handle ?? '',
     };
   }
 

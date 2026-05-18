@@ -526,22 +526,47 @@ export class StatsController {
     const bunqInp = document.getElementById('betaalverzoek-username-inp');
     const tikkieInp = document.getElementById('tikkie-handle-inp');
     const saveBtn = document.getElementById('btn-betaalverzoek-save');
-    if (!saveBtn) return;
 
-    if (bunqInp) bunqInp.value = this._db.getBetaalverzoekUsername();
+    // Vul alleen in als het input-veld niet focussed is — voorkomt dat een
+    // re-render tijdens typen de zojuist ingevoerde waarde overschrijft.
+    const veilig = (inp, waarde) => {
+      if (!inp || inp === document.activeElement) return;
+      inp.value = waarde;
+    };
+    if (revolut) veilig(revolut, this._db.getRevolutUsername());
+    if (bunqInp) veilig(bunqInp, this._db.getBetaalverzoekUsername());
     if (tikkieInp && typeof this._db.getTikkieHandle === 'function') {
-      tikkieInp.value = this._db.getTikkieHandle();
+      veilig(tikkieInp, this._db.getTikkieHandle());
     }
 
+    // Auto-save bij blur — gebruiker hoeft niet apart te klikken. Was eerder
+    // alleen Tikkie via App._bindV3Instellingen; bunq en Revolut wachtten
+    // tot een aparte Opslaan-knop wat tot dataverlies leidde wanneer de
+    // gebruiker vergat te klikken.
+    const bindAutosave = (inp, prefix, setter) => {
+      if (!inp || inp.dataset.autosave === '1') return;
+      inp.dataset.autosave = '1';
+      inp.addEventListener('change', () => {
+        const v = inp.value.trim().replace(new RegExp('^' + prefix + '/', 'i'), '');
+        setter.call(this._db, v);
+      });
+    };
+    bindAutosave(revolut, 'revolut\\.me', this._db.setRevolutUsername);
+    bindAutosave(bunqInp, 'bunq\\.me', this._db.setBetaalverzoekUsername);
+    bindAutosave(tikkieInp, 'tikkie\\.me', this._db.setTikkieHandle);
+
+    // Opslaan-knop blijft beschikbaar als expliciete bevestiging.
+    if (!saveBtn) return;
     const nieuw = saveBtn.cloneNode(true);
     saveBtn.parentNode.replaceChild(nieuw, saveBtn);
+    nieuw.dataset.autosave = '1';
     nieuw.addEventListener('click', () => {
       if (revolut) this._db.setRevolutUsername(revolut.value.trim().replace(/^revolut\.me\//i, ''));
       if (bunqInp) this._db.setBetaalverzoekUsername(bunqInp.value.trim().replace(/^bunq\.me\//i, ''));
       if (tikkieInp && typeof this._db.setTikkieHandle === 'function') {
         this._db.setTikkieHandle(tikkieInp.value.trim().replace(/^tikkie\.me\//i, ''));
       }
-      Utils.toast('Betaalverzoek instellingen opgeslagen ✓');
+      Utils.toast('Opgeslagen ✓');
     });
   }
 
