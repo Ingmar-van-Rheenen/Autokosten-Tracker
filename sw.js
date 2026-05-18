@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v55';
+const CACHE = 'tanklog-v56';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -118,10 +118,6 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// ── Bericht-handler: page kan SKIP_WAITING sturen om upgrade te forceren ─────
-self.addEventListener('message', (e) => {
-  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
-});
 
 // ── Activatie: verwijder oude cache-versies ────────────────────────────────────
 self.addEventListener('activate', (e) => {

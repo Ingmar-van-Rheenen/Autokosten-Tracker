@@ -8,28 +8,12 @@ import { CarScene } from '../scenes/CarScene.js';
 import { SplashScene } from '../scenes/SplashScene.js';
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // SW registratie zonder auto-reload — eerder veroorzaakte
+  // controllerchange + Partials._herstel een reload-loop wanneer Live
+  // Server elke install als 'new SW' zag. De gebruiker reload zelf na
+  // een deploy; Partials.js detecteert stale-cache issues alsnog.
   if ('serviceWorker' in navigator) {
-    try {
-      const reg = await navigator.serviceWorker.register('./sw.js');
-      // Wanneer een nieuwe SW klaar staat (na recente deploy met nieuwe
-      // assets) → activeren + reloaden zodat alle precaches kloppen.
-      reg.addEventListener('updatefound', () => {
-        const nieuw = reg.installing;
-        nieuw?.addEventListener('statechange', () => {
-          if (nieuw.state === 'installed' && navigator.serviceWorker.controller) {
-            // Tweede install (er was al een SW actief) → forceer activatie.
-            nieuw.postMessage?.({ type: 'SKIP_WAITING' });
-          }
-        });
-      });
-      // Reload exact eenmaal wanneer een nieuwe SW de controle pakt.
-      let bezigMetReload = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (bezigMetReload) return;
-        bezigMetReload = true;
-        location.reload();
-      });
-    } catch { /* SW registratie mislukt — app werkt nog steeds */ }
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 
   // Splash is direct zichtbaar — vul de hemel + auto-animatie meteen
