@@ -35,7 +35,11 @@ export class StatsController {
     if (!auto) return;
 
     const { betaald, verschuldigd } = this._berekenKosten(auto);
-    const saldo = betaald - verschuldigd;
+    // Saldo inclusief geregistreerde betalingen zodat dit getal consistent
+    // is met de Afrekenen-sheet — anders blijft het verschil staan na een
+    // markeer-als-afgerekend actie.
+    const betalingenDelta = this._berekenBetalingenDelta(auto);
+    const saldo = betaald + betalingenDelta - verschuldigd;
 
     const el = document.getElementById('saldo-val');
     el.textContent = (saldo >= 0 ? '+' : '−') + Utils.eur(saldo);
@@ -43,6 +47,30 @@ export class StatsController {
     document.getElementById('saldo-uitleg').textContent = saldo >= 0
       ? 'Je hebt meer getankt dan gereden — tegoed'
       : 'Je hebt meer gereden dan getankt — bij te storten';
+  }
+
+  /**
+   * Som van betalingen die het saldo van de huidige gebruiker beïnvloeden.
+   * Positief = ik betaalde (saldo stijgt), negatief = ik ontving (saldo daalt).
+   * Herkent zowel het stabiele 'Ik' sentinel als de huidige naam.
+   */
+  _berekenBetalingenDelta(auto) {
+    const betalingen = (typeof this._db.getAutoBetalingen === 'function')
+      ? (this._db.getAutoBetalingen(auto.id) || []) : [];
+    if (!betalingen.length) return 0;
+    const eigenNaam = (this._db.load().naam || '').toLowerCase().trim();
+    const isIk = (v) => {
+      const x = (v || '').toLowerCase().trim();
+      if (!x) return false;
+      if (x === 'ik') return true;
+      return !!eigenNaam && x === eigenNaam;
+    };
+    return betalingen.reduce((acc, b) => {
+      const bedrag = Number(b.bedrag || 0);
+      if (isIk(b.naar)) return acc - bedrag;
+      if (isIk(b.van)) return acc + bedrag;
+      return acc;
+    }, 0);
   }
 
   updateOverzicht() {
@@ -308,11 +336,16 @@ export class StatsController {
     const el = document.getElementById('per-auto-stats');
     if (!el) return;
 
-    // Deze maand subset
+    // Periode-respecterende subset
     const filterFn = (typeof Utils.filterOpPeriode === 'function')
       ? Utils.filterOpPeriode.bind(Utils) : (items) => items;
-    const rittenMaand = filterFn(alleRitten, 'maand');
-    const kmDezeMaand = rittenMaand.reduce((s, r) => s + Number(r.km || 0), 0);
+    const periodeLbl = this._periode === 'jaar'
+      ? 'Km dit jaar'
+      : this._periode === 'alles'
+        ? 'Km totaal'
+        : 'Km deze maand';
+    const rittenPeriode = this._periode === 'alles' ? (alleRitten || []) : filterFn(alleRitten, this._periode);
+    const kmInPeriode = rittenPeriode.reduce((s, r) => s + Number(r.km || 0), 0);
     const kmTotaal = (alleRitten || []).reduce((s, r) => s + Number(r.km || 0), 0);
 
     const km100l = (typeof Utils.km100l === 'function')
@@ -321,7 +354,7 @@ export class StatsController {
       ? Utils.kostenPerKm(alleRitten, alleTank, alleVk) : 0;
 
     const cellen = [
-      { lbl: 'Km deze maand', val: kmDezeMaand.toFixed(1).replace('.', ',') + ' km' },
+      { lbl: periodeLbl, val: kmInPeriode.toFixed(1).replace('.', ',') + ' km' },
       { lbl: 'Totaal km', val: kmTotaal.toFixed(0) + ' km' },
       { lbl: 'Gem. l/100km', val: km100l > 0 ? km100l.toFixed(1).replace('.', ',') : '—' },
       { lbl: '€ per km', val: eurPerKm > 0 ? '€ ' + eurPerKm.toFixed(2).replace('.', ',') : '—' },

@@ -174,8 +174,11 @@ export class VasteKostenController {
       label: label || (TYPE_LABELS[type] || 'Vaste kost'),
       bedrag: parseFloat(bedrag.toFixed(2)),
       frequentie,
-      start_datum: startD ? new Date(startD).toISOString() : new Date().toISOString(),
-      eind_datum: eindD ? new Date(eindD).toISOString() : null,
+      // Bewaar als YYYY-MM-DD om timezone-shift te voorkomen: een input van
+      // "2026-05-01" werd anders in CET '2026-04-30T22:00:00Z', wat de
+      // maand-bucket in de grafiek op zone-grenzen verkeerd zette.
+      start_datum: startD || new Date().toISOString().slice(0, 10),
+      eind_datum: eindD || null,
       notitie: notitie || null,
     };
 

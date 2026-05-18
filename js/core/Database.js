@@ -29,8 +29,10 @@ export class Database {
       if (rawV2) {
         const gemigreerd = this._migreerV2NaarV3(JSON.parse(rawV2));
         const hydrated = this._hydrate(gemigreerd);
-        // Non-destructief: v2 key blijft bestaan voor eventuele downgrade.
         this._schrijf(hydrated);
+        // Oude v2-key opruimen — anders raken v2 en v3 uit sync zodra
+        // de gebruiker iets wijzigt en bij een latere reload terugleest.
+        try { localStorage.removeItem(DB_KEY_V2); } catch {}
         return hydrated;
       }
 
@@ -40,6 +42,10 @@ export class Database {
         const v3obj = this._migreerV2NaarV3(v2obj);
         const hydrated = this._hydrate(v3obj);
         this._schrijf(hydrated);
+        try {
+          localStorage.removeItem(DB_KEY_V1);
+          localStorage.removeItem(DB_KEY_V2);
+        } catch {}
         return hydrated;
       }
     } catch {
@@ -237,14 +243,20 @@ export class Database {
     if (!tank || typeof tank !== 'object') return;
     const d = this.load();
     const liters = Number(tank.liters) || 0;
-    const prijs = Number(tank.prijs_per_liter) || 0;
+    const prijs = Number(tank.prijs_per_liter ?? tank.prijs_per_kwh) || 0;
     const totaal = tank.totaal != null ? Number(tank.totaal) : liters * prijs;
+    const autoId = tank.auto_id ?? d.geselecteerd ?? null;
+    const auto = autoId ? d.autos.find((a) => a.id === autoId) : null;
+    const elektrisch = auto?.type === 'elektrisch';
     const compleet = {
       id: tank.id ?? Utils.uid(),
-      auto_id: tank.auto_id ?? d.geselecteerd ?? null,
+      auto_id: autoId,
       datum: tank.datum ?? new Date().toISOString(),
       liters,
-      prijs_per_liter: prijs,
+      // Voor EVs slaan we de waarde apart op als prijs_per_kwh; per-liter
+      // analytics blijven daardoor correct.
+      prijs_per_liter: elektrisch ? 0 : prijs,
+      prijs_per_kwh: elektrisch ? prijs : (tank.prijs_per_kwh ?? null),
       totaal,
       bon_foto: tank.bon_foto ?? null,
       km_stand: tank.km_stand ?? null,
@@ -430,7 +442,9 @@ export class Database {
    */
   _hydrate(data) {
     if (!data || typeof data !== 'object') return this._leegV3();
-    data.versie = 3;
+    // Toekomstige v4-saves blijven v4; alleen ontbrekende/oudere velden
+    // worden op 3 gezet om silent-downgrade-corruptie te voorkomen.
+    if (typeof data.versie !== 'number' || data.versie < 3) data.versie = 3;
     if (!['auto', 'licht', 'donker'].includes(data.thema)) data.thema = 'auto';
     if (typeof data.naam !== 'string') data.naam = '';
     if (!Array.isArray(data.autos)) data.autos = [];
@@ -518,8 +532,8 @@ export class Database {
         notitie: t.notitie ?? null,
       })),
       onderhoud: Array.isArray(v2.onderhoud) ? v2.onderhoud : [],
-      vaste_kosten: [],
-      betalingen: [],
+      vaste_kosten: Array.isArray(v2.vaste_kosten) ? v2.vaste_kosten : [],
+      betalingen: Array.isArray(v2.betalingen) ? v2.betalingen : [],
       smart_tracking: !!v2.smart_tracking,
       betaalverzoek_username: v2.betaalverzoek_username ?? '',
       revolut_username: v2.revolut_username ?? '',
@@ -534,11 +548,11 @@ export class Database {
   _migreerV1NaarV2(oud) {
     const id = Utils.uid();
     return {
-      naam: '',
+      naam: typeof oud?.naam === 'string' ? oud.naam : '',
       autos: [{
         id,
-        naam: 'Auto van Mama',
-        merk: '',
+        naam: oud?.instellingen?.auto_naam || oud?.auto_naam || 'Mijn auto',
+        merk: oud?.instellingen?.merk || '',
         km_per_liter: oud?.instellingen?.km_per_liter || 14,
         prijs_per_liter: oud?.instellingen?.prijs_per_liter || 2.10,
         emoji: '🚗',
@@ -548,5 +562,30 @@ export class Database {
       tankbeurten: (oud?.tankbeurten || []).map((t) => ({ ...t, auto_id: id })),
       onderhoud: [],
     };
+  }
+
+  // ── Auto verwijderen ───────────────────────────────────────────────────────
+
+  /**
+   * Verwijder een auto inclusief al zijn ritten, tankbeurten, onderhoud,
+   * vaste kosten en betalingen. Promote de eerste resterende auto naar
+   * geselecteerd als de verwijderde auto actief was.
+   */
+  deleteAuto(autoId) {
+    if (!autoId) return;
+    const d = this.load();
+    const idx = d.autos.findIndex((a) => a.id === autoId);
+    if (idx === -1) return;
+    d.autos.splice(idx, 1);
+    d.ritten = (d.ritten || []).filter((r) => r.auto_id !== autoId);
+    d.tankbeurten = (d.tankbeurten || []).filter((t) => t.auto_id !== autoId);
+    d.onderhoud = (d.onderhoud || []).filter((o) => o.auto_id !== autoId);
+    d.vaste_kosten = (d.vaste_kosten || []).filter((v) => v.auto_id !== autoId);
+    d.betalingen = (d.betalingen || []).filter((b) => b.auto_id !== autoId);
+    if (d.geselecteerd === autoId) {
+      d.geselecteerd = d.autos[0]?.id ?? null;
+    }
+    this._schrijf(d);
+    this._emit('deleteAuto', { autoId });
   }
 }

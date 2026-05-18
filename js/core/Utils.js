@@ -351,7 +351,7 @@ export class Utils {
 
     const brandstofKosten = (tankbeurten || []).reduce((s, t) => s + (Number(t?.totaal) || 0), 0);
 
-    // Zoek het oudste datum-item om de periode-spanne te bepalen.
+    // Zoek de periode (oudste activiteit → vandaag).
     let oudste = null;
     const verzamel = (arr) => {
       for (const it of (arr || [])) {
@@ -362,25 +362,34 @@ export class Utils {
     verzamel(ritten);
     verzamel(tankbeurten);
 
-    const nu = Date.now();
-    let maanden = 1;
-    if (oudste !== null) {
-      const oud = new Date(oudste);
-      const huidig = new Date(nu);
-      const verschilMnd = (huidig.getFullYear() - oud.getFullYear()) * 12
-        + (huidig.getMonth() - oud.getMonth());
-      maanden = Math.max(1, verschilMnd + 1);
-    }
+    const nu = new Date();
+    const periodeStart = oudste !== null ? new Date(oudste) : nu;
+
+    // Som vaste kosten alleen voor de maanden waarin ze actief waren binnen
+    // de periode (respecteer start_datum / eind_datum).
+    const monthsBetween = (a, b) =>
+      Math.max(0, (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()) + 1);
+
+    const totalePeriodeMnd = Math.max(1, monthsBetween(periodeStart, nu));
 
     let vasteTotaal = 0;
     for (const vk of (vasteKosten || [])) {
       const bedrag = Number(vk?.bedrag) || 0;
+      if (!bedrag) continue;
+      const start = vk?.start_datum ? new Date(vk.start_datum) : periodeStart;
+      const eind = vk?.eind_datum ? new Date(vk.eind_datum) : nu;
+      const actiefVanaf = start > periodeStart ? start : periodeStart;
+      const actiefTot = eind < nu ? eind : nu;
+      if (actiefVanaf > actiefTot) continue;
+      const actieveMnd = Math.max(1, monthsBetween(actiefVanaf, actiefTot));
       if (vk?.frequentie === 'maandelijks') {
-        vasteTotaal += bedrag * maanden;
+        vasteTotaal += bedrag * actieveMnd;
       } else if (vk?.frequentie === 'jaarlijks') {
-        vasteTotaal += bedrag * (maanden / 12);
+        vasteTotaal += bedrag * (actieveMnd / 12);
       }
     }
+    // (totalePeriodeMnd wordt impliciet gerespecteerd via actieveMnd ≤ totalePeriodeMnd)
+    void totalePeriodeMnd;
 
     return (brandstofKosten + vasteTotaal) / km;
   }

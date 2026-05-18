@@ -152,7 +152,9 @@ export class AfrekenController {
     const auto = this._db.getGeselecteerdeAuto();
     if (!auto) return;
     const saldo = Number(this._huidigSaldo || 0);
-    if (Math.abs(saldo) < 0.005) {
+    // Drempel ≥ 1 cent — voorkomt dat een herhaalde klik tijdens rounding-rest
+    // mini-betalingen blijft registreren.
+    if (Math.abs(saldo) < 0.01) {
       Utils.toast('Niets te verrekenen', 'info');
       this._sluit();
       return;
