@@ -164,6 +164,66 @@
   animation: pijl-bob 1.2s ease-in-out infinite;
 }
 
+/* ── INSTALL STAPPEN MODAL — platform-tabs ───────── */
+.install-stappen-sheet {
+  text-align: left;
+}
+
+.install-platform-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: var(--surface);
+  border-radius: 100px;
+  padding: 4px;
+  margin: 16px 0 18px;
+}
+
+.install-platform-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 100px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tekst-zwak);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.install-platform-tab:hover {
+  color: var(--tekst);
+}
+
+.install-platform-tab.actief {
+  background: var(--bg-elev);
+  color: var(--tekst);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.install-platform-tab svg {
+  flex-shrink: 0;
+}
+
+.install-stappen-paneel {
+  margin-bottom: 20px;
+}
+
+.install-stappen-paneel.hidden {
+  display: none;
+}
+
+.install-stappen-sheet .btn-form-primary {
+  width: 100%;
+}
+
 /* ── Later-knop ──────────────────────────── */
 .install-later {
   background: none;

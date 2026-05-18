@@ -15,35 +15,7 @@
     <div class="install-titel">Installeer Vroom als app</div>
     <div class="install-sub">Voeg Vroom toe aan je beginscherm voor de snelste ervaring — ook offline beschikbaar.</div>
 
-    <!-- Android: directe installatieknop -->
-    <div id="install-android-sectie" class="install-sectie hidden">
-      <button id="pwa-install-btn" class="install-primaire-btn">Toevoegen aan beginscherm</button>
-    </div>
-
-    <!-- iOS: stap-voor-stap instructies -->
-    <div id="install-ios-sectie" class="install-sectie hidden">
-      <ol class="install-stappen">
-        <li>
-          <span class="install-stap-nr">1</span>
-          <span>Tik op het <strong>Deel</strong>-icoon
-            <svg class="install-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v9M9 5l3-3 3 3"/><rect x="3" y="11" width="18" height="10" rx="2"/>
-            </svg>
-            onderaan je scherm
-          </span>
-        </li>
-        <li>
-          <span class="install-stap-nr">2</span>
-          <span>Kies <strong>'Zet op beginscherm'</strong></span>
-        </li>
-        <li>
-          <span class="install-stap-nr">3</span>
-          <span>Tik op <strong>'Voeg toe'</strong></span>
-        </li>
-      </ol>
-      <div class="install-pijl">▼</div>
-    </div>
-
+    <button id="pwa-install-btn" class="install-primaire-btn">Toevoegen aan beginscherm</button>
     <button class="install-later" id="install-later">Misschien later</button>
   </div>
 </div>

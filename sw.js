@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v60';
+const CACHE = 'tanklog-v61';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -65,6 +65,7 @@ const ASSETS = [
   '/partials/modals/rit-splitsen.partial',
   '/partials/modals/bevestigen.partial',
   '/partials/modals/afrekenen.partial',
+  '/partials/modals/install-stappen.partial',
   '/partials/sheets/vaste-kost.partial',
   '/js/services/GeoService.js',
   '/js/services/MapController.js',

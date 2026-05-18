@@ -597,30 +597,63 @@ export class App {
       document.getElementById('install-overlay-bd')?.addEventListener('click', sluit, { once: true });
       window.addEventListener('appinstalled', sluit, { once: true });
 
-      if (isIos) {
-        document.getElementById('install-ios-sectie')?.classList.remove('hidden');
-      } else {
-        document.getElementById('install-android-sectie')?.classList.remove('hidden');
-        let deferredPrompt = null;
+      // Android: capture native install-prompt zodra browser hem aanbiedt.
+      let deferredPrompt = null;
+      if (!isIos) {
         window.addEventListener('beforeinstallprompt', (e) => {
           e.preventDefault();
           deferredPrompt = e;
         }, { once: true });
-
-        document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-            deferredPrompt = null;
-          } else {
-            Utils.toast('Gebruik het menu van je browser → "Toevoegen aan beginscherm"');
-          }
-          sluit();
-        }, { once: true });
       }
+
+      document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
+        // Android met native prompt beschikbaar → direct prompten.
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          sluit();
+          return;
+        }
+        // iOS, of Android zonder native prompt → toon stappen-modal.
+        this._toonInstallStappen(isIos ? 'ios' : 'android');
+        sluit();
+      }, { once: true });
 
       overlay.classList.remove('hidden');
     });
+  }
+
+  /** Toon de modal met platform-specifieke install-stappen. */
+  _toonInstallStappen(actiefPlatform = 'ios') {
+    const modal = document.getElementById('modal-install-stappen');
+    if (!modal) return;
+
+    const wisselPlatform = (platform) => {
+      modal.querySelectorAll('.install-platform-tab').forEach((tab) => {
+        const aan = tab.dataset.platform === platform;
+        tab.classList.toggle('actief', aan);
+        tab.setAttribute('aria-selected', aan ? 'true' : 'false');
+      });
+      modal.querySelectorAll('.install-stappen-paneel').forEach((p) => {
+        p.classList.toggle('hidden', p.dataset.paneel !== platform);
+      });
+    };
+    wisselPlatform(actiefPlatform);
+
+    modal.querySelectorAll('.install-platform-tab').forEach((tab) => {
+      tab.addEventListener('click', () => wisselPlatform(tab.dataset.platform));
+    });
+
+    const sluitModal = () => {
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+    };
+    document.getElementById('install-stappen-sluit')?.addEventListener('click', sluitModal, { once: true });
+    document.getElementById('install-stappen-backdrop')?.addEventListener('click', sluitModal, { once: true });
+
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
   }
 
   // ── Snelle auto-wissel ────────────────────────────────────────────────────
