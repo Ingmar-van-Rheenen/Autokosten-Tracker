@@ -59,17 +59,17 @@ export class OnderhoudController {
     }
 
     const auto = this._db.getGeselecteerdeAuto();
-    const d = this._db.load();
-    if (!d.onderhoud) d.onderhoud = [];
-    d.onderhoud.unshift({
-      id: Utils.uid(),
-      auto_id: auto?.id,
-      datum: new Date().toISOString(),
+    if (!auto) {
+      Utils.toast('Selecteer eerst een auto.', 'err');
+      return;
+    }
+
+    this._db.addOnderhoud({
+      auto_id: auto.id,
       type,
-      kosten: parseFloat(kosten.toFixed(2)),
+      kosten,
       opmerking,
     });
-    this._db.save(d);
 
     document.getElementById('ond-kosten').value = '';
     document.getElementById('ond-opmerking').value = '';
@@ -94,9 +94,7 @@ export class OnderhoudController {
   }
 
   _verwijder(id) {
-    const d = this._db.load();
-    d.onderhoud = (d.onderhoud || []).filter((o) => o.id !== id);
-    this._db.save(d);
+    this._db.deleteOnderhoud(id);
     this.render();
     Utils.toast('Verwijderd');
   }

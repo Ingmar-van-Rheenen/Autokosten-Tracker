@@ -35,14 +35,14 @@ export class BottomSheetController {
 
     const { saldo } = Utils.berekenSaldo(ritten, tank, auto);
 
-    // KM + kosten deze maand
-    const kml = auto.km_per_liter ?? 1;
-    const prijs = auto.prijs_per_liter ?? 0;
+    // KM + kosten deze maand — defaults matchen Utils.berekenSaldo
     const nu = new Date();
     const maandStart = new Date(nu.getFullYear(), nu.getMonth(), 1).toISOString();
     const rittenMaand = ritten.filter((r) => r.datum >= maandStart);
     const kmMaand = rittenMaand.reduce((s, r) => s + r.km, 0);
-    const kostenMaand = (kmMaand / kml) * prijs;
+    const kostenMaand = auto.type === 'elektrisch'
+      ? (kmMaand / 100) * (auto.kwh_per_100km || 15) * (auto.prijs_per_kwh || 0.25)
+      : (kmMaand / (auto.km_per_liter || 14)) * (auto.prijs_per_liter || 2.10);
 
     const saldoEl = document.getElementById('bs-q-saldo');
     const kmEl = document.getElementById('bs-q-km');

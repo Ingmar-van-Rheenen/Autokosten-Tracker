@@ -384,7 +384,9 @@ export class RitController {
     const tank = this._db.getAutoTankbeurten(auto.id);
     const kosten = auto.type === 'elektrisch'
       ? (this._ritKm / 100) * (auto.kwh_per_100km || 15) * (auto.prijs_per_kwh || 0.25)
-      : (this._ritKm / (auto.km_per_liter || 1)) * (auto.prijs_per_liter || 0);
+      // Default 14 km/L hier matched Utils.berekenSaldo — eerdere 'fallback 1'
+      // inflateerde de live-kosten ~14× bij een misgeconfigureerde auto.
+      : (this._ritKm / (auto.km_per_liter || 14)) * (auto.prijs_per_liter || 2.10);
     const { saldo: saldoBase } = Utils.berekenSaldo(ritten, tank, auto);
     const saldo = saldoBase - kosten;
 

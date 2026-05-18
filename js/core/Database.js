@@ -284,6 +284,37 @@ export class Database {
     return (d.onderhoud || []).filter((o) => o.auto_id === autoId);
   }
 
+  addOnderhoud(o) {
+    if (!o || typeof o !== 'object') return;
+    if (!o.auto_id) return;
+    const kosten = Number(o.kosten);
+    if (!(kosten > 0)) return;
+    const d = this.load();
+    const compleet = {
+      id: o.id ?? Utils.uid(),
+      auto_id: o.auto_id,
+      datum: o.datum ?? new Date().toISOString(),
+      type: o.type ?? 'overig',
+      kosten: parseFloat(kosten.toFixed(2)),
+      opmerking: typeof o.opmerking === 'string' ? o.opmerking : '',
+    };
+    d.onderhoud = d.onderhoud || [];
+    d.onderhoud.unshift(compleet);
+    this._schrijf(d);
+    this._emit('addOnderhoud', compleet);
+  }
+
+  deleteOnderhoud(id) {
+    if (!id) return;
+    const d = this.load();
+    d.onderhoud = d.onderhoud || [];
+    const voor = d.onderhoud.length;
+    d.onderhoud = d.onderhoud.filter((o) => o.id !== id);
+    if (d.onderhoud.length === voor) return;
+    this._schrijf(d);
+    this._emit('deleteOnderhoud', { id });
+  }
+
   // ── Vaste kosten (NEW v3) ──────────────────────────────────────────────────
 
   getAutoVasteKosten(autoId) {
