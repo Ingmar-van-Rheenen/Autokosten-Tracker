@@ -100,6 +100,7 @@
   border: none;
   border-radius: 100px;
   padding: 15px 24px;
+  margin-bottom: 12px;
   font-family: var(--mono);
   font-size: 0.78rem;
   letter-spacing: 0.07em;

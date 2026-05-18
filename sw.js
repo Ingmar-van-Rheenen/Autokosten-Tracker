@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v61';
+const CACHE = 'tanklog-v62';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
