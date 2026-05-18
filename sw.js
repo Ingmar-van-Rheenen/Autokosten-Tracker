@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v52';
+const CACHE = 'tanklog-v53';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -107,7 +107,7 @@ const ASSETS = [
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
   'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
-  'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;600&display=swap',
+  // Google Fonts CSS bewust NIET in precache — laat de browser cachen.
 ];
 
 // ── Installatie: pre-cache alle app-bestanden ─────────────────────────────────
@@ -189,23 +189,12 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Cross-origin fonts (fonts.gstatic.com) — opaque responses, cache-first.
-  // Belangrijk: niet via cache.match() halen want de woff2-files staan
-  // niet in onze precache; doe stale-while-revalidate met no-cors.
+  // Google Fonts (fonts.gstatic.com + fonts.googleapis.com) NIET intercepten —
+  // de browser's HTTP-cache + `font-display: swap` fallback regelen het beter.
+  // Eerdere SW-handlers cachten opaque-responses die soms terugkwamen als 503
+  // ('OTS parsing error') waardoor de fonts visueel kapot bleven; door hier
+  // niet `e.respondWith` aan te roepen gaat het request direct naar het netwerk.
   if (url.hostname === 'fonts.gstatic.com' || url.hostname === 'fonts.googleapis.com') {
-    e.respondWith(
-      caches.open(CACHE).then((cache) =>
-        cache.match(req).then((cached) => {
-          const netwerk = fetch(req).then((resp) => {
-            if (resp && (resp.status === 200 || resp.type === 'opaque')) {
-              cache.put(req, resp.clone()).catch(() => { });
-            }
-            return resp;
-          }).catch(() => null);
-          return cached || netwerk || fetch(req);
-        })
-      ).catch(() => fetch(req))
-    );
     return;
   }
 
