@@ -417,6 +417,15 @@ export class AutoManager {
     this._onSnelleWissel?.();
   }
 
+  /** Publieke variant zonder mobile-UI cleanup — voor de desktop-modal. */
+  kiesAutoSnel(id) {
+    const d = this._db.load();
+    if (d.geselecteerd === id) return;
+    d.geselecteerd = id;
+    this._db.save(d);
+    this._onSnelleWissel?.();
+  }
+
   _kiesAuto(id) {
     const d = this._db.load();
     d.geselecteerd = id;

@@ -104,6 +104,52 @@ export class DesktopModals {
     setTimeout(() => document.getElementById('desk-vk-label')?.focus(), 220);
   }
 
+  openAutoWissel(onKies, onToevoegen) {
+    const d = this._db.load();
+    const lijst = document.getElementById('desk-auto-lijst');
+    if (!lijst) return;
+
+    if (!d.autos.length) {
+      lijst.innerHTML = '<li class="desk-auto-item" style="cursor:default;justify-content:center;color:var(--txt-dark-m)">Nog geen auto\'s</li>';
+    } else {
+      lijst.innerHTML = d.autos.map((a) => {
+        const sub = a.type === 'elektrisch'
+          ? `${a.kwh_per_100km ?? '—'} kWh/100km`
+          : `1 op ${a.km_per_liter ?? '—'}`;
+        const merk = a.merk ? `${this._esc(a.merk)} · ` : '';
+        return `
+          <li class="desk-auto-item ${a.id === d.geselecteerd ? 'actief' : ''}" data-id="${a.id}">
+            <span class="desk-auto-emoji">${a.emoji || '🚗'}</span>
+            <div class="desk-auto-info">
+              <div class="desk-auto-naam">${this._esc(a.naam)}</div>
+              <div class="desk-auto-sub">${merk}${sub}</div>
+            </div>
+            ${a.id === d.geselecteerd ? '<span class="desk-auto-vinkje">✓</span>' : ''}
+          </li>`;
+      }).join('');
+    }
+
+    lijst.querySelectorAll('.desk-auto-item[data-id]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const id = el.dataset.id;
+        this._sluit();
+        if (typeof onKies === 'function') onKies(id);
+      });
+    });
+
+    const addBtn = document.getElementById('desk-auto-toevoegen');
+    if (addBtn) {
+      const nieuwAddBtn = addBtn.cloneNode(true);
+      addBtn.replaceWith(nieuwAddBtn);
+      nieuwAddBtn.addEventListener('click', () => {
+        this._sluit();
+        if (typeof onToevoegen === 'function') onToevoegen();
+      });
+    }
+
+    this._toon('desk-modal-auto');
+  }
+
   openWidgets(huidigeKeuze, totale, onSave) {
     const lijst = document.getElementById('desk-widgets-toggles');
     if (!lijst) return;
@@ -349,6 +395,14 @@ export class DesktopModals {
     const el = document.getElementById(id);
     if (!el) return;
     el.value = v ?? '';
+  }
+
+  _esc(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 }
 

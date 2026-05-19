@@ -184,6 +184,32 @@
 </div>
 
 
+<!-- ── Modal: auto wisselen (desktop) ─────────────────────────────────── -->
+<div id="desk-modal-auto" class="desk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="desk-auto-titel">
+  <div class="desk-modal-bd" data-sluit></div>
+  <div class="desk-modal-paneel" role="document">
+    <header class="desk-modal-kop">
+      <div>
+        <div class="desk-modal-chip">AUTO</div>
+        <h2 id="desk-auto-titel" class="desk-modal-titel">Kies een auto</h2>
+      </div>
+      <button class="desk-modal-sluit" type="button" data-sluit aria-label="Sluit">✕</button>
+    </header>
+
+    <div class="desk-modal-body">
+      <ul class="desk-auto-lijst" id="desk-auto-lijst">
+        <!-- ingevuld door DesktopModals.js -->
+      </ul>
+    </div>
+
+    <footer class="desk-modal-voet">
+      <button type="button" class="desk-btn desk-btn-secundair" data-sluit>Annuleer</button>
+      <button type="button" class="desk-btn desk-btn-primair" id="desk-auto-toevoegen">+ Nieuwe auto</button>
+    </footer>
+  </div>
+</div>
+
+
 <!-- ── Modal: widget-customizer ───────────────────────────────────────── -->
 <div id="desk-modal-widgets" class="desk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="desk-widgets-titel">
   <div class="desk-modal-bd" data-sluit></div>

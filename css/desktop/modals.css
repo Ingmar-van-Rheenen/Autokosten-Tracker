@@ -123,7 +123,7 @@
 
 /* ── BODY ────────────────────────────────────────────────────────────── */
 .desk-modal-body {
-  padding: 22px 24px 4px;
+  padding: 22px 24px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -374,6 +374,69 @@
 .desk-toggle-naam {
   font-family: var(--sans);
   color: var(--txt-dark);
+}
+
+/* ── AUTO-WISSELEN LIJST ────────────────────────────────────────────── */
+.desk-auto-lijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.desk-auto-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.desk-auto-item:hover {
+  border-color: var(--green-lite);
+  transform: translateY(-1px);
+}
+.desk-auto-item.actief {
+  background: rgba(122, 184, 122, 0.08);
+  border-color: var(--green-lite);
+}
+
+.desk-auto-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.desk-auto-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.desk-auto-naam {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.94rem;
+  color: var(--txt-dark);
+  margin-bottom: 2px;
+}
+
+.desk-auto-sub {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--txt-dark-m);
+}
+
+.desk-auto-vinkje {
+  color: var(--green-lite);
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 /* iOS-stijl tuimelschakelaar */
