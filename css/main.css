@@ -48,6 +48,7 @@
 
 /* ── 6. DESKTOP DASHBOARD (≥1280px) ──────────────────────────────── */
 @import './desktop/layout.css';
+@import './desktop/modals.css';
 @import './desktop/widgets/saldo.css';
 @import './desktop/widgets/trend.css';
 @import './desktop/widgets/mini-lijst.css';
