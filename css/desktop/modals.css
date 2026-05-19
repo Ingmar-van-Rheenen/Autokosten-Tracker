@@ -1,0 +1,468 @@
+/* ── DESKTOP MODALS ────────────────────────────────────────────────────────
+   Eigen modal-stack voor het desktop-dashboard. Mobiele bottom-sheets
+   gebruiken cream achtergrond en zitten onderaan vastgeplakt; desktop
+   modals zijn dark, gecentreerd, en hebben hover/focus states die op
+   pointer-input zijn afgestemd.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.desk-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.desk-modal.hidden {
+  display: none;
+}
+
+.desk-modal-bd {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 20, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  animation: desk-modal-bd-in 0.18s ease-out forwards;
+  cursor: pointer;
+}
+
+@keyframes desk-modal-bd-in {
+  to { opacity: 1; }
+}
+
+.desk-modal-paneel {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 88vh;
+  background: var(--dark-2);
+  border: 1px solid var(--dark-border);
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+  animation: desk-modal-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) 0.04s forwards;
+  color: var(--txt-dark);
+}
+
+@keyframes desk-modal-in {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Sluit-animatie wordt door JS getriggerd via .uit klasse */
+.desk-modal.uit .desk-modal-bd {
+  animation: desk-modal-bd-uit 0.18s ease-in forwards;
+}
+.desk-modal.uit .desk-modal-paneel {
+  animation: desk-modal-uit 0.18s ease-in forwards;
+}
+@keyframes desk-modal-bd-uit {
+  to { opacity: 0; }
+}
+@keyframes desk-modal-uit {
+  to { opacity: 0; transform: translateY(6px) scale(0.985); }
+}
+
+/* ── KOP ─────────────────────────────────────────────────────────────── */
+.desk-modal-kop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.desk-modal-chip {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 3px 10px 2px;
+  border-radius: 100px;
+  border: 1px solid rgba(122, 184, 122, 0.4);
+  background: rgba(122, 184, 122, 0.1);
+  color: var(--green-lite);
+  margin-bottom: 8px;
+}
+
+.desk-modal-titel {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--txt-dark);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.desk-modal-sluit {
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  color: var(--txt-dark);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+.desk-modal-sluit:hover {
+  background: var(--dark-border);
+}
+
+/* ── BODY ────────────────────────────────────────────────────────────── */
+.desk-modal-body {
+  padding: 22px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.desk-form-veld {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.desk-form-lbl {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--txt-dark-m);
+}
+
+.desk-form-input {
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  color: var(--txt-dark);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.desk-form-input:focus {
+  outline: none;
+  border-color: var(--green-lite);
+  box-shadow: 0 0 0 3px rgba(122, 184, 122, 0.18);
+}
+
+.desk-form-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: var(--sans);
+}
+
+.desk-form-rij {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* ── RADIO BLOK (voor frequentie) ───────────────────────────────────── */
+.desk-radio-blok {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.desk-radio-blok:hover {
+  border-color: var(--green-lite);
+}
+.desk-radio-blok input {
+  accent-color: var(--green);
+}
+.desk-radio-blok:has(input:checked) {
+  background: rgba(122, 184, 122, 0.1);
+  border-color: var(--green-lite);
+}
+
+/* ── TOTAAL-RIJ (tank-modal) ────────────────────────────────────────── */
+.desk-totaal-rij {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding: 12px 14px;
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 10px;
+}
+
+.desk-totaal-val {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--green-lite);
+}
+
+/* ── VOET / KNOPPEN ─────────────────────────────────────────────────── */
+.desk-modal-voet {
+  display: flex;
+  gap: 10px;
+  padding: 18px 24px 22px;
+  justify-content: flex-end;
+  border-top: 1px solid var(--dark-border);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.desk-modal-voet-3 {
+  justify-content: space-between;
+}
+
+.desk-btn {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+}
+.desk-btn:active {
+  transform: scale(0.97);
+}
+
+.desk-btn-primair {
+  background: var(--green);
+  color: var(--white);
+}
+.desk-btn-primair:hover {
+  background: var(--green-2, #6ba76b);
+}
+
+.desk-btn-secundair {
+  background: transparent;
+  color: var(--txt-dark-m);
+  border-color: var(--dark-border);
+}
+.desk-btn-secundair:hover {
+  color: var(--txt-dark);
+  border-color: var(--txt-dark-m);
+}
+
+.desk-btn-gevaar {
+  background: transparent;
+  color: #e07070;
+  border-color: rgba(224, 112, 112, 0.4);
+}
+.desk-btn-gevaar:hover {
+  background: rgba(224, 112, 112, 0.1);
+  border-color: #e07070;
+}
+
+.desk-btn.hidden {
+  display: none;
+}
+
+/* ── WIDGET-CUSTOMIZER ──────────────────────────────────────────────── */
+.desk-widgets-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.desk-widgets-preset-rij {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.desk-preset-knop {
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  color: var(--txt-dark);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.desk-preset-knop:hover {
+  border-color: var(--green-lite);
+  transform: translateY(-1px);
+}
+.desk-preset-knop.actief {
+  border-color: var(--green-lite);
+  background: rgba(122, 184, 122, 0.08);
+}
+
+.desk-preset-titel {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.desk-preset-sub {
+  font-size: 0.7rem;
+  color: var(--txt-dark-m);
+}
+
+.desk-widgets-handmatig {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--dark-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.desk-widgets-toggles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.desk-widget-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 10px;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.desk-widget-toggle:hover {
+  border-color: var(--green-lite);
+}
+.desk-widget-toggle.aan {
+  background: rgba(122, 184, 122, 0.08);
+  border-color: var(--green-lite);
+}
+
+.desk-toggle-naam {
+  font-family: var(--sans);
+  color: var(--txt-dark);
+}
+
+/* ── AUTO-WISSELEN LIJST ────────────────────────────────────────────── */
+.desk-auto-lijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.desk-auto-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--dark-3);
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.desk-auto-item:hover {
+  border-color: var(--green-lite);
+  transform: translateY(-1px);
+}
+.desk-auto-item.actief {
+  background: rgba(122, 184, 122, 0.08);
+  border-color: var(--green-lite);
+}
+
+.desk-auto-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.desk-auto-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.desk-auto-naam {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.94rem;
+  color: var(--txt-dark);
+  margin-bottom: 2px;
+}
+
+.desk-auto-sub {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--txt-dark-m);
+}
+
+.desk-auto-vinkje {
+  color: var(--green-lite);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* iOS-stijl tuimelschakelaar */
+.desk-toggle-knop {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  background: var(--dark-border);
+  border-radius: 100px;
+  transition: background 0.18s ease;
+  flex-shrink: 0;
+}
+.desk-toggle-knop::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--white);
+  transition: transform 0.18s ease;
+}
+.desk-widget-toggle.aan .desk-toggle-knop {
+  background: var(--green);
+}
+.desk-widget-toggle.aan .desk-toggle-knop::after {
+  transform: translateX(16px);
+}

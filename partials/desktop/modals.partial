@@ -1,0 +1,257 @@
+<!-- ── DESKTOP MODALS ─────────────────────────────────────────────────────────
+     Eigen modal-stack voor desktop-acties (rit / tankbeurt / vaste kost).
+     Onafhankelijk van de mobiele sheets — gecentreerd, met fade-in backdrop
+     en escape-toets ondersteuning. Bediend door js/desktop/DesktopModals.js
+     ─────────────────────────────────────────────────────────────────────── -->
+
+<!-- ── Modal: handmatige rit toevoegen ─────────────────────────────────── -->
+<div id="desk-modal-rit" class="desk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="desk-rit-titel">
+  <div class="desk-modal-bd" data-sluit></div>
+  <div class="desk-modal-paneel" role="document">
+    <header class="desk-modal-kop">
+      <div>
+        <div class="desk-modal-chip">NIEUWE RIT</div>
+        <h2 id="desk-rit-titel" class="desk-modal-titel">Rit toevoegen</h2>
+      </div>
+      <button class="desk-modal-sluit" type="button" data-sluit aria-label="Sluit">✕</button>
+    </header>
+
+    <div class="desk-modal-body">
+      <div class="desk-form-rij">
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">Datum</span>
+          <input type="date" id="desk-rit-datum" class="desk-form-input" />
+        </label>
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">Tijd (optioneel)</span>
+          <input type="time" id="desk-rit-tijd" class="desk-form-input" />
+        </label>
+      </div>
+
+      <label class="desk-form-veld">
+        <span class="desk-form-lbl">Afstand (km)</span>
+        <input type="number" step="0.1" min="0" id="desk-rit-km" class="desk-form-input" placeholder="bijv. 47.3" />
+      </label>
+
+      <label class="desk-form-veld">
+        <span class="desk-form-lbl">Bestemming (optioneel)</span>
+        <input type="text" id="desk-rit-bestemming" class="desk-form-input" placeholder="bijv. Utrecht" />
+      </label>
+
+      <label class="desk-form-veld">
+        <span class="desk-form-lbl">KM-stand (optioneel)</span>
+        <input type="number" min="0" id="desk-rit-kmstand" class="desk-form-input" placeholder="bijv. 124500" />
+      </label>
+
+      <label class="desk-form-veld">
+        <span class="desk-form-lbl">Notitie (optioneel)</span>
+        <textarea id="desk-rit-notitie" class="desk-form-input desk-form-textarea" rows="2" placeholder="bijv. Familiebezoek"></textarea>
+      </label>
+    </div>
+
+    <footer class="desk-modal-voet">
+      <button type="button" class="desk-btn desk-btn-secundair" data-sluit>Annuleer</button>
+      <button type="button" class="desk-btn desk-btn-primair" id="desk-rit-opslaan">Rit opslaan</button>
+    </footer>
+  </div>
+</div>
+
+
+<!-- ── Modal: tankbeurt / laadbeurt toevoegen ──────────────────────────── -->
+<div id="desk-modal-tank" class="desk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="desk-tank-titel">
+  <div class="desk-modal-bd" data-sluit></div>
+  <div class="desk-modal-paneel" role="document">
+    <header class="desk-modal-kop">
+      <div>
+        <div class="desk-modal-chip" id="desk-tank-chip">NIEUWE TANKBEURT</div>
+        <h2 id="desk-tank-titel" class="desk-modal-titel">Tankbeurt toevoegen</h2>
+      </div>
+      <button class="desk-modal-sluit" type="button" data-sluit aria-label="Sluit">✕</button>
+    </header>
+
+    <div class="desk-modal-body">
+      <div class="desk-form-rij">
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">Datum</span>
+          <input type="date" id="desk-tank-datum" class="desk-form-input" />
+        </label>
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl" id="desk-tank-lbl-liters">Liters</span>
+          <input type="number" step="0.01" min="0" id="desk-tank-liters" class="desk-form-input" placeholder="bijv. 35.4" />
+        </label>
+      </div>
+
+      <div class="desk-form-rij">
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl" id="desk-tank-lbl-prijs">Prijs per liter (€)</span>
+          <input type="number" step="0.001" min="0" id="desk-tank-prijs" class="desk-form-input" placeholder="bijv. 2.10" />
+        </label>
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">KM-stand (optioneel)</span>
+          <input type="number" min="0" id="desk-tank-kmstand" class="desk-form-input" />
+        </label>
+      </div>
+
+      <label class="desk-form-veld">
+        <span class="desk-form-lbl">Notitie (optioneel)</span>
+        <input type="text" id="desk-tank-notitie" class="desk-form-input" placeholder="bijv. snelweg" />
+      </label>
+
+      <div class="desk-totaal-rij">
+        <span class="desk-form-lbl">Totaal</span>
+        <span class="desk-totaal-val" id="desk-tank-totaal">€ —</span>
+      </div>
+    </div>
+
+    <footer class="desk-modal-voet">
+      <button type="button" class="desk-btn desk-btn-secundair" data-sluit>Annuleer</button>
+      <button type="button" class="desk-btn desk-btn-primair" id="desk-tank-opslaan">Tankbeurt opslaan</button>
+    </footer>
+  </div>
+</div>
+
+
+<!-- ── Modal: vaste kost (nieuw of bewerken) ──────────────────────────── -->
+<div id="desk-modal-vk" class="desk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="desk-vk-titel">
+  <div class="desk-modal-bd" data-sluit></div>
+  <div class="desk-modal-paneel" role="document">
+    <header class="desk-modal-kop">
+      <div>
+        <div class="desk-modal-chip">VASTE KOST</div>
+        <h2 id="desk-vk-titel" class="desk-modal-titel">Vaste kost toevoegen</h2>
+      </div>
+      <button class="desk-modal-sluit" type="button" data-sluit aria-label="Sluit">✕</button>
+    </header>
+
+    <div class="desk-modal-body">
+      <label class="desk-form-veld">
+        <span class="desk-form-lbl">Naam</span>
+        <input type="text" id="desk-vk-label" class="desk-form-input" placeholder="bijv. Autoverzekering" />
+      </label>
+
+      <div class="desk-form-rij">
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">Type</span>
+          <select id="desk-vk-type" class="desk-form-input">
+            <option value="verzekering">Verzekering</option>
+            <option value="wegenbelasting">Wegenbelasting</option>
+            <option value="apk">APK</option>
+            <option value="onderhoud">Onderhoud</option>
+            <option value="parkeren">Parkeervergunning</option>
+            <option value="overig">Overig</option>
+          </select>
+        </label>
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">Bedrag (€)</span>
+          <input type="number" step="0.01" min="0" id="desk-vk-bedrag" class="desk-form-input" placeholder="bijv. 45.00" />
+        </label>
+      </div>
+
+      <div class="desk-form-rij" role="radiogroup" aria-label="Frequentie">
+        <label class="desk-radio-blok">
+          <input type="radio" name="desk-vk-freq" value="maandelijks" checked />
+          <span>Maandelijks</span>
+        </label>
+        <label class="desk-radio-blok">
+          <input type="radio" name="desk-vk-freq" value="jaarlijks" />
+          <span>Jaarlijks</span>
+        </label>
+      </div>
+
+      <div class="desk-form-rij">
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">Begindatum</span>
+          <input type="date" id="desk-vk-start" class="desk-form-input" />
+        </label>
+        <label class="desk-form-veld">
+          <span class="desk-form-lbl">Einddatum (optioneel)</span>
+          <input type="date" id="desk-vk-eind" class="desk-form-input" />
+        </label>
+      </div>
+
+      <label class="desk-form-veld">
+        <span class="desk-form-lbl">Notitie (optioneel)</span>
+        <input type="text" id="desk-vk-notitie" class="desk-form-input" placeholder="bijv. polisnummer" />
+      </label>
+    </div>
+
+    <footer class="desk-modal-voet desk-modal-voet-3">
+      <button type="button" class="desk-btn desk-btn-gevaar hidden" id="desk-vk-verwijder">Verwijder</button>
+      <button type="button" class="desk-btn desk-btn-secundair" data-sluit>Annuleer</button>
+      <button type="button" class="desk-btn desk-btn-primair" id="desk-vk-opslaan">Opslaan</button>
+    </footer>
+  </div>
+</div>
+
+
+<!-- ── Modal: auto wisselen (desktop) ─────────────────────────────────── -->
+<div id="desk-modal-auto" class="desk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="desk-auto-titel">
+  <div class="desk-modal-bd" data-sluit></div>
+  <div class="desk-modal-paneel" role="document">
+    <header class="desk-modal-kop">
+      <div>
+        <div class="desk-modal-chip">AUTO</div>
+        <h2 id="desk-auto-titel" class="desk-modal-titel">Kies een auto</h2>
+      </div>
+      <button class="desk-modal-sluit" type="button" data-sluit aria-label="Sluit">✕</button>
+    </header>
+
+    <div class="desk-modal-body">
+      <ul class="desk-auto-lijst" id="desk-auto-lijst">
+        <!-- ingevuld door DesktopModals.js -->
+      </ul>
+    </div>
+
+    <footer class="desk-modal-voet">
+      <button type="button" class="desk-btn desk-btn-secundair" data-sluit>Annuleer</button>
+      <button type="button" class="desk-btn desk-btn-primair" id="desk-auto-toevoegen">+ Nieuwe auto</button>
+    </footer>
+  </div>
+</div>
+
+
+<!-- ── Modal: widget-customizer ───────────────────────────────────────── -->
+<div id="desk-modal-widgets" class="desk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="desk-widgets-titel">
+  <div class="desk-modal-bd" data-sluit></div>
+  <div class="desk-modal-paneel" role="document">
+    <header class="desk-modal-kop">
+      <div>
+        <div class="desk-modal-chip">PERSONALISEER</div>
+        <h2 id="desk-widgets-titel" class="desk-modal-titel">Widgets aanpassen</h2>
+      </div>
+      <button class="desk-modal-sluit" type="button" data-sluit aria-label="Sluit">✕</button>
+    </header>
+
+    <div class="desk-modal-body">
+      <div class="desk-widgets-presets">
+        <span class="desk-form-lbl">Snelle layout</span>
+        <div class="desk-widgets-preset-rij">
+          <button type="button" class="desk-preset-knop" data-preset="minimaal">
+            <span class="desk-preset-titel">Minimaal</span>
+            <span class="desk-preset-sub">Alleen saldo + acties</span>
+          </button>
+          <button type="button" class="desk-preset-knop" data-preset="compleet">
+            <span class="desk-preset-titel">Compleet</span>
+            <span class="desk-preset-sub">Alles aan</span>
+          </button>
+          <button type="button" class="desk-preset-knop" data-preset="reizen">
+            <span class="desk-preset-titel">Reizen</span>
+            <span class="desk-preset-sub">Focus op km + kaart</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="desk-widgets-handmatig">
+        <span class="desk-form-lbl">Of kies handmatig</span>
+        <ul class="desk-widgets-toggles" id="desk-widgets-toggles">
+          <!-- ingevuld door DesktopModals.js -->
+        </ul>
+      </div>
+    </div>
+
+    <footer class="desk-modal-voet">
+      <button type="button" class="desk-btn desk-btn-secundair" data-sluit>Annuleer</button>
+      <button type="button" class="desk-btn desk-btn-primair" id="desk-widgets-opslaan">Opslaan</button>
+    </footer>
+  </div>
+</div>

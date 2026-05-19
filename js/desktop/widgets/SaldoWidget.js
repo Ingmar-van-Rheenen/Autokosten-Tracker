@@ -6,6 +6,7 @@ import { Utils } from '../../core/Utils.js';
 export class SaldoWidget {
   constructor(db) {
     this._db = db;
+    this._vorigeSaldo = null;
   }
 
   render(auto) {
@@ -17,10 +18,21 @@ export class SaldoWidget {
 
     const val = document.getElementById('dash-saldo-val');
     if (val) {
-      val.textContent = (saldo >= 0 ? '+ ' : '− ') + Utils.eur(saldo);
+      const nieuw = (saldo >= 0 ? '+ ' : '− ') + Utils.eur(saldo);
+      if (val.textContent !== nieuw) {
+        val.textContent = nieuw;
+        // Flash bij wijziging — niet bij allereerste paint (vorigeSaldo===null)
+        if (this._vorigeSaldo !== null && Math.abs(this._vorigeSaldo - saldo) > 0.005) {
+          val.classList.remove('widget-val-flash');
+          // eslint-disable-next-line no-unused-expressions
+          val.offsetWidth;
+          val.classList.add('widget-val-flash');
+        }
+      }
       val.classList.remove('negatief', 'neutraal');
       if (saldo < -0.005) val.classList.add('negatief');
       else if (Math.abs(saldo) <= 0.005) val.classList.add('neutraal');
+      this._vorigeSaldo = saldo;
     }
 
     const uitleg = document.getElementById('dash-saldo-uitleg');

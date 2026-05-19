@@ -160,3 +160,63 @@
 @keyframes splash-uit {
   to { opacity: 0; transform: translateY(-12px); }
 }
+
+/* ── DESKTOP — volledig scherm met grotere typografie ──────────────── */
+@media (min-width: 1280px) {
+  #screen-splash {
+    /* Subtiele radial-glow vanaf het midden — geeft 'm meer space op desktop */
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(122, 184, 122, 0.07) 0%, transparent 55%),
+      var(--dark, #1b2537);
+  }
+
+  .splash-inner {
+    /* Centreer een ruimere kolom, geef de elementen lucht */
+    max-width: 720px;
+    width: 100%;
+    padding: 0 32px;
+  }
+
+  .splash-greeting {
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+  }
+
+  .splash-title {
+    font-size: 3.4rem;
+    letter-spacing: 0.5em;
+    margin-bottom: 10px;
+  }
+
+  .splash-sub {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 56px;
+  }
+
+  .splash-stage {
+    width: 340px;
+  }
+
+  .splash-track {
+    margin-top: 32px;
+    width: 420px;
+    max-width: 90vw;
+  }
+
+  .splash-loader {
+    margin-top: 52px;
+    gap: 18px;
+  }
+
+  .splash-spinner {
+    width: 42px;
+    height: 42px;
+    border-width: 3px;
+  }
+
+  .splash-loader-text {
+    font-size: 0.78rem;
+    letter-spacing: 0.32em;
+  }
+}

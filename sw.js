@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v63';
+const CACHE = 'tanklog-v65';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -34,6 +34,7 @@ const ASSETS = [
   '/css/features/betalingen.css',
   '/css/features/afreken.css',
   '/css/desktop/layout.css',
+  '/css/desktop/modals.css',
   '/css/desktop/widgets/saldo.css',
   '/css/desktop/widgets/trend.css',
   '/css/desktop/widgets/mini-lijst.css',
@@ -56,6 +57,7 @@ const ASSETS = [
   '/partials/app/overzicht-tab.partial',
   '/partials/app/instellingen-tab.partial',
   '/partials/desktop/dashboard.partial',
+  '/partials/desktop/modals.partial',
   '/partials/overlays/changelog.partial',
   '/partials/overlays/info.partial',
   '/partials/overlays/install.partial',
@@ -90,6 +92,7 @@ const ASSETS = [
   '/js/scenes/CarScene.js',
   '/js/scenes/SplashScene.js',
   '/js/desktop/DesktopDashboard.js',
+  '/js/desktop/DesktopModals.js',
   '/js/desktop/widgets/SaldoWidget.js',
   '/js/desktop/widgets/TrendWidget.js',
   '/js/desktop/widgets/RittenWidget.js',

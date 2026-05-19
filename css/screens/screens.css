@@ -16,11 +16,12 @@
   }
 }
 
-/* Desktop breakpoint: #screen-app vult het hele scherm zodat het
-   dashboard-grid kan ontvouwen. Andere schermen (splash, intro,
-   auto-select) blijven 390px gecentreerd. */
+/* Desktop breakpoint: #screen-app + #screen-splash vullen het hele scherm.
+   Andere schermen (intro, auto-select) blijven 390px gecentreerd zodat
+   die onboardingflows hun mobiele indeling behouden. */
 @media (min-width: 1280px) {
-  #screen-app.screen {
+  #screen-app.screen,
+  #screen-splash.screen {
     left: 0;
     right: 0;
     transform: none;
