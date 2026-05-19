@@ -45,6 +45,8 @@ export class DesktopDashboard {
     this._gebonden = false;
     this._geExpanded = null;
     this._eersteRender = true;
+    this._editModus = false;
+    this._dragBron = null;
 
     this._modals = new DesktopModals(db);
 
@@ -66,14 +68,20 @@ export class DesktopDashboard {
     this._gebonden = true;
     this._bindEvents();
     this._pasZichtbaarheidToe();
+    this._pasVolgordeToe();
     this.render();
     window.addEventListener('db:updated', (e) => {
-      // Herrender alleen bij relevante mutaties. setDesktopWidgets herschikt
-      // het grid — speciaal behandelen om stagger opnieuw te laten lopen.
       const m = e?.detail?.mutator;
+      // setDesktopWidgets herschikt zichtbaarheid — re-stagger zodat
+      // verborgen widgets niet meer meedoen.
       if (m === 'setDesktopWidgets') {
         this._eersteRender = true;
         this._pasZichtbaarheidToe();
+      }
+      // setDesktopWidgetOrder past alleen volgorde aan — geen stagger
+      // (anders flashen widgets na elke drop).
+      if (m === 'setDesktopWidgetOrder') {
+        this._pasVolgordeToe();
       }
       this.render();
     });
@@ -99,11 +107,18 @@ export class DesktopDashboard {
 
   _bindEvents() {
     document.getElementById('dash-wissel-knop')?.addEventListener('click', () => {
-      this._deps.autoManager?._toonWisselPicker?.();
+      this._modals.openAutoWissel(
+        (id) => this._deps.autoManager?.kiesAutoSnel?.(id),
+        () => this._deps.autoManager?.openModal?.(),
+      );
     });
 
     document.getElementById('dash-widgets-knop')?.addEventListener('click', () => {
       this._openWidgetCustomizer();
+    });
+
+    document.getElementById('dash-edit-knop')?.addEventListener('click', () => {
+      this._toggleEditModus();
     });
 
     document.querySelectorAll('#desktop-dashboard [data-actie]').forEach((btn) => {
@@ -169,6 +184,116 @@ export class DesktopDashboard {
       w.classList.toggle('widget-verborgen', !aan);
     });
   }
+
+  /** Pas opgeslagen widget-volgorde toe via CSS order. */
+  _pasVolgordeToe() {
+    const order = this._db.getDesktopWidgetOrder() || DEFAULT_KEUZE;
+    // Bouw een index-map zodat onbekende widgets (nieuw toegevoegd in code,
+    // nog niet in opgeslagen volgorde) na de bekende komen.
+    const idx = new Map(order.map((k, i) => [k, i]));
+    let staart = order.length;
+    document.querySelectorAll('#desktop-dashboard .widget[data-widget]').forEach((w) => {
+      const k = w.dataset.widget;
+      const pos = idx.has(k) ? idx.get(k) : staart++;
+      w.style.order = String(pos);
+    });
+  }
+
+  // ── EDIT-MODUS: drag-and-drop reordering ─────────────────────────────
+  _toggleEditModus() {
+    this._editModus = !this._editModus;
+    const grid = document.getElementById('dash-grid');
+    const knop = document.getElementById('dash-edit-knop');
+    if (!grid) return;
+
+    grid.classList.toggle('edit-modus', this._editModus);
+    if (knop) {
+      knop.classList.toggle('actief', this._editModus);
+      knop.querySelector('.dash-edit-lbl').textContent = this._editModus ? 'Klaar' : 'Layout';
+    }
+
+    if (this._editModus) {
+      this._activeerDragHandlers();
+    } else {
+      this._deactiveerDragHandlers();
+    }
+  }
+
+  _activeerDragHandlers() {
+    document.querySelectorAll('#dash-grid .widget[data-widget]').forEach((w) => {
+      w.setAttribute('draggable', 'true');
+      w.addEventListener('dragstart', this._onDragStart);
+      w.addEventListener('dragend',   this._onDragEnd);
+      w.addEventListener('dragover',  this._onDragOver);
+      w.addEventListener('drop',      this._onDrop);
+      w.addEventListener('dragleave', this._onDragLeave);
+    });
+  }
+
+  _deactiveerDragHandlers() {
+    document.querySelectorAll('#dash-grid .widget[data-widget]').forEach((w) => {
+      w.removeAttribute('draggable');
+      w.removeEventListener('dragstart', this._onDragStart);
+      w.removeEventListener('dragend',   this._onDragEnd);
+      w.removeEventListener('dragover',  this._onDragOver);
+      w.removeEventListener('drop',      this._onDrop);
+      w.removeEventListener('dragleave', this._onDragLeave);
+      w.classList.remove('drag-over', 'drag-bezig');
+    });
+  }
+
+  /**
+   * Drag handlers — gebruiken arrow-functies zodat `this` blijft binden aan
+   * de DesktopDashboard-instance. Volgorde-updates worden direct in de DOM
+   * toegepast via `order`; pas bij dragend persist naar DB (vermijdt 50×
+   * setDesktopWidgetOrder + db:updated round-trips).
+   */
+  _onDragStart = (e) => {
+    const w = e.currentTarget;
+    this._dragBron = w;
+    w.classList.add('drag-bezig');
+    // Firefox vereist een dataTransfer-payload anders fires drop niet.
+    try { e.dataTransfer.setData('text/plain', w.dataset.widget); } catch {}
+    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+  };
+
+  _onDragEnd = (e) => {
+    e.currentTarget.classList.remove('drag-bezig');
+    document.querySelectorAll('#dash-grid .widget.drag-over').forEach((el) => el.classList.remove('drag-over'));
+    if (!this._dragBron) return;
+
+    // Persist huidige DOM-volgorde van zichtbare widgets naar DB
+    const nieuw = Array.from(document.querySelectorAll('#dash-grid .widget[data-widget]'))
+      .sort((a, b) => Number(a.style.order || 0) - Number(b.style.order || 0))
+      .map((el) => el.dataset.widget);
+    this._db.setDesktopWidgetOrder(nieuw);
+    this._dragBron = null;
+  };
+
+  _onDragOver = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    const doel = e.currentTarget;
+    if (!this._dragBron || doel === this._dragBron) return;
+    doel.classList.add('drag-over');
+  };
+
+  _onDragLeave = (e) => {
+    e.currentTarget.classList.remove('drag-over');
+  };
+
+  _onDrop = (e) => {
+    e.preventDefault();
+    const doel = e.currentTarget;
+    doel.classList.remove('drag-over');
+    if (!this._dragBron || doel === this._dragBron) return;
+
+    // Swap CSS order tussen bron en doel — eenvoudig en visueel direct.
+    const bronOrder = Number(this._dragBron.style.order || 0);
+    const doelOrder = Number(doel.style.order || 0);
+    this._dragBron.style.order = String(doelOrder);
+    doel.style.order = String(bronOrder);
+  };
 
   // ── EXPAND / COLLAPSE ────────────────────────────────────────────────
 

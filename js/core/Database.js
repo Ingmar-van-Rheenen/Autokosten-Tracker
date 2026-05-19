@@ -170,6 +170,22 @@ export class Database {
     this._emit('setDesktopWidgets', { widgets: d.desktop_widgets });
   }
 
+  /**
+   * Volgorde van widgets in het desktop-grid. null = default volgorde.
+   * Anders een array met widget-keys waarop CSS `order` wordt toegepast.
+   */
+  getDesktopWidgetOrder() {
+    const o = this.load().desktop_widget_order;
+    return Array.isArray(o) ? o : null;
+  }
+
+  setDesktopWidgetOrder(order) {
+    const d = this.load();
+    d.desktop_widget_order = Array.isArray(order) ? order.slice() : null;
+    this._schrijf(d);
+    this._emit('setDesktopWidgetOrder', { order: d.desktop_widget_order });
+  }
+
   // ── Auto's ─────────────────────────────────────────────────────────────────
 
   getGeselecteerdeAuto() {
@@ -484,6 +500,7 @@ export class Database {
       revolut_username: '',
       tikkie_handle: '',
       desktop_widgets: null,
+      desktop_widget_order: null,
     };
   }
 
@@ -512,6 +529,7 @@ export class Database {
     if (typeof data.revolut_username !== 'string') data.revolut_username = '';
     if (typeof data.tikkie_handle !== 'string') data.tikkie_handle = '';
     if (data.desktop_widgets !== null && !Array.isArray(data.desktop_widgets)) data.desktop_widgets = null;
+    if (data.desktop_widget_order !== null && !Array.isArray(data.desktop_widget_order)) data.desktop_widget_order = null;
 
     // Item-niveau defaults voor nieuwe v3-velden — idempotent.
     data.ritten = data.ritten.map((r) => ({

@@ -130,8 +130,9 @@
     animation: widget-flash 0.9s ease-out;
   }
 
-  /* Knop in de header voor widget-customizer */
-  .dash-widgets-knop {
+  /* Knop in de header voor widget-customizer + layout-edit */
+  .dash-widgets-knop,
+  .dash-edit-knop {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -140,14 +141,70 @@
     border-radius: 100px;
     border: 1px solid var(--dark-border);
     background: var(--dark-3);
-    transition: border-color 0.15s ease, color 0.15s ease;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
   }
-  .dash-widgets-knop:hover {
+  .dash-widgets-knop:hover,
+  .dash-edit-knop:hover {
     color: var(--green-lite);
     border-color: var(--green-lite);
   }
-  .dash-widgets-knop svg {
+  .dash-widgets-knop svg,
+  .dash-edit-knop svg {
     flex-shrink: 0;
+  }
+
+  /* Active state edit-knop — geeft duidelijk feedback dat layout-modus aan staat */
+  .dash-edit-knop.actief {
+    background: var(--green);
+    color: var(--white);
+    border-color: var(--green);
+  }
+  .dash-edit-knop.actief:hover {
+    background: var(--green-2, #6ba76b);
+    color: var(--white);
+  }
+
+  /* ── EDIT-MODUS: drag-and-drop ─────────────────────────────────────── */
+  .dash-grid.edit-modus .widget {
+    cursor: grab;
+    animation: widget-wiggle 0.6s ease-in-out infinite alternate;
+  }
+  .dash-grid.edit-modus .widget:nth-child(odd) {
+    animation-direction: alternate-reverse;
+  }
+  /* In edit-modus mag hover-lift niet conflicteren met de wiggle */
+  .dash-grid.edit-modus .widget:hover {
+    transform: none;
+    border-color: var(--green-lite);
+  }
+
+  /* In edit-modus geen klik-naar-expand-gedrag — drag heeft prioriteit */
+  .dash-grid.edit-modus .widget * {
+    pointer-events: none;
+  }
+
+  @keyframes widget-wiggle {
+    from { transform: rotate(-0.4deg); }
+    to   { transform: rotate(0.4deg); }
+  }
+
+  .widget.drag-bezig {
+    opacity: 0.35;
+    animation: none;
+    transform: scale(0.97);
+  }
+
+  .widget.drag-over {
+    border-color: var(--green-lite) !important;
+    box-shadow: 0 0 0 2px rgba(122, 184, 122, 0.35), 0 10px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Disabled-state op overige knoppen tijdens edit zodat de gebruiker
+     niet per ongeluk modals opent door op widget-acties te drukken. */
+  .dash-grid.edit-modus .widget-actie,
+  .dash-grid.edit-modus .dash-actie-knop {
+    pointer-events: none;
+    opacity: 0.5;
   }
 
   /* Widget header */

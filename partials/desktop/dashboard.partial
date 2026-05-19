@@ -12,6 +12,13 @@
       <span> · </span>
       <span id="dash-auto-merk">—</span>
       <button id="dash-wissel-knop" class="widget-actie" style="margin-left: 16px;">Wissel auto →</button>
+      <button id="dash-edit-knop" class="widget-actie dash-edit-knop" type="button" aria-label="Layout bewerken" title="Layout bewerken (sleep widgets)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 9h14M5 15h14"/>
+          <path d="M9 5l-4 4 4 4M15 11l4 4-4 4"/>
+        </svg>
+        <span class="dash-edit-lbl">Layout</span>
+      </button>
       <button id="dash-widgets-knop" class="widget-actie dash-widgets-knop" type="button" aria-label="Widgets aanpassen" title="Widgets aanpassen">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="3"/>
