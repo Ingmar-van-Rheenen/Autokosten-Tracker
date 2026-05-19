@@ -154,6 +154,22 @@ export class Database {
     this._emit('setStadiaApiKey', { key: d.stadia_api_key });
   }
 
+  /**
+   * Desktop dashboard widget-configuratie. null = default layout (alles aan).
+   * Anders een array met widget-keys die zichtbaar moeten zijn.
+   */
+  getDesktopWidgets() {
+    const w = this.load().desktop_widgets;
+    return Array.isArray(w) ? w : null;
+  }
+
+  setDesktopWidgets(widgets) {
+    const d = this.load();
+    d.desktop_widgets = Array.isArray(widgets) ? widgets.slice() : null;
+    this._schrijf(d);
+    this._emit('setDesktopWidgets', { widgets: d.desktop_widgets });
+  }
+
   // ── Auto's ─────────────────────────────────────────────────────────────────
 
   getGeselecteerdeAuto() {
@@ -467,6 +483,7 @@ export class Database {
       betaalverzoek_username: '',
       revolut_username: '',
       tikkie_handle: '',
+      desktop_widgets: null,
     };
   }
 
@@ -494,6 +511,7 @@ export class Database {
     if (typeof data.betaalverzoek_username !== 'string') data.betaalverzoek_username = '';
     if (typeof data.revolut_username !== 'string') data.revolut_username = '';
     if (typeof data.tikkie_handle !== 'string') data.tikkie_handle = '';
+    if (data.desktop_widgets !== null && !Array.isArray(data.desktop_widgets)) data.desktop_widgets = null;
 
     // Item-niveau defaults voor nieuwe v3-velden — idempotent.
     data.ritten = data.ritten.map((r) => ({

@@ -5,7 +5,9 @@
 //   - Widgets instantiëren en hun render() coordineren
 //   - Luisteren naar db:updated + thema:gewijzigd om opnieuw te renderen
 //   - Expand-in-place gedrag (klik op widget → andere widgets 0.18 opacity)
-//   - Quick-actions koppelen aan bestaande modal-flows en mobiele tabs
+//   - Quick-actions koppelen aan dedicated desktop-modals (DesktopModals)
+//   - Widget-customizer: aan/uit zetten van widgets + 3 preset-layouts
+//   - Stagger-entrance animatie + value-flash bij db-mutaties
 import { SaldoWidget } from './widgets/SaldoWidget.js';
 import { TrendWidget } from './widgets/TrendWidget.js';
 import { RittenWidget } from './widgets/RittenWidget.js';
@@ -15,9 +17,26 @@ import { StatsWidget } from './widgets/StatsWidget.js';
 import { KaartWidget } from './widgets/KaartWidget.js';
 import { QuickActionsWidget } from './widgets/QuickActionsWidget.js';
 import { ThemaWidget } from './widgets/ThemaWidget.js';
+import { DesktopModals } from './DesktopModals.js';
 
 /** Widgets die uitklapbaar zijn (klik op de tegel opent expand-in-place). */
 const EXPANDABLE = ['ritten', 'tank', 'vk', 'kaart'];
+
+/** Volgorde + meta van alle widgets — wordt gebruikt door de customizer. */
+const WIDGET_META = [
+  { key: 'saldo',   label: 'Saldo (hero)'         },
+  { key: 'trend',   label: 'Trend grafiek'        },
+  { key: 'ritten',  label: 'Recente ritten'       },
+  { key: 'tank',    label: 'Recente tankbeurten'  },
+  { key: 'vk',      label: 'Vaste kosten'         },
+  { key: 'stats',   label: 'Auto-stats'           },
+  { key: 'kaart',   label: 'Kaart-thumbnail'      },
+  { key: 'actions', label: 'Snelle acties'        },
+  { key: 'themas',  label: 'Thema-switcher'       },
+];
+
+/** Default-set wanneer er nog geen voorkeur is opgeslagen. */
+const DEFAULT_KEUZE = WIDGET_META.map((w) => w.key);
 
 export class DesktopDashboard {
   constructor(db, deps) {
@@ -25,6 +44,9 @@ export class DesktopDashboard {
     this._deps = deps;
     this._gebonden = false;
     this._geExpanded = null;
+    this._eersteRender = true;
+
+    this._modals = new DesktopModals(db);
 
     this._widgets = {
       saldo: new SaldoWidget(db),
@@ -43,8 +65,18 @@ export class DesktopDashboard {
     if (this._gebonden) return;
     this._gebonden = true;
     this._bindEvents();
+    this._pasZichtbaarheidToe();
     this.render();
-    window.addEventListener('db:updated', () => this.render());
+    window.addEventListener('db:updated', (e) => {
+      // Herrender alleen bij relevante mutaties. setDesktopWidgets herschikt
+      // het grid — speciaal behandelen om stagger opnieuw te laten lopen.
+      const m = e?.detail?.mutator;
+      if (m === 'setDesktopWidgets') {
+        this._eersteRender = true;
+        this._pasZichtbaarheidToe();
+      }
+      this.render();
+    });
     window.addEventListener('thema:gewijzigd', () => this._widgets.themas.render());
   }
 
@@ -57,6 +89,10 @@ export class DesktopDashboard {
     }
     this._renderHeader(auto);
     Object.values(this._widgets).forEach((w) => w.render(auto));
+    if (this._eersteRender) {
+      this._staggerEntrance();
+      this._eersteRender = false;
+    }
   }
 
   // ── EVENTS ───────────────────────────────────────────────────────────
@@ -64,6 +100,10 @@ export class DesktopDashboard {
   _bindEvents() {
     document.getElementById('dash-wissel-knop')?.addEventListener('click', () => {
       this._deps.autoManager?._toonWisselPicker?.();
+    });
+
+    document.getElementById('dash-widgets-knop')?.addEventListener('click', () => {
+      this._openWidgetCustomizer();
     });
 
     document.querySelectorAll('#desktop-dashboard [data-actie]').forEach((btn) => {
@@ -90,23 +130,44 @@ export class DesktopDashboard {
   }
 
   _verwerkActie(actie, btn) {
-    const TAB_KLIKS = {
-      'nieuwe-rit': 'kaart',
-      'nieuwe-tank': 'saldo',
-      'instellingen': 'instellingen',
-    };
-    if (TAB_KLIKS[actie]) {
-      document.querySelector(`.nav-btn[data-tab="${TAB_KLIKS[actie]}"]`)?.click();
+    if (actie === 'nieuwe-rit')        return this._modals.openRit();
+    if (actie === 'nieuwe-tank')       return this._modals.openTank();
+    if (actie === 'nieuwe-vk')         return this._modals.openVk();
+    if (actie === 'afrekenen')         return this._deps.afreken?.openSheet?.();
+    if (actie === 'instellingen') {
+      // Op desktop is er geen aparte instellingen-tab, maar op kleinere
+      // schermen kan deze knop wel zichtbaar worden — fallback naar tab.
+      document.querySelector('.nav-btn[data-tab="instellingen"]')?.click();
       return;
     }
-    if (actie === 'afrekenen') {
-      this._deps.afreken?.openSheet?.();
-    } else if (actie === 'nieuwe-vk') {
-      this._deps.vasteKosten?.openSheet?.();
-    } else if (actie === 'expand') {
+    if (actie === 'widgets')           return this._openWidgetCustomizer();
+    if (actie === 'expand') {
       const widget = btn.closest('.widget');
       if (widget) this._expand(widget);
     }
+  }
+
+  // ── WIDGET CUSTOMIZER ────────────────────────────────────────────────
+  _openWidgetCustomizer() {
+    const huidig = this._db.getDesktopWidgets() || DEFAULT_KEUZE;
+    this._modals.openWidgets(huidig, WIDGET_META, (nieuw) => {
+      // Sla álleen op als er minstens één widget actief is — anders blijft
+      // het dashboard leeg en heeft de gebruiker geen knop om het te openen.
+      if (!nieuw || !nieuw.length) {
+        this._db.setDesktopWidgets(DEFAULT_KEUZE);
+      } else {
+        this._db.setDesktopWidgets(nieuw);
+      }
+    });
+  }
+
+  _pasZichtbaarheidToe() {
+    const keuze = this._db.getDesktopWidgets() || DEFAULT_KEUZE;
+    const aktief = new Set(keuze);
+    document.querySelectorAll('#desktop-dashboard .widget[data-widget]').forEach((w) => {
+      const aan = aktief.has(w.dataset.widget);
+      w.classList.toggle('widget-verborgen', !aan);
+    });
   }
 
   // ── EXPAND / COLLAPSE ────────────────────────────────────────────────
@@ -163,6 +224,22 @@ export class DesktopDashboard {
     const actie = kop.querySelector('.widget-actie');
     if (actie) actie.style.display = 'none';
     kop.appendChild(sluit);
+  }
+
+  // ── ANIMATIE: stagger-entrance ──────────────────────────────────────
+  _staggerEntrance() {
+    const widgets = document.querySelectorAll(
+      '#desktop-dashboard .widget:not(.widget-verborgen)'
+    );
+    widgets.forEach((w, i) => {
+      w.style.setProperty('--stagger-i', i);
+      w.classList.remove('widget-entrance');
+      // Reflow forceert restart van de animatie wanneer hij al een keer liep
+      // (relevant bij wissel van layout). offsetWidth lezen volstaat.
+      // eslint-disable-next-line no-unused-expressions
+      w.offsetWidth;
+      w.classList.add('widget-entrance');
+    });
   }
 
   // ── HEADER + EMPTY STATE ────────────────────────────────────────────
