@@ -7,6 +7,22 @@ const SEEN_KEY = 'tanklog_changelog_seen';
 
 export const VERSIES = [
   {
+    versie: 8,
+    label: '3.2',
+    datum: '2026-05-20',
+    items: [
+      'Rit-detail: tik een rit aan voor de gereden route op de kaart + statistieken',
+      'Maand-recap: terugblik op de vorige maand met cijfers, top-bestemmingen en verbruik',
+      'Notificaties: krijg een melding als APK / verzekering bijna afloopt',
+      'Notificaties: melding zodra het saldo onder je drempel duikt',
+      'Update-banner: nieuwe versies installeren zonder rare half-oude state',
+      'Offline-indicator onderaan zodra het netwerk wegvalt',
+      'Systeem-sectie in instellingen: app-versie, opslag en kaart-cache wissen',
+      'Tanklog als share-target: deel een locatie vanuit Maps direct naar een nieuwe rit',
+      'Vaste data wordt nu persistent gemaakt zodat de browser hem niet evict',
+    ],
+  },
+  {
     versie: 7,
     label: '3.1',
     datum: '2026-05-12',

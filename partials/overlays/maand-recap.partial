@@ -1,0 +1,126 @@
+<!-- ── OVERLAY: MAAND-RECAP ───────────────────────────────────────────────────
+     Terugblik op de vorige maand. Bediend door
+     js/controllers/MaandRecapController.js. Verschijnt automatisch op de
+     eerste app-opening van een nieuwe maand, en handmatig via de knop
+     op de overzicht-tab.
+     ─────────────────────────────────────────────────────────────────────── -->
+<div id="recap-overlay" class="recap-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="recap-titel">
+  <div class="recap-backdrop" id="recap-backdrop"></div>
+
+  <div class="recap-card" role="document">
+    <button id="recap-sluit" class="recap-sluit" type="button" aria-label="Sluiten">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Progress-balkjes (Instagram-stijl) — gevuld door de controller -->
+    <div class="recap-progress" id="recap-progress" aria-hidden="true"></div>
+
+    <!-- Tap-zones voor terug/volgende (mobiel) -->
+    <button type="button" class="recap-tap recap-tap-vorige" id="recap-tap-vorige" aria-label="Vorige"></button>
+    <button type="button" class="recap-tap recap-tap-volgende" id="recap-tap-volgende" aria-label="Volgende"></button>
+
+    <!-- Pijl-knoppen voor desktop -->
+    <button type="button" class="recap-pijl recap-pijl-l" id="recap-pijl-l" aria-label="Vorige">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+    <button type="button" class="recap-pijl recap-pijl-r" id="recap-pijl-r" aria-label="Volgende">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 18l6-6-6-6" />
+      </svg>
+    </button>
+
+    <!-- Card-stack — exact één is .actief, de rest wachten -->
+    <div class="recap-stack" id="recap-stack">
+
+      <!-- 1. INTRO -->
+      <section class="recap-page recap-page-intro" data-page="intro">
+        <div class="recap-mark">TANKLOG · RECAP</div>
+        <h1 class="recap-titel-hero" id="recap-titel">— in cijfers</h1>
+        <p class="recap-sub" id="recap-sub">—</p>
+        <div class="recap-hint">Tik om verder te gaan</div>
+      </section>
+
+      <!-- 2. AFSTAND -->
+      <section class="recap-page recap-page-afstand" data-page="afstand">
+        <div class="recap-chip">AFSTAND</div>
+        <div class="recap-hero">
+          <span class="recap-hero-val" id="recap-km" data-doel="0">0</span>
+          <span class="recap-hero-unit">km gereden</span>
+        </div>
+        <div class="recap-mini-rij">
+          <div class="recap-mini">
+            <span class="recap-mini-lbl">Ritten</span>
+            <span class="recap-mini-val" id="recap-ritten">—</span>
+          </div>
+          <div class="recap-mini">
+            <span class="recap-mini-lbl">Gem. per rit</span>
+            <span class="recap-mini-val" id="recap-gem-km">—</span>
+          </div>
+        </div>
+        <div class="recap-delta" id="recap-km-delta">—</div>
+      </section>
+
+      <!-- 3. BRANDSTOF / LADEN -->
+      <section class="recap-page recap-page-brand" data-page="brand">
+        <div class="recap-chip" id="recap-brand-chip">BRANDSTOF</div>
+        <div class="recap-hero">
+          <span class="recap-hero-prefix">€</span>
+          <span class="recap-hero-val" id="recap-kosten" data-doel="0">0</span>
+        </div>
+        <div class="recap-sub-blok" id="recap-brand-sub">—</div>
+        <div class="recap-mini-rij">
+          <div class="recap-mini">
+            <span class="recap-mini-lbl" id="recap-volume-lbl">Liters</span>
+            <span class="recap-mini-val" id="recap-volume">—</span>
+          </div>
+          <div class="recap-mini">
+            <span class="recap-mini-lbl" id="recap-prijs-lbl">Gem. €/L</span>
+            <span class="recap-mini-val" id="recap-prijs">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. VERBRUIK -->
+      <section class="recap-page recap-page-verbruik" data-page="verbruik">
+        <div class="recap-chip">VERBRUIK</div>
+        <div class="recap-hero">
+          <span class="recap-hero-val" id="recap-verbruik">—</span>
+          <span class="recap-hero-unit" id="recap-verbruik-unit">L/100km</span>
+        </div>
+        <div class="recap-delta" id="recap-verbruik-delta">—</div>
+        <div class="recap-quote" id="recap-verbruik-quote">—</div>
+      </section>
+
+      <!-- 5. BESTEMMINGEN -->
+      <section class="recap-page recap-page-top" data-page="bestemmingen">
+        <div class="recap-chip">TOP BESTEMMINGEN</div>
+        <ol class="recap-top" id="recap-top-list">
+          <!-- ingevuld door controller -->
+        </ol>
+        <div class="recap-quote" id="recap-top-quote">—</div>
+      </section>
+
+      <!-- 6. OUTRO -->
+      <section class="recap-page recap-page-outro" data-page="outro">
+        <div class="recap-chip">SALDO</div>
+        <div class="recap-hero">
+          <span class="recap-hero-prefix" id="recap-saldo-teken">+ €</span>
+          <span class="recap-hero-val" id="recap-saldo" data-doel="0">0</span>
+        </div>
+        <div class="recap-sub-blok" id="recap-saldo-sub">—</div>
+        <div class="recap-outro-acties">
+          <button type="button" class="recap-btn recap-btn-primair" id="recap-afreken">Afrekenen →</button>
+          <button type="button" class="recap-btn recap-btn-secundair" id="recap-klaar">Klaar</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>

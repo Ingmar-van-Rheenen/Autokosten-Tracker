@@ -1,0 +1,581 @@
+/* ── MAAND-RECAP ─────────────────────────────────────────────────────────────
+   Terugblik op de vorige maand. Theme-aware (klassiek / licht / donker),
+   gebruikt de bestaande huisstijl-tokens (Fraunces voor titels, Space Mono
+   voor cijfers, --bg-elev voor kaarten, --primair voor accenten).
+   Bediend door js/controllers/MaandRecapController.js.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── TRIGGER op de overzicht-tab ─────────────────────────────────────────── */
+.recap-trigger {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: calc(100% - 32px);
+  margin: 14px 16px 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--rand);
+  border-radius: 16px;
+  background: var(--bg-elev);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--sans);
+  color: var(--tekst);
+  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease;
+  box-shadow: var(--schaduw-1);
+}
+
+.recap-trigger:hover {
+  border-color: var(--primair);
+}
+
+.recap-trigger:active {
+  transform: scale(0.985);
+}
+
+.recap-trigger-icoon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-bg);
+  color: var(--primair);
+}
+
+.recap-trigger-icoon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.recap-trigger-tekst {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recap-trigger-titel {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+.recap-trigger-sub {
+  font-size: 0.78rem;
+  color: var(--tekst-zwak);
+}
+
+.recap-trigger-pijl {
+  flex-shrink: 0;
+  color: var(--tekst-zwak);
+  display: flex;
+}
+
+/* ── OVERLAY ─────────────────────────────────────────────────────────────── */
+.recap-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 480;
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.recap-overlay.zichtbaar {
+  opacity: 1;
+}
+
+.recap-overlay.hidden {
+  display: none;
+}
+
+.recap-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 20, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* ── CARD ────────────────────────────────────────────────────────────────── */
+.recap-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--tekst);
+  transform: translateY(14px);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.recap-overlay.zichtbaar .recap-card {
+  transform: translateY(0);
+}
+
+/* Subtiele groene gloed bovenaan, in lijn met de saldo-hero en de splash. */
+.recap-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(94, 148, 100, 0.12) 0%, transparent 55%);
+  opacity: 0.9;
+}
+
+/* ── SLUITKNOP ───────────────────────────────────────────────────────────── */
+.recap-sluit {
+  position: absolute;
+  z-index: 6;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--rand);
+  background: var(--bg-elev);
+  color: var(--tekst);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, background 0.15s ease;
+  box-shadow: var(--schaduw-1);
+}
+
+.recap-sluit:active {
+  transform: scale(0.92);
+}
+
+/* ── PROGRESS-BALKJES ────────────────────────────────────────────────────── */
+.recap-progress {
+  position: absolute;
+  z-index: 5;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  left: 14px;
+  right: 64px;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+  height: 36px;
+  align-items: center;
+}
+
+.recap-progress-balk {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rand);
+  overflow: hidden;
+}
+
+.recap-progress-balk-vul {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--primair);
+  border-radius: 2px;
+  transition: width 0.28s linear;
+}
+
+.recap-progress-balk.gedaan .recap-progress-balk-vul,
+.recap-progress-balk.actief .recap-progress-balk-vul {
+  width: 100%;
+}
+
+/* ── NAVIGATIE (tap-zones + pijlen) ──────────────────────────────────────── */
+.recap-tap {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  bottom: 0;
+  width: 32%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.recap-tap-vorige  { left: 0; }
+.recap-tap-volgende { right: 0; }
+
+.recap-pijl {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .recap-pijl {
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--rand);
+    background: var(--bg-elev);
+    color: var(--tekst);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--schaduw-2);
+    transition: transform 0.12s ease, border-color 0.15s ease;
+  }
+
+  .recap-pijl:hover {
+    border-color: var(--primair);
+    color: var(--primair);
+  }
+
+  .recap-pijl:active {
+    transform: translateY(-50%) scale(0.94);
+  }
+
+  .recap-pijl-l { left: -64px; }
+  .recap-pijl-r { right: -64px; }
+
+  .recap-tap { display: none; }
+}
+
+/* ── CARD-STACK ──────────────────────────────────────────────────────────── */
+.recap-stack {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recap-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 28px max(40px, env(safe-area-inset-bottom, 28px));
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.recap-page.actief {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ── TYPOGRAFIE — INTRO ─────────────────────────────────────────────────── */
+.recap-mark {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--tekst-zwak);
+  margin-bottom: 36px;
+}
+
+.recap-titel-hero {
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  color: var(--tekst);
+  max-width: 14ch;
+  margin: 0 0 10px;
+}
+
+.recap-sub {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--tekst-zwak);
+  max-width: 26ch;
+}
+
+.recap-hint {
+  position: absolute;
+  bottom: max(36px, env(safe-area-inset-bottom, 24px));
+  left: 0;
+  right: 0;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tekst-zwak);
+  animation: recap-bob 1.6s ease-in-out infinite;
+}
+
+/* ── TYPOGRAFIE — CHIPS & HERO (overige cards) ──────────────────────────── */
+.recap-chip {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--primair);
+  background: var(--green-bg);
+  padding: 5px 12px 4px;
+  border-radius: 999px;
+  margin-bottom: 28px;
+}
+
+.recap-hero {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--mono);
+  color: var(--tekst);
+}
+
+.recap-hero-prefix {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--tekst-zwak);
+}
+
+.recap-hero-val {
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--tekst);
+}
+
+.recap-hero-unit {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--tekst-zwak);
+  margin-left: 6px;
+}
+
+.recap-sub-blok {
+  margin-top: 14px;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  color: var(--tekst-zwak);
+}
+
+.recap-quote {
+  margin-top: 22px;
+  max-width: 28ch;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--tekst-zwak);
+  line-height: 1.45;
+}
+
+/* ── MINI-STATS ──────────────────────────────────────────────────────────── */
+.recap-mini-rij {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.recap-mini {
+  flex: 1;
+  background: var(--bg-elev);
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  padding: 12px 12px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--schaduw-1);
+}
+
+.recap-mini-lbl {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tekst-zwak);
+}
+
+.recap-mini-val {
+  font-family: var(--sans);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+/* ── DELTA t.o.v. vorige maand ───────────────────────────────────────────── */
+.recap-delta {
+  margin-top: 22px;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--tekst-zwak);
+  min-height: 1.2em;
+}
+
+.recap-delta.beter  { color: var(--primair); }
+.recap-delta.slecht { color: var(--gevaar); }
+
+/* ── TOP BESTEMMINGEN ────────────────────────────────────────────────────── */
+.recap-top {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.recap-top-leeg {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  color: var(--tekst-zwak);
+  text-align: center;
+}
+
+.recap-top-rij {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-elev);
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: var(--schaduw-1);
+}
+
+.recap-top-rang {
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primair);
+  width: 28px;
+  text-align: center;
+}
+
+.recap-top-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.recap-top-naam {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--tekst);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recap-top-sub {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--tekst-zwak);
+  text-transform: uppercase;
+}
+
+/* ── OUTRO ACTIES ────────────────────────────────────────────────────────── */
+.recap-outro-acties {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.recap-btn {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 999px;
+  border: none;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.recap-btn:active {
+  transform: scale(0.97);
+}
+
+.recap-btn-primair {
+  background: var(--primair);
+  color: #ffffff;
+}
+
+.recap-btn-primair:hover {
+  background: var(--green-2);
+}
+
+.recap-btn-secundair {
+  background: transparent;
+  color: var(--tekst-zwak);
+  border: 1px solid var(--rand);
+}
+
+/* ── ANIMATIES ───────────────────────────────────────────────────────────── */
+@keyframes recap-bob {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50%      { transform: translateY(3px); opacity: 0.85; }
+}
+
+/* ── DESKTOP — gecentreerde card ─────────────────────────────────────────── */
+@media (min-width: 1280px) {
+  .recap-overlay {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .recap-card {
+    width: min(440px, 90vw);
+    height: min(720px, 90vh);
+    border-radius: 24px;
+    border: 1px solid var(--rand);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  }
+
+  .recap-titel-hero {
+    font-size: 2.1rem;
+  }
+
+  .recap-hero-val {
+    font-size: 3.5rem;
+  }
+}
+
+/* ── REDUCED MOTION ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .recap-overlay,
+  .recap-card,
+  .recap-page,
+  .recap-hint {
+    transition: none;
+    animation: none;
+  }
+}

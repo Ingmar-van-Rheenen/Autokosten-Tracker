@@ -1,0 +1,152 @@
+/* ── SW UPDATE-BANNER + OFFLINE-PIL ──────────────────────────────────────────
+   Bediend door js/ui/SwUpdate.js. Theme-aware via huisstijl-tokens —
+   verschijnt onderaan in beide schermen (mobiel + desktop).
+   ────────────────────────────────────────────────────────────────────────── */
+
+.sw-update-banner {
+  position: fixed;
+  z-index: 9100; /* boven alle overlays, onder toasts */
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  width: min(420px, calc(100vw - 24px));
+  transform: translate(-50%, calc(100% + 24px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 14px;
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  background: var(--bg-elev);
+  color: var(--tekst);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  font-family: var(--sans);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+}
+
+.sw-update-banner.zichtbaar {
+  transform: translate(-50%, 0);
+}
+
+.sw-update-banner.uit {
+  opacity: 0;
+  transform: translate(-50%, calc(100% + 24px));
+}
+
+.sw-update-tekst {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sw-update-titel {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+.sw-update-sub {
+  font-size: 0.72rem;
+  color: var(--tekst-zwak);
+  line-height: 1.3;
+}
+
+.sw-update-knop {
+  flex-shrink: 0;
+  padding: 9px 14px 8px;
+  border: none;
+  border-radius: 999px;
+  background: var(--primair);
+  color: #ffffff;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.sw-update-knop:hover {
+  background: var(--green-2);
+}
+
+.sw-update-knop:active {
+  transform: scale(0.96);
+}
+
+.sw-update-sluit {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--tekst-zwak);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sw-update-sluit:hover {
+  background: var(--surface);
+  color: var(--tekst);
+}
+
+/* ── OFFLINE-PIL ────────────────────────────────────────────────────────── */
+.sw-offline-pil {
+  position: fixed;
+  z-index: 9050;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  transform: translate(-50%, calc(100% + 24px));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px 6px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--rand);
+  color: var(--tekst);
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  font-weight: 500;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sw-offline-pil.zichtbaar {
+  transform: translate(-50%, 0);
+}
+
+.sw-offline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gevaar);
+  animation: sw-offline-knip 1.4s ease-in-out infinite;
+}
+
+/* Wanneer er ook al een update-banner staat: pil iets hoger zodat ze
+   elkaar niet overlappen. */
+.sw-update-banner.zichtbaar ~ .sw-offline-pil.zichtbaar {
+  transform: translate(-50%, -74px);
+}
+
+@keyframes sw-offline-knip {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-update-banner,
+  .sw-offline-pil,
+  .sw-offline-dot {
+    transition: none;
+    animation: none;
+  }
+}

@@ -38,12 +38,15 @@
 @import './components/controls.css';
 @import './components/shortcut.css';
 @import './components/pwa.css';
+@import './components/sw-update.css';
 
 /* ── 5. FEATURES (v3) ────────────────────────────────────────────── */
 @import './features/vaste-kosten.css';
 @import './features/betalingen.css';
 @import './features/afreken.css';
 @import './features/rit-detail.css';
+@import './features/maand-recap.css';
+@import './features/systeem.css';
 
 @import './features/sync.css';
 

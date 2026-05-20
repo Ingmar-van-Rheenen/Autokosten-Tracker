@@ -186,6 +186,40 @@ export class Database {
     this._emit('setDesktopWidgetOrder', { order: d.desktop_widget_order });
   }
 
+  // ── Notificatie-instellingen (v3) ─────────────────────────────────────────
+  // Een enkel object met alle notificatie-voorkeuren. `null` velden betekenen
+  // "niet ingesteld" zodat we onderscheid kunnen maken tussen "uit" en "niet
+  // geconfigureerd" (relevant voor first-run UX).
+  getNotificatieInstellingen() {
+    const d = this.load();
+    return {
+      aan: !!d.notif_aan,
+      deadline_aan: d.notif_deadline_aan !== false, // default true zodra notif_aan = true
+      deadline_dagen: Number(d.notif_deadline_dagen) || 14,
+      saldo_aan: !!d.notif_saldo_aan,
+      saldo_drempel: Number.isFinite(d.notif_saldo_drempel)
+        ? Number(d.notif_saldo_drempel) : 25,
+    };
+  }
+
+  setNotificatieInstellingen(patch) {
+    if (!patch || typeof patch !== 'object') return;
+    const d = this.load();
+    if ('aan' in patch) d.notif_aan = !!patch.aan;
+    if ('deadline_aan' in patch) d.notif_deadline_aan = !!patch.deadline_aan;
+    if ('deadline_dagen' in patch) {
+      const n = Number(patch.deadline_dagen);
+      d.notif_deadline_dagen = Number.isFinite(n) && n >= 1 ? Math.round(n) : 14;
+    }
+    if ('saldo_aan' in patch) d.notif_saldo_aan = !!patch.saldo_aan;
+    if ('saldo_drempel' in patch) {
+      const n = Number(patch.saldo_drempel);
+      d.notif_saldo_drempel = Number.isFinite(n) ? n : 25;
+    }
+    this._schrijf(d);
+    this._emit('setNotificatieInstellingen', { patch });
+  }
+
   // ── Auto's ─────────────────────────────────────────────────────────────────
 
   getGeselecteerdeAuto() {
@@ -501,6 +535,11 @@ export class Database {
       tikkie_handle: '',
       desktop_widgets: null,
       desktop_widget_order: null,
+      notif_aan: false,
+      notif_deadline_aan: true,
+      notif_deadline_dagen: 14,
+      notif_saldo_aan: false,
+      notif_saldo_drempel: 25,
     };
   }
 
@@ -530,6 +569,11 @@ export class Database {
     if (typeof data.tikkie_handle !== 'string') data.tikkie_handle = '';
     if (data.desktop_widgets !== null && !Array.isArray(data.desktop_widgets)) data.desktop_widgets = null;
     if (data.desktop_widget_order !== null && !Array.isArray(data.desktop_widget_order)) data.desktop_widget_order = null;
+    if (typeof data.notif_aan !== 'boolean') data.notif_aan = false;
+    if (typeof data.notif_deadline_aan !== 'boolean') data.notif_deadline_aan = true;
+    if (!Number.isFinite(data.notif_deadline_dagen)) data.notif_deadline_dagen = 14;
+    if (typeof data.notif_saldo_aan !== 'boolean') data.notif_saldo_aan = false;
+    if (!Number.isFinite(data.notif_saldo_drempel)) data.notif_saldo_drempel = 25;
 
     // Item-niveau defaults voor nieuwe v3-velden — idempotent.
     data.ritten = data.ritten.map((r) => ({

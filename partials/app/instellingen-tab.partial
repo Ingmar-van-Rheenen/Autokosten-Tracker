@@ -221,6 +221,76 @@
       </div>
     </div>
 
+    <!-- NOTIFICATIES -->
+    <div class="tab-sectie-label">NOTIFICATIES</div>
+    <div class="form-kaart">
+      <div class="smart-toggle-rij">
+        <div class="smart-toggle-info-col">
+          <div class="smart-toggle-naam">Notificaties</div>
+          <div class="smart-toggle-sub" id="notif-status-sub">Lokale meldingen op dit apparaat</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notif-master" />
+          <span class="toggle-knop"></span>
+        </label>
+      </div>
+
+      <div id="notif-detail" class="notif-detail hidden">
+        <div class="form-kaart-scheiding"></div>
+
+        <div class="smart-toggle-rij">
+          <div class="smart-toggle-info-col">
+            <div class="smart-toggle-naam">Deadline-herinneringen</div>
+            <div class="smart-toggle-sub">APK, verzekering of andere vaste kosten</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="notif-deadline" />
+            <span class="toggle-knop"></span>
+          </label>
+        </div>
+        <div class="notif-sub-rij">
+          <label class="form-lbl" for="notif-deadline-dagen">Aantal dagen vóór deadline</label>
+          <input type="number" id="notif-deadline-dagen" class="form-input" min="1" max="60" step="1" />
+        </div>
+
+        <div class="form-kaart-scheiding"></div>
+
+        <div class="smart-toggle-rij">
+          <div class="smart-toggle-info-col">
+            <div class="smart-toggle-naam">Saldo-drempel</div>
+            <div class="smart-toggle-sub">Melding zodra je onder dit bedrag duikt</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="notif-saldo" />
+            <span class="toggle-knop"></span>
+          </label>
+        </div>
+        <div class="notif-sub-rij">
+          <label class="form-lbl" for="notif-saldo-drempel">Drempel (€ in de min)</label>
+          <input type="number" id="notif-saldo-drempel" class="form-input" min="1" step="1" placeholder="bijv. 25" />
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEEM -->
+    <div class="tab-sectie-label">SYSTEEM</div>
+    <div class="form-kaart">
+      <div class="syst-rij">
+        <span class="syst-lbl">App-versie</span>
+        <span class="syst-val" id="syst-versie">—</span>
+      </div>
+      <div class="syst-rij">
+        <span class="syst-lbl">Opslag</span>
+        <span class="syst-val" id="syst-storage">—</span>
+      </div>
+      <div class="syst-rij">
+        <span class="syst-lbl">Persistent</span>
+        <span class="syst-val" id="syst-persistent">—</span>
+      </div>
+      <button id="btn-clear-tiles" class="btn-form-sec">Kaart-cache wissen</button>
+      <button id="btn-update-check" class="btn-form-sec">Check op updates</button>
+    </div>
+
     <div class="tab-sectie-label">DATA</div>
     <div class="form-kaart">
       <button class="btn-form-sec" onclick="exportData()">↓ Exporteer JSON</button>

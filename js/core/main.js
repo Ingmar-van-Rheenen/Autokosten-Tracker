@@ -6,6 +6,7 @@ import { App } from './App.js';
 import { Partials } from './Partials.js';
 import { CarScene } from '../scenes/CarScene.js';
 import { SplashScene } from '../scenes/SplashScene.js';
+import { SwUpdate } from '../ui/SwUpdate.js';
 
 // Detecteer development-mode: localhost / 127.0.0.1 / 0.0.0.0 / file:// →
 // geen Service Worker registreren + eventuele oude SW + caches opruimen.
@@ -28,7 +29,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
       } catch {}
     } else {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => SwUpdate.init(reg))
+        .catch(() => { /* SW-registratie kan in private mode falen */ });
     }
   }
 

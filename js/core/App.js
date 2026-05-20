@@ -7,6 +7,9 @@ import { PrijsService } from '../services/PrijsService.js';
 import { RitController } from '../controllers/RitController.js';
 import { RittenController } from '../controllers/RittenController.js';
 import { RitDetailController } from '../controllers/RitDetailController.js';
+import { MaandRecapController } from '../controllers/MaandRecapController.js';
+import { StorageInfo } from '../ui/StorageInfo.js';
+import { NotificatieController } from '../ui/NotificatieController.js';
 import { TankController } from '../controllers/TankController.js';
 import { StatsController } from '../controllers/StatsController.js';
 import { AutoManager } from '../controllers/AutoManager.js';
@@ -50,6 +53,8 @@ export class App {
     );
     this._deelController = new DeelController(this._db);
     this._ritDetail = new RitDetailController(this._db);
+    this._maandRecap = new MaandRecapController(this._db, { afreken: this._afreken });
+    this._notif = new NotificatieController(this._db);
     this._rittenController = new RittenController(
       this._db,
       () => this._onRitUpdate(),
@@ -175,6 +180,44 @@ export class App {
 
     if (actie === 'start') {
       setTimeout(() => document.getElementById('btn-start')?.click(), 400);
+    }
+
+    // Share-target: vanuit Google Maps / browser-share opent Tanklog met
+    // ?share_title=… &share_text=… &share_url=…  Wij plukken er een leesbare
+    // bestemming uit (titel of tekst) en openen het rit-toevoegen-flow.
+    const titel = params.get('share_title');
+    const tekst = params.get('share_text');
+    const url   = params.get('share_url');
+    if (titel || tekst || url) {
+      const bestemming = (titel || tekst || url || '').trim().slice(0, 120);
+      setTimeout(() => this._openRitMetBestemming(bestemming), 600);
+    }
+
+    // Direct naar een specifieke tab (gebruikt door notif-clicks)
+    const tab = params.get('tab');
+    if (tab && ['kaart', 'ritten', 'saldo', 'overzicht', 'instellingen'].includes(tab)) {
+      setTimeout(() => this._navigeerNaarTab(tab), 400);
+    }
+  }
+
+  /**
+   * Open de "nieuwe rit"-flow met een voor-ingevulde bestemming. Gebruikt
+   * de DesktopModals op desktop en de mobile rit-flow op kleinere schermen.
+   */
+  _openRitMetBestemming(bestemming) {
+    if (!bestemming) return;
+    const desktop = window.matchMedia('(min-width: 1280px)').matches;
+    if (desktop && this._desktopDashboard?._modals?.openRit) {
+      this._desktopDashboard._modals.openRit();
+      // Probeer het bestemmings-veld direct te vullen
+      const inp = document.getElementById('desk-rit-bestemming');
+      if (inp) { inp.value = bestemming; inp.dispatchEvent(new Event('input')); }
+    } else {
+      // Mobiel: vul de bestemming in op de rit-pill / confirm-state
+      Utils.toast(`Bestemming: ${bestemming}`);
+      // (Op mobiel is rit-toevoegen een live GPS-flow; we kunnen geen
+      // bestemming voor-invullen zonder een actieve rit. Toast is daarom
+      // de eerlijke MVP — desktop krijgt de echte share-target ervaring.)
     }
   }
 
@@ -340,6 +383,195 @@ export class App {
     // Device-sync (Web Share + WebRTC paring via PeerJS)
     this._sync = new SyncController(this._db, this._dataManager);
     this._sync.init();
+
+    // Maand-recap: trigger-knop binden + check op auto-opening na maandwissel.
+    this._bindMaandRecap();
+
+    // Systeem-sectie (versie, opslag, cache wissen, update-check)
+    this._bindSysteem();
+
+    // Notificatie-sectie + initiële check
+    this._bindNotificaties();
+
+    // Vraag persistent storage zodra mogelijk — beschermt localStorage tegen
+    // silent eviction onder geheugen-druk. Stille no-op op browsers zonder API.
+    StorageInfo.persist().catch(() => { /* no-op */ });
+  }
+
+  /** Bind de "Maand-recap"-knop op de overzicht-tab + check op auto-trigger. */
+  _bindMaandRecap() {
+    if (this._maandRecapGebonden) return;
+    this._maandRecapGebonden = true;
+
+    document.getElementById('recap-trigger')?.addEventListener('click', () => {
+      this._maandRecap.open();
+    });
+
+    // Subtekst dynamisch maken — bv. "Terugblik op april 2026"
+    const sub = document.getElementById('recap-trigger-sub');
+    if (sub) {
+      const nu = new Date();
+      const peil = new Date(nu.getFullYear(), nu.getMonth() - 1, 1);
+      const maand = peil.toLocaleString('nl-NL', { month: 'long' });
+      sub.textContent = `Terugblik op ${maand} ${peil.getFullYear()}`;
+    }
+
+    // Auto-trigger: éénmalig bij eerste opening van een nieuwe maand.
+    this._maandRecap.controleerAutoStart();
+  }
+
+  // ── Systeem-sectie ────────────────────────────────────────────────────────
+
+  async _bindSysteem() {
+    if (this._systeemGebonden) return;
+    this._systeemGebonden = true;
+
+    const versieEl = document.getElementById('syst-versie');
+    const storageEl = document.getElementById('syst-storage');
+    const persistEl = document.getElementById('syst-persistent');
+
+    const ververs = async () => {
+      const versie = await StorageInfo.getVersion();
+      if (versieEl) versieEl.textContent = versie || '—';
+
+      const usage = await StorageInfo.usage();
+      if (storageEl && usage) {
+        const pct = usage.quota > 0 ? Math.round((usage.bytes / usage.quota) * 100) : 0;
+        storageEl.textContent = `${StorageInfo.formatBytes(usage.bytes)} (${pct}%)`;
+        storageEl.classList.toggle('gevaar', pct >= 85);
+      } else if (storageEl) {
+        storageEl.textContent = 'Onbekend';
+      }
+
+      const isPersist = await StorageInfo.isPersistent();
+      if (persistEl) {
+        if (isPersist === true) {
+          persistEl.textContent = 'Beveiligd ✓';
+          persistEl.classList.add('succes');
+        } else if (isPersist === false) {
+          persistEl.textContent = 'Niet beveiligd';
+          persistEl.classList.add('gevaar');
+        } else {
+          persistEl.textContent = 'Niet ondersteund';
+        }
+      }
+    };
+    await ververs();
+
+    document.getElementById('btn-clear-tiles')?.addEventListener('click', async () => {
+      const ja = await ConfirmModal.toon({
+        titel: 'Kaart-cache wissen?',
+        tekst: 'De opgeslagen kaart-tiles worden verwijderd. Je app-data blijft staan; alleen kaarten moeten opnieuw geladen worden.',
+        bevestigLabel: 'Wissen',
+      });
+      if (!ja) return;
+      const ok = await StorageInfo.clearTiles();
+      Utils.toast(ok ? 'Kaart-cache gewist ✓' : 'Kon cache niet wissen', ok ? 'ok' : 'err');
+      ververs();
+    });
+
+    document.getElementById('btn-update-check')?.addEventListener('click', async () => {
+      try {
+        const reg = await navigator.serviceWorker?.getRegistration();
+        if (!reg) { Utils.toast('Service worker niet beschikbaar', 'err'); return; }
+        await reg.update();
+        Utils.toast('Check gedaan — eventuele update verschijnt automatisch ✓');
+      } catch {
+        Utils.toast('Check mislukt — geen verbinding?', 'err');
+      }
+    });
+  }
+
+  // ── Notificaties-sectie ───────────────────────────────────────────────────
+
+  async _bindNotificaties() {
+    if (this._notifGebonden) return;
+    this._notifGebonden = true;
+
+    const status = this._notif.status();
+    const masterChk = document.getElementById('notif-master');
+    const detail = document.getElementById('notif-detail');
+    const statusSub = document.getElementById('notif-status-sub');
+    const dlChk = document.getElementById('notif-deadline');
+    const dlDgn = document.getElementById('notif-deadline-dagen');
+    const saChk = document.getElementById('notif-saldo');
+    const saInp = document.getElementById('notif-saldo-drempel');
+
+    // Initial render
+    const inst = this._db.getNotificatieInstellingen();
+    if (masterChk) masterChk.checked = inst.aan;
+    if (dlChk) dlChk.checked = inst.deadline_aan;
+    if (dlDgn) dlDgn.value = inst.deadline_dagen;
+    if (saChk) saChk.checked = inst.saldo_aan;
+    if (saInp) saInp.value = inst.saldo_drempel;
+    if (detail) detail.classList.toggle('hidden', !inst.aan);
+
+    const renderStatus = () => {
+      if (!statusSub) return;
+      statusSub.classList.remove('geweigerd', 'toegestaan');
+      if (!status.ondersteund) {
+        statusSub.textContent = 'Niet ondersteund op dit apparaat';
+        masterChk && (masterChk.disabled = true);
+      } else if (Notification.permission === 'denied') {
+        statusSub.textContent = 'Geweigerd — wijzig via browser-instellingen';
+        statusSub.classList.add('geweigerd');
+      } else if (Notification.permission === 'granted') {
+        statusSub.textContent = 'Lokale meldingen op dit apparaat';
+        statusSub.classList.add('toegestaan');
+      } else {
+        statusSub.textContent = 'Lokale meldingen op dit apparaat';
+      }
+    };
+    renderStatus();
+
+    masterChk?.addEventListener('change', async () => {
+      if (masterChk.checked) {
+        const perm = await this._notif.vraagToestemming();
+        if (perm !== 'granted') {
+          masterChk.checked = false;
+          renderStatus();
+          Utils.toast('Notificaties geweigerd', 'err');
+          return;
+        }
+        this._db.setNotificatieInstellingen({ aan: true });
+        detail?.classList.remove('hidden');
+        renderStatus();
+        // Direct een check zodat eventuele deadlines/saldo meteen pingen.
+        this._notif.checkAlles();
+      } else {
+        this._db.setNotificatieInstellingen({ aan: false });
+        detail?.classList.add('hidden');
+      }
+    });
+
+    dlChk?.addEventListener('change', () => {
+      this._db.setNotificatieInstellingen({ deadline_aan: dlChk.checked });
+    });
+    dlDgn?.addEventListener('change', () => {
+      const n = parseInt(dlDgn.value, 10);
+      if (Number.isFinite(n) && n >= 1) this._db.setNotificatieInstellingen({ deadline_dagen: n });
+    });
+    saChk?.addEventListener('change', () => {
+      this._db.setNotificatieInstellingen({ saldo_aan: saChk.checked });
+      // Markers wissen zodat een bestaande "in de min"-situatie opnieuw kan pingen.
+      if (saChk.checked) this._notif.resetMarkers();
+    });
+    saInp?.addEventListener('change', () => {
+      const n = parseFloat(saInp.value);
+      if (Number.isFinite(n) && n > 0) this._db.setNotificatieInstellingen({ saldo_drempel: n });
+    });
+
+    // Initiële check + bij elke db-mutatie (debounced) opnieuw — zo krijgt de
+    // gebruiker tijdig saldo-meldingen na nieuwe ritten of tankbeurten.
+    this._notif.checkAlles();
+    if (!this._notifDbHook) {
+      this._notifDbHook = true;
+      let timer = null;
+      window.addEventListener('db:updated', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => this._notif.checkAlles(), 500);
+      });
+    }
   }
 
   // ── v3 wire-ups voor Instellingen-tab + globale db:updated listener ───────

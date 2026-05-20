@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v69';
+const CACHE = 'tanklog-v73';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -30,10 +30,13 @@ const ASSETS = [
   '/css/components/controls.css',
   '/css/components/shortcut.css',
   '/css/components/pwa.css',
+  '/css/components/sw-update.css',
   '/css/features/vaste-kosten.css',
   '/css/features/betalingen.css',
   '/css/features/afreken.css',
   '/css/features/rit-detail.css',
+  '/css/features/maand-recap.css',
+  '/css/features/systeem.css',
   '/css/desktop/layout.css',
   '/css/desktop/modals.css',
   '/css/desktop/widgets/saldo.css',
@@ -62,6 +65,7 @@ const ASSETS = [
   '/partials/overlays/changelog.partial',
   '/partials/overlays/info.partial',
   '/partials/overlays/rit-detail.partial',
+  '/partials/overlays/maand-recap.partial',
   '/partials/overlays/install.partial',
   '/partials/modals/auto-toevoegen.partial',
   '/partials/modals/auto-wisselen.partial',
@@ -77,6 +81,7 @@ const ASSETS = [
   '/js/controllers/RitController.js',
   '/js/controllers/RittenController.js',
   '/js/controllers/RitDetailController.js',
+  '/js/controllers/MaandRecapController.js',
   '/js/controllers/TankController.js',
   '/js/controllers/StatsController.js',
   '/js/controllers/AutoManager.js',
@@ -92,6 +97,9 @@ const ASSETS = [
   '/js/ui/Changelog.js',
   '/js/ui/ThemaController.js',
   '/js/ui/ConfirmModal.js',
+  '/js/ui/SwUpdate.js',
+  '/js/ui/StorageInfo.js',
+  '/js/ui/NotificatieController.js',
   '/js/scenes/CarScene.js',
   '/js/scenes/SplashScene.js',
   '/js/desktop/DesktopDashboard.js',
@@ -118,11 +126,62 @@ const ASSETS = [
 ];
 
 // ── Installatie: pre-cache alle app-bestanden ─────────────────────────────────
+// We roepen NIET zelf skipWaiting() aan. Een nieuwe SW blijft "waiting" tot de
+// pagina via postMessage {type:'SKIP_WAITING'} opdracht geeft — dan zit de
+// gebruiker niet midden in een sessie met half-oude / half-nieuwe assets.
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE).then((c) => c.addAll(ASSETS).catch(() => { }))
   );
-  self.skipWaiting();
+});
+
+// Communicatiekanaal SW ↔ page voor versie-info, cache-wissen en SW-overname.
+// MessageChannel-port (in event.ports[0]) wordt gebruikt zodat de page een
+// directe response krijgt — geen broadcast naar alle clients.
+self.addEventListener('message', (e) => {
+  const type = e.data && e.data.type;
+  const reply = (msg) => {
+    const port = e.ports && e.ports[0];
+    if (port) port.postMessage(msg);
+    else if (e.source && e.source.postMessage) e.source.postMessage(msg);
+  };
+
+  if (type === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
+
+  if (type === 'GET_VERSION') {
+    reply({ type: 'VERSION', version: CACHE });
+    return;
+  }
+
+  if (type === 'CLEAR_TILE_CACHE') {
+    e.waitUntil(
+      caches.delete(TILE_CACHE)
+        .then(() => reply({ type: 'TILE_CACHE_CLEARED', ok: true }))
+        .catch(() => reply({ type: 'TILE_CACHE_CLEARED', ok: false }))
+    );
+  }
+});
+
+// ── Notificatie-klik: focus bestaande tab of open nieuwe ─────────────────────
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/';
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clients) => {
+        const open = clients.find((c) => 'focus' in c);
+        if (open) {
+          if (url && url !== '/' && open.navigate) {
+            open.navigate(url).catch(() => { });
+          }
+          return open.focus();
+        }
+        return self.clients.openWindow(url);
+      })
+  );
 });
 
 

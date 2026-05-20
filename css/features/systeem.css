@@ -1,0 +1,72 @@
+/* ── SYSTEEM + NOTIFICATIES (instellingen-tab) ──────────────────────────────
+   Stijl voor de extra secties op de instellingen-tab. Sluit aan bij de
+   bestaande .form-kaart / .smart-toggle-rij patterns.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Systeem-info rijen ──────────────────────────────────────────────────── */
+.syst-rij {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rand);
+}
+
+.syst-rij:last-of-type {
+  border-bottom: none;
+  margin-bottom: 8px;
+}
+
+.syst-lbl {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--tekst-zwak);
+}
+
+.syst-val {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tekst);
+  text-align: right;
+}
+
+.syst-val.gevaar  { color: var(--gevaar); }
+.syst-val.succes  { color: var(--primair); }
+
+/* ── Notificatie-detail (uitklap onder de master-toggle) ─────────────────── */
+.notif-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notif-detail.hidden {
+  display: none;
+}
+
+.notif-sub-rij {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 4px;
+}
+
+.notif-sub-rij .form-input {
+  max-width: 180px;
+}
+
+.notif-sub-rij.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Statusregel onder de master-toggle die de huidige permissie weergeeft. */
+#notif-status-sub.geweigerd {
+  color: var(--gevaar);
+}
+
+#notif-status-sub.toegestaan {
+  color: var(--primair);
+}
