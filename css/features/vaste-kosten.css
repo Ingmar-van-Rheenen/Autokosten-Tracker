@@ -75,6 +75,21 @@
   color: var(--tekst);
   white-space: nowrap;
   flex-shrink: 0;
+  /* Bedrag en frequentie ("/ maand") onder elkaar zodat het label-blok niet
+     wordt opgegeten en lange labels niet meer afgeknipt worden. De frequentie
+     lijnt nu visueel uit met de "VERZEKERING"-meta links. */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  line-height: 1.15;
+}
+
+/* Frequentie-suffix binnen het bedrag-blok — kleiner en rustiger. */
+.vk-kaart-bedrag .vk-kaart-meta {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .vk-kaart-edit {
