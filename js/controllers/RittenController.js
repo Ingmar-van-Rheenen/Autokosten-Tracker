@@ -3,10 +3,11 @@
 import { Utils } from '../core/Utils.js';
 
 export class RittenController {
-  constructor(db, onUpdate, onDeel) {
+  constructor(db, onUpdate, onDeel, onDetail) {
     this._db = db;
     this._onUpdate = onUpdate;
     this._onDeel = onDeel;
+    this._onDetail = onDetail;
     this._editId = null;
 
     this._bindModalEvents();
@@ -34,7 +35,7 @@ export class RittenController {
         const kosten = (r.km / kml) * prijs;
         return `
           <li>
-            <div>
+            <div class="item-info" data-detail-id="${r.id}" role="button" tabindex="0">
               <div class="item-naam">${naam}</div>
               <div class="item-sub">${Utils.datumStr(r.datum)}${notitie}</div>
               <div class="item-kosten">${Utils.eur(kosten)}</div>
@@ -109,6 +110,15 @@ export class RittenController {
   // ── Acties per rij ────────────────────────────────────────────────────────
 
   _bindActies(el) {
+    // Klik op de rit-rij (niet de actie-knoppen) opent de detailweergave.
+    el.querySelectorAll('.item-info[data-detail-id]').forEach((info) => {
+      const open = () => this._onDetail?.(info.getAttribute('data-detail-id'));
+      info.addEventListener('click', open);
+      info.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+    });
+
     el.querySelectorAll('.item-deel').forEach((btn) => {
       btn.addEventListener('click', (e) => { e.stopPropagation(); this._onDeel?.(btn.dataset.id); });
     });

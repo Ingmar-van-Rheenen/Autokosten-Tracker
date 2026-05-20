@@ -6,6 +6,7 @@ import { MapController } from '../services/MapController.js';
 import { PrijsService } from '../services/PrijsService.js';
 import { RitController } from '../controllers/RitController.js';
 import { RittenController } from '../controllers/RittenController.js';
+import { RitDetailController } from '../controllers/RitDetailController.js';
 import { TankController } from '../controllers/TankController.js';
 import { StatsController } from '../controllers/StatsController.js';
 import { AutoManager } from '../controllers/AutoManager.js';
@@ -48,8 +49,12 @@ export class App {
       this._db, this._geo, this._kaart, () => this._onRitUpdate()
     );
     this._deelController = new DeelController(this._db);
+    this._ritDetail = new RitDetailController(this._db);
     this._rittenController = new RittenController(
-      this._db, () => this._onRitUpdate(), (id) => this._deelController.openModal(id)
+      this._db,
+      () => this._onRitUpdate(),
+      (id) => this._deelController.openModal(id),
+      (id) => this._ritDetail.open(id),
     );
     this._tankController = new TankController(
       this._db, () => this._onTankUpdate()
@@ -328,6 +333,7 @@ export class App {
       vasteKosten: this._vasteKosten,
       stats: this._stats,
       autoManager: this._autoManager,
+      ritDetail: this._ritDetail,
     });
     this._desktopDashboard.init();
 

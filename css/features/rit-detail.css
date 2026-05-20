@@ -1,0 +1,507 @@
+/* ── RIT-DETAIL OVERLAY ──────────────────────────────────────────────────────
+   Strava-achtige detailweergave van één rit. Volledig scherm op mobiel,
+   een gecentreerde kaart op desktop (≥1280px). Bediend door
+   js/controllers/RitDetailController.js.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.rd-overlay {
+  position: absolute;
+  inset: 0;
+  /* Onder --z-info-overlay (500) zodat de gedeelde info-overlay erbovenop
+     kan verschijnen wanneer je op de route-uitleg tikt. */
+  z-index: 470;
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.26s ease;
+}
+
+.rd-overlay.zichtbaar {
+  opacity: 1;
+}
+
+.rd-overlay.hidden {
+  display: none;
+}
+
+.rd-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 20, 0.62);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.rd-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+  transform: translateY(16px);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rd-overlay.zichtbaar .rd-card {
+  transform: translateY(0);
+}
+
+/* ── SLUITKNOP — los kind van de card zodat hij ook zonder kaart zichtbaar is ── */
+.rd-sluit {
+  position: absolute;
+  z-index: 6;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  left: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-elev);
+  color: var(--tekst);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease;
+}
+
+.rd-sluit:active {
+  transform: scale(0.9);
+}
+
+/* ── KAART ───────────────────────────────────────────────────────────────── */
+.rd-kaart-wrap {
+  position: relative;
+  flex-shrink: 0;
+  height: 44vh;
+  background: var(--surface);
+}
+
+.rd-kaart {
+  width: 100%;
+  height: 100%;
+  /* Eigen stacking-context: Leaflet's interne panes en controls hebben hoge
+     z-indexen (tot ~1000) die anders bovenop de sluitknop, de badge en de
+     veeg-hint uitkomen. isolation houdt ze binnen de kaart. */
+  isolation: isolate;
+}
+
+.rd-kaart .leaflet-control-attribution {
+  font-size: 9px;
+  padding: 1px 5px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.rd-overlay.rd-geen-kaart .rd-kaart-wrap {
+  display: none;
+}
+
+/* ── KAART-BADGE ─────────────────────────────────────────────────────────── */
+.rd-kaart-badge {
+  position: absolute;
+  z-index: 5;
+  bottom: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px 4px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--tekst);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24);
+}
+
+.rd-kaart-badge.hidden {
+  display: none;
+}
+
+.rd-kaart-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.rd-kaart-badge.globaal .rd-kaart-badge-dot {
+  background: var(--tekst-zwak);
+}
+
+/* ── VEEG-HINT — leert de gebruiker dat het paneel weg te swipen is ──────── */
+.rd-veeg-hint {
+  position: absolute;
+  z-index: 5;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px 6px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--tekst);
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32);
+  animation: rd-veeg-hint-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rd-veeg-hint.hidden {
+  display: none;
+}
+
+.rd-veeg-hint.uit {
+  animation: rd-veeg-hint-uit 0.34s ease forwards;
+}
+
+.rd-veeg-hint-pijl {
+  color: var(--primair);
+  animation: rd-veeg-pijl 1.3s ease-in-out infinite;
+}
+
+@keyframes rd-veeg-hint-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes rd-veeg-hint-uit {
+  to { opacity: 0; transform: translateX(-50%) translateY(8px); }
+}
+
+@keyframes rd-veeg-pijl {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
+}
+
+/* ── PANEEL ──────────────────────────────────────────────────────────────── */
+.rd-paneel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--bg);
+  border-radius: 22px 22px 0 0;
+  margin-top: -22px;
+  position: relative;
+  z-index: 2;
+  padding: 0 22px max(28px, env(safe-area-inset-bottom, 20px));
+}
+
+.rd-overlay.rd-geen-kaart .rd-paneel {
+  margin-top: 0;
+  border-radius: 0;
+  padding-top: 64px;
+}
+
+.rd-greep {
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--tekst-zwak);
+  opacity: 0.5;
+  margin: 10px auto 2px;
+}
+
+.rd-overlay.rd-geen-kaart .rd-greep {
+  display: none;
+}
+
+/* ── KOP ─────────────────────────────────────────────────────────────────── */
+.rd-kop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 0 2px;
+}
+
+.rd-chip {
+  align-self: flex-start;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--primair);
+  background: var(--green-bg);
+  padding: 3px 9px 2px;
+  border-radius: 999px;
+}
+
+.rd-titel {
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--tekst);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.rd-datum {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--tekst-zwak);
+}
+
+/* ── HERO — afstand ──────────────────────────────────────────────────────── */
+.rd-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 16px 0 2px;
+}
+
+.rd-hero-val {
+  font-family: var(--mono);
+  font-size: 2.7rem;
+  font-weight: 700;
+  color: var(--tekst);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.rd-hero-eenheid {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--tekst-zwak);
+}
+
+/* ── STATS-GRID ──────────────────────────────────────────────────────────── */
+.rd-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.rd-stat {
+  background: var(--bg-elev);
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rd-stat-breed {
+  grid-column: 1 / -1;
+}
+
+.rd-stat-lbl {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tekst-zwak);
+}
+
+.rd-stat-val {
+  font-family: var(--sans);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+/* ── ROUTE-HINT — uitleg waarom de route een rechte lijn / leeg is ───────── */
+.rd-hint {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 13px;
+  border-radius: 14px;
+  border: 1px solid var(--rand);
+  background: var(--bg-elev);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--sans);
+  transition: transform 0.12s ease;
+}
+
+.rd-hint.hidden {
+  display: none;
+}
+
+.rd-hint:active {
+  transform: scale(0.985);
+}
+
+.rd-hint-icoon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-bg);
+  color: var(--primair);
+}
+
+.rd-hint-tekst {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rd-hint-tekst strong {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+.rd-hint-tekst span {
+  font-size: 0.76rem;
+  color: var(--tekst-zwak);
+  line-height: 1.4;
+}
+
+.rd-hint-meer {
+  flex-shrink: 0;
+  display: flex;
+  color: var(--tekst-zwak);
+}
+
+/* ── NOTITIE ─────────────────────────────────────────────────────────────── */
+.rd-notitie {
+  margin-top: 14px;
+  background: var(--bg-elev);
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  padding: 13px 15px;
+}
+
+.rd-notitie.hidden {
+  display: none;
+}
+
+.rd-notitie-lbl {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tekst-zwak);
+  margin-bottom: 5px;
+}
+
+.rd-notitie-txt {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--tekst);
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+/* ── STAGGER-ENTRANCE van de paneel-inhoud ───────────────────────────────── */
+.rd-overlay.zichtbaar .rd-kop,
+.rd-overlay.zichtbaar .rd-hero,
+.rd-overlay.zichtbaar .rd-hint:not(.hidden),
+.rd-overlay.zichtbaar .rd-stats,
+.rd-overlay.zichtbaar .rd-notitie:not(.hidden) {
+  animation: rd-inhoud-op 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rd-overlay.zichtbaar .rd-hero {
+  animation-delay: 0.05s;
+}
+
+.rd-overlay.zichtbaar .rd-hint:not(.hidden) {
+  animation-delay: 0.08s;
+}
+
+.rd-overlay.zichtbaar .rd-stats {
+  animation-delay: 0.11s;
+}
+
+.rd-overlay.zichtbaar .rd-notitie:not(.hidden) {
+  animation-delay: 0.15s;
+}
+
+@keyframes rd-inhoud-op {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Eenmalige "bob" — doet het veeg-omlaag-gebaar voor bij de eerste opens. */
+.rd-card.rd-bob {
+  animation: rd-card-bob 0.62s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+@keyframes rd-card-bob {
+  0%   { transform: translateY(0); }
+  40%  { transform: translateY(22px); }
+  70%  { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
+}
+
+/* ── KLIKBARE RIT-RIJEN (lijst-bron) ─────────────────────────────────────── */
+.item-info {
+  cursor: pointer;
+}
+
+.dash-mini-rij[data-rit-id] {
+  cursor: pointer;
+}
+
+/* ── DESKTOP — gecentreerde kaart i.p.v. volledig scherm ─────────────────── */
+@media (min-width: 1280px) {
+  .rd-overlay {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rd-card {
+    width: min(860px, 92vw);
+    height: min(680px, 88vh);
+    border-radius: 22px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+    transform: translateY(0) scale(0.96);
+  }
+
+  .rd-overlay.zichtbaar .rd-card {
+    transform: translateY(0) scale(1);
+  }
+
+  .rd-kaart-wrap {
+    height: 320px;
+  }
+
+  .rd-paneel {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rd-overlay,
+  .rd-card {
+    transition: none;
+  }
+
+  .rd-overlay.zichtbaar .rd-kop,
+  .rd-overlay.zichtbaar .rd-hero,
+  .rd-overlay.zichtbaar .rd-hint:not(.hidden),
+  .rd-overlay.zichtbaar .rd-stats,
+  .rd-overlay.zichtbaar .rd-notitie:not(.hidden),
+  .rd-card.rd-bob,
+  .rd-veeg-hint,
+  .rd-veeg-hint-pijl {
+    animation: none;
+  }
+}

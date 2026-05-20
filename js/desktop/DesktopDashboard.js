@@ -137,6 +137,15 @@ export class DesktopDashboard {
       });
     });
 
+    // Klik op een rit-rij in de "Recente ritten"-widget → detailweergave.
+    // stopPropagation voorkomt dat de widget tegelijk uitklapt.
+    document.getElementById('dash-ritten-lijst')?.addEventListener('click', (e) => {
+      const rij = e.target.closest('[data-rit-id]');
+      if (!rij) return;
+      e.stopPropagation();
+      this._deps.ritDetail?.open?.(rij.dataset.ritId);
+    });
+
     document.getElementById('dash-backdrop')?.addEventListener('click', () => this._collapse());
 
     document.addEventListener('keydown', (e) => {

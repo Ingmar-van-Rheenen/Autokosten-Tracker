@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v65';
+const CACHE = 'tanklog-v68';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -33,6 +33,7 @@ const ASSETS = [
   '/css/features/vaste-kosten.css',
   '/css/features/betalingen.css',
   '/css/features/afreken.css',
+  '/css/features/rit-detail.css',
   '/css/desktop/layout.css',
   '/css/desktop/modals.css',
   '/css/desktop/widgets/saldo.css',
@@ -60,6 +61,7 @@ const ASSETS = [
   '/partials/desktop/modals.partial',
   '/partials/overlays/changelog.partial',
   '/partials/overlays/info.partial',
+  '/partials/overlays/rit-detail.partial',
   '/partials/overlays/install.partial',
   '/partials/modals/auto-toevoegen.partial',
   '/partials/modals/auto-wisselen.partial',
@@ -74,6 +76,7 @@ const ASSETS = [
   '/js/services/PrijsService.js',
   '/js/controllers/RitController.js',
   '/js/controllers/RittenController.js',
+  '/js/controllers/RitDetailController.js',
   '/js/controllers/TankController.js',
   '/js/controllers/StatsController.js',
   '/js/controllers/AutoManager.js',

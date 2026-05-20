@@ -3,8 +3,8 @@
 // (of voer het uit via DevTools → Snippets). Het script:
 //   • wist bestaande localStorage tanklog_v3
 //   • zet 2 auto's neer (1 benzine, 1 EV)
-//   • genereert ~6 maanden ritten, tankbeurten, onderhoud, vaste kosten en
-//     betalingen met enigszins realistische spreiding
+//   • genereert ~6 maanden ritten (deels met opgenomen GPS-track),
+//     tankbeurten, onderhoud, vaste kosten en betalingen
 //   • herlaadt de pagina zodat de app de nieuwe data inleest
 //
 // Aantal-knoppen onderaan kun je naar smaak aanpassen.
@@ -60,6 +60,40 @@
     return R * 2 * Math.atan2(Math.sqrt(sa), Math.sqrt(1 - sa)) * 1.25;
   };
 
+  // GPS-track: een vloeiend slingerend pad van start naar eind, alsof het met
+  // smart-tracking is opgenomen. Begin- en eindpunt liggen exact op start/eind;
+  // de tussenpunten krijgen een boog + lichte ruis zodat het geen rechte lijn is.
+  const genereerTrack = (start, eind, punten = 48) => {
+    const dLat = eind.lat - start.lat;
+    const dLng = eind.lng - start.lng;
+    // Loodrechte richting (90° gedraaid) waarlangs de route 'boogt'
+    const perpLat = -dLng;
+    const perpLng = dLat;
+    const amp = rand(0.04, 0.16);          // boog-amplitude (fractie van route)
+    const golven = rand(0.5, 1.8);         // aantal slingers
+    const fase = rand(0, Math.PI);
+    const track = [];
+    for (let i = 0; i <= punten; i++) {
+      const t = i / punten;
+      let lat = start.lat + dLat * t;
+      let lng = start.lng + dLng * t;
+      // sin(pi*t) houdt de boog op 0 bij start en eind
+      const boog =
+        Math.sin(Math.PI * t) *
+        Math.sin(Math.PI * golven * t + fase) *
+        amp;
+      lat += perpLat * boog;
+      lng += perpLng * boog;
+      // Lichte GPS-ruis op de tussenpunten (endpoints exact laten)
+      if (i > 0 && i < punten) {
+        lat += rand(-0.0009, 0.0009);
+        lng += rand(-0.0013, 0.0013);
+      }
+      track.push([+lat.toFixed(5), +lng.toFixed(5)]);
+    }
+    return track;
+  };
+
   // ── Auto's ─────────────────────────────────────────────────────────────────
   const autoBenzine = {
     id: uid(),
@@ -94,6 +128,11 @@
     let eind = pick(NL_PLEKKEN);
     while (eind === start) eind = pick(NL_PLEKKEN);
     const km = +haversineKm(start, eind).toFixed(1);
+    // ~55% van de ritten is "opgenomen" met smart-tracking en krijgt een
+    // GPS-track; de rest blijft een rechte lijn (alleen start + eind).
+    const gps_track = Math.random() < 0.55
+      ? genereerTrack(start, eind, randInt(36, 68))
+      : null;
     ritten.push({
       id: uid(),
       auto_id: auto.id,
@@ -106,7 +145,7 @@
         'Boodschappen', 'Werk', 'Verjaardag', 'Familiebezoek', 'Sport',
       ]) : null,
       km_stand: null,
-      gps_track: null,
+      gps_track,
     });
   }
   ritten.sort((a, b) => new Date(b.datum) - new Date(a.datum));
@@ -215,7 +254,7 @@
     onderhoud,
     vaste_kosten,
     betalingen,
-    smart_tracking: false,
+    smart_tracking: true,
     betaalverzoek_username: '',
     revolut_username: 'ingmar',
     tikkie_handle: '',
@@ -230,6 +269,7 @@
   console.log('[Tanklog] testdata gezaaid:', {
     autos: autos.length,
     ritten: ritten.length,
+    ritten_met_gps: ritten.filter((r) => r.gps_track).length,
     tankbeurten: tankbeurten.length,
     onderhoud: onderhoud.length,
     vaste_kosten: vaste_kosten.length,

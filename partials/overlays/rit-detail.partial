@@ -1,0 +1,75 @@
+<!-- ── OVERLAY: RIT-DETAIL ────────────────────────────────────────────────────
+     Strava-achtige detailweergave van één rit: een kaart met de gereden route
+     plus statistieken (afstand, kosten, tijd, route-type). Bediend door
+     js/controllers/RitDetailController.js — geopend vanuit de ritten-lijst
+     (mobiel) en de "Recente ritten"-widget (desktop).
+     ─────────────────────────────────────────────────────────────────────── -->
+<div id="rit-detail-overlay" class="rd-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="rd-titel">
+  <div class="rd-backdrop" id="rd-backdrop"></div>
+
+  <div class="rd-card" role="document">
+    <button id="rd-sluit" class="rd-sluit" type="button" aria-label="Sluiten">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+
+    <div class="rd-kaart-wrap">
+      <div id="rd-kaart" class="rd-kaart"></div>
+      <div class="rd-kaart-badge hidden" id="rd-kaart-badge">
+        <span class="rd-kaart-badge-dot"></span>
+        <span id="rd-kaart-badge-txt">GPS-route</span>
+      </div>
+      <div class="rd-veeg-hint hidden" id="rd-veeg-hint" aria-hidden="true">
+        <svg class="rd-veeg-hint-pijl" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M19 12l-7 7-7-7" />
+        </svg>
+        <span>Veeg omlaag om te sluiten</span>
+      </div>
+    </div>
+
+    <div class="rd-paneel">
+      <div class="rd-greep"></div>
+
+      <div class="rd-kop">
+        <div class="rd-chip">RIT</div>
+        <h2 class="rd-titel" id="rd-titel">Rit</h2>
+        <div class="rd-datum" id="rd-datum">—</div>
+      </div>
+
+      <div class="rd-hero">
+        <span class="rd-hero-val" id="rd-hero-km">—</span>
+        <span class="rd-hero-eenheid">km gereden</span>
+      </div>
+
+      <button type="button" class="rd-hint hidden" id="rd-route-hint">
+        <span class="rd-hint-icoon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4M12 8h.01" />
+          </svg>
+        </span>
+        <span class="rd-hint-tekst">
+          <strong id="rd-hint-titel">Rechte lijn op de kaart</strong>
+          <span id="rd-hint-sub">Smart-tracking stond uit tijdens deze rit.</span>
+        </span>
+        <span class="rd-hint-meer" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </span>
+      </button>
+
+      <div class="rd-stats" id="rd-stats"></div>
+
+      <div class="rd-notitie hidden" id="rd-notitie-blok">
+        <div class="rd-notitie-lbl">Notitie</div>
+        <p class="rd-notitie-txt" id="rd-notitie-txt"></p>
+      </div>
+    </div>
+  </div>
+</div>

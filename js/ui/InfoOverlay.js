@@ -19,6 +19,14 @@ const CONFIGS = {
     btn: 'Begrepen',
     visual: _kmVisual,
   },
+  route: {
+    chip: 'INFO',
+    chipKleur: '#7ab87a',
+    titel: 'De route op de kaart',
+    tekst: 'Een rit toont een rechte lijn — of helemaal geen route — als smart-tracking uit stond. De app kent dan alleen het start- en eindpunt en trekt daar een rechte lijn tussen.\n\nZet smart-tracking aan bij Instellingen. Tijdens een rit legt de app dan met GPS je werkelijk gereden route vast — die zie je hier daarna terug.',
+    btn: 'Begrepen',
+    visual: _kmVisual,
+  },
   kaart: {
     chip: 'INFO',
     chipKleur: '#7ab87a',

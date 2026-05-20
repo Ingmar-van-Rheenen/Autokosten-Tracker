@@ -1,6 +1,7 @@
 // ── KaartWidget ─────────────────────────────────────────────────────────────
 // SVG-thumbnail van de laatste rit met gps_track. Normaliseert lat/lng naar
 // 320×120 viewBox; toont datum + km in de footer-overlay.
+import { InfoOverlay } from '../../ui/InfoOverlay.js';
 
 export class KaartWidget {
   constructor(db) {
@@ -64,7 +65,15 @@ export class KaartWidget {
     if (!wrap.querySelector('.dash-kaart-leeg')) {
       const p = document.createElement('p');
       p.className = 'dash-kaart-leeg';
-      p.textContent = 'Smart-tracking nog niet gebruikt. Log een rit met GPS-tracking om de route hier te zien.';
+      p.setAttribute('role', 'button');
+      p.tabIndex = 0;
+      p.style.cursor = 'pointer';
+      p.textContent = 'Nog geen rit met GPS-route. Tik voor uitleg over smart-tracking.';
+      const open = () => InfoOverlay.toon('route');
+      p.addEventListener('click', open);
+      p.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
       wrap.appendChild(p);
     }
   }

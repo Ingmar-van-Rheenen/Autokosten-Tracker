@@ -24,7 +24,7 @@ export class RittenWidget {
       });
       const km = Number(r.km || 0).toFixed(1).replace('.', ',');
       return `
-        <li class="dash-mini-rij">
+        <li class="dash-mini-rij" data-rit-id="${r.id}">
           <div>
             <div class="dash-mini-naam">${km} km</div>
             <span class="dash-mini-sub">${datum}${r.notitie ? ' · ' + Utils.esc(r.notitie) : ''}</span>
