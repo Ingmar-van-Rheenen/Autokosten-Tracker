@@ -5,6 +5,11 @@
    ─────────────────────────────────────────── */
 
 #modal-confirm .cm-sheet {
+  /* position+z-index nodig: zonder dit schildert de absolute .cm-backdrop
+     (positioned) bovenop de van zichzelf statische sheet, waardoor het waas
+     én de klik-vanger over de knoppen heen valt. */
+  position: relative;
+  z-index: 1;
   gap: var(--ruimte-3);
   padding: 24px;
   padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
