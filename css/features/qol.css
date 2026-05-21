@@ -1,0 +1,175 @@
+/* ── QOL FEATURES ────────────────────────────────────────────────────────────
+   Voltank-melding (saldo-hero meta-regel) + prullenbak (instellingen-tab).
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── VOLTANK-MELDING ─────────────────────────────────────────────────────────
+   Een rustige meta-regel onder de saldo-uitleg — bewust GEEN pill of knop,
+   zodat het saldo-bedrag zelf het brandpunt van de hero blijft. Een dunne
+   icoon + tekst, in dezelfde gedempte stijl als de saldo-uitleg.
+   ────────────────────────────────────────────────────────────────────────── */
+.saldo-meta {
+  /* Block-level flex met justify-content:center — gegarandeerd gecentreerd
+     in de hero, ongeacht text-align-eigenaardigheden. */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--saldo-hero-tekst-zwak, rgba(255, 255, 255, 0.5));
+  animation: saldo-meta-in 0.4s ease both;
+}
+
+.saldo-meta.hidden {
+  display: none;
+}
+
+.saldo-meta-icoon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+/* Bijna leeg (betrouwbare schatting) → subtiele amber hint, geen alarm. */
+.saldo-meta[data-niveau='laag'] {
+  color: #e3b367;
+}
+.saldo-meta[data-niveau='laag'] .saldo-meta-icoon {
+  opacity: 1;
+}
+
+@keyframes saldo-meta-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saldo-meta {
+    animation: none;
+  }
+}
+
+/* ── PRULLENBAK ──────────────────────────────────────────────────────────── */
+.trash-info {
+  font-size: 0.8rem;
+  color: var(--tekst-zwak);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.trash-lijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trash-leeg {
+  font-size: 0.86rem;
+  color: var(--tekst-zwak);
+  text-align: center;
+  padding: 8px 0;
+}
+
+.trash-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg);
+  border: 1px solid var(--rand);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.trash-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.trash-item-titel {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.trash-item-type {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primair);
+  background: var(--green-bg);
+  padding: 2px 7px 1px;
+  border-radius: 999px;
+}
+
+.trash-item-oms {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--tekst);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trash-item-sub {
+  font-size: 0.72rem;
+  color: var(--tekst-zwak);
+  margin-top: 2px;
+}
+
+.trash-item-acties {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.trash-herstel {
+  border: 1px solid var(--rand);
+  background: var(--bg-elev);
+  color: var(--primair);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.trash-herstel:hover {
+  border-color: var(--primair);
+  background: var(--green-bg);
+}
+
+.trash-purge {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--tekst-zwak);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.trash-purge:hover {
+  background: rgba(201, 64, 64, 0.12);
+  color: var(--gevaar);
+}

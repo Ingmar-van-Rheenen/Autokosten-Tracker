@@ -5,6 +5,14 @@
       <div class="saldo-hero-lbl">SALDO</div>
       <div id="saldo-val" class="saldo-hero-val">€ —</div>
       <div id="saldo-uitleg" class="saldo-hero-uitleg"></div>
+      <div id="saldo-voltank" class="saldo-meta hidden" data-niveau="ok">
+        <svg class="saldo-meta-icoon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 20V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14M3 20h12" />
+          <path d="M14 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V9l-3-3" />
+        </svg>
+        <span id="saldo-voltank-tekst">—</span>
+      </div>
       <button id="afreken-knop" class="btn-form-sec saldo-afreken-knop" type="button">Afrekenen →</button>
     </div>
     <div class="tab-sectie-label" id="tank-sectie-lbl">TANKBEURT TOEVOEGEN</div>

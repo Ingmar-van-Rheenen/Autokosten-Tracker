@@ -47,6 +47,43 @@ export class StatsController {
     document.getElementById('saldo-uitleg').textContent = saldo >= 0
       ? 'Je hebt meer getankt dan gereden — tegoed'
       : 'Je hebt meer gereden dan getankt — bij te storten';
+
+    this._updateVoltank(auto);
+  }
+
+  /**
+   * Werk de voltank-melding onder het saldo bij. Bewust een rustige,
+   * gedempte meta-regel — geen pill of gauge — zodat het saldo-bedrag
+   * het brandpunt van de hero blijft.
+   */
+  _updateVoltank(auto) {
+    const blok = document.getElementById('saldo-voltank');
+    const tekstEl = document.getElementById('saldo-voltank-tekst');
+    if (!blok || !tekstEl) return;
+
+    const ritten = this._db.getAutoRitten(auto.id) || [];
+    const tank = this._db.getAutoTankbeurten(auto.id) || [];
+    const v = Utils.voltankVoorspelling(ritten, tank, auto);
+
+    if (!v) {
+      blok.classList.add('hidden');
+      return;
+    }
+
+    const isEV = auto.type === 'elektrisch';
+
+    if (!v.betrouwbaar) {
+      // Verder gereden dan de laatste tankbeurt dekt — waarschijnlijk een
+      // niet-gelogde tankbeurt. Toon een neutraal feit, geen alarm.
+      blok.dataset.niveau = 'neutraal';
+      tekstEl.textContent =
+        `${Math.round(v.gereden)} km sinds je laatste ${isEV ? 'laadbeurt' : 'tankbeurt'}`;
+    } else {
+      const km = Math.round(v.km);
+      blok.dataset.niveau = km <= 50 ? 'laag' : 'ok';
+      tekstEl.textContent = `Nog ~${km} km tot ${isEV ? 'laden' : 'tanken'}`;
+    }
+    blok.classList.remove('hidden');
   }
 
   /**

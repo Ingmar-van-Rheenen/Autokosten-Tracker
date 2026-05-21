@@ -8,6 +8,7 @@ import { RitController } from '../controllers/RitController.js';
 import { RittenController } from '../controllers/RittenController.js';
 import { RitDetailController } from '../controllers/RitDetailController.js';
 import { MaandRecapController } from '../controllers/MaandRecapController.js';
+import { TrashController } from '../controllers/TrashController.js';
 import { StorageInfo } from '../ui/StorageInfo.js';
 import { NotificatieController } from '../ui/NotificatieController.js';
 import { TankController } from '../controllers/TankController.js';
@@ -55,6 +56,7 @@ export class App {
     this._ritDetail = new RitDetailController(this._db);
     this._maandRecap = new MaandRecapController(this._db, { afreken: this._afreken });
     this._notif = new NotificatieController(this._db);
+    this._trash = new TrashController(this._db);
     this._rittenController = new RittenController(
       this._db,
       () => this._onRitUpdate(),
@@ -369,6 +371,8 @@ export class App {
     this._bindDbUpdated();
     this._vasteKosten.render();
     this._betalingen.render();
+    this._trash.render();
+    this._updateHeatmap();
 
     // Desktop dashboard (≥1280px) — render altijd, CSS regelt zichtbaarheid
     this._desktopDashboard = new DesktopDashboard(this._db, {
@@ -609,6 +613,17 @@ export class App {
         Utils.toast('Kaart-instellingen opgeslagen ✓');
       });
     }
+
+    // Heatmap-toggle
+    const heatChk = document.getElementById('chk-heatmap');
+    if (heatChk) {
+      heatChk.checked = this._db.getKaartHeatmapAan();
+      heatChk.addEventListener('change', () => {
+        this._db.setKaartHeatmapAan(heatChk.checked);
+        this._updateHeatmap();
+        Utils.toast(heatChk.checked ? 'Heatmap aan ✓' : 'Heatmap uit');
+      });
+    }
     document.getElementById('btn-stadia-info')?.addEventListener('click', () => {
       InfoOverlay.toon('kaart');
     });
@@ -656,6 +671,7 @@ export class App {
     this._stats.updateOverzicht();
     this._stats.updateInstellingen?.();
     this._bottomSheet?.updateQuickStats();
+    this._updateHeatmap();
   }
 
   // ── iOS snelkoppeling ─────────────────────────────────────────────────────
@@ -793,11 +809,45 @@ export class App {
 
     this._huidigTabIndex = nieuweIndex;
 
-    if (tab === 'kaart') this._kaart.invalidateSize();
+    if (tab === 'kaart') { this._kaart.invalidateSize(); this._updateHeatmap(); }
     if (tab === 'saldo') { this._stats.updateSaldo(); this._tankController.render(); this._tankController.laadStandaard(); }
     if (tab === 'overzicht') { this._stats.updateOverzicht(); this._onderhoudController.render(); this._vasteKosten.render(); }
-    if (tab === 'instellingen') { this._stats.updateInstellingen(); this._betalingen.render(); }
+    if (tab === 'instellingen') { this._stats.updateInstellingen(); this._betalingen.render(); this._trash.render(); }
     if (tab === 'ritten') this._rittenController.render();
+  }
+
+  /**
+   * Render of verberg de heatmap op de hoofdkaart, afhankelijk van de
+   * instelling. Verzamelt alle gereden punten van de geselecteerde auto:
+   * GPS-tracks indien aanwezig, anders het start- en eindpunt.
+   */
+  _updateHeatmap() {
+    if (!this._kaart || typeof this._kaart.toonHeatmap !== 'function') return;
+    if (!this._db.getKaartHeatmapAan()) {
+      this._kaart.verbergHeatmap();
+      return;
+    }
+    const auto = this._db.getGeselecteerdeAuto();
+    if (!auto) { this._kaart.verbergHeatmap(); return; }
+
+    const punten = [];
+    (this._db.getAutoRitten(auto.id) || []).forEach((r) => {
+      if (Array.isArray(r.gps_track) && r.gps_track.length) {
+        r.gps_track.forEach((p) => {
+          if (Array.isArray(p) && p.length >= 2
+              && Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1]))) {
+            punten.push([Number(p[0]), Number(p[1])]);
+          }
+        });
+      } else {
+        [r.start, r.eind].forEach((pt) => {
+          if (pt && Number.isFinite(pt.lat) && Number.isFinite(pt.lng)) {
+            punten.push([pt.lat, pt.lng]);
+          }
+        });
+      }
+    });
+    this._kaart.toonHeatmap(punten);
   }
 
   // ── PWA install overlay (gate) ────────────────────────────────────────────
@@ -912,6 +962,7 @@ export class App {
     this._stats.updateSaldo();
     this._stats.updateOverzicht();
     this._bottomSheet?.updateQuickStats();
+    this._updateHeatmap();
     Utils.toast('Auto gewisseld ✓');
   }
 

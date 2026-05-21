@@ -60,6 +60,8 @@ export class MapController {
     // Live-polyline state (v3) — wordt gevuld tijdens actieve rit
     this._livePolyline = null;
     this._liveTrack = null;
+    // Heatmap-laag (v3.3) — alle gereden punten, optioneel via instellingen
+    this._heatLayer = null;
     // Locate-me callback (gezet door App.js)
     this._onLocateMe = null;
 
@@ -331,6 +333,45 @@ export class MapController {
     if (kmh < 80) return '#7ab87a';        // regio — lichtgroen
     if (kmh < 120) return '#f59e0b';       // snelweg — oranje
     return '#c94040';                       // hard — rood
+  }
+
+  // ── Heatmap (v3.3) ───────────────────────────────────────────────────────
+  // Toont alle gereden punten als warmtekaart. Punten worden door de aanroeper
+  // verzameld uit gps_track-arrays + start/eind van ritten zonder track.
+
+  /**
+   * Render de heatmap-laag met een lijst [[lat,lng], ...]. Vereist de
+   * leaflet.heat-plugin (L.heatLayer). Stille no-op als die ontbreekt.
+   * @param {Array<[number,number]>} punten
+   */
+  toonHeatmap(punten) {
+    if (!this._map || typeof L === 'undefined' || typeof L.heatLayer !== 'function') return;
+    this.verbergHeatmap();
+    if (!Array.isArray(punten) || !punten.length) return;
+
+    this._heatLayer = L.heatLayer(punten, {
+      radius: 22,
+      blur: 18,
+      maxZoom: 14,
+      minOpacity: 0.35,
+      gradient: {
+        0.2: '#4e7d52',
+        0.5: '#7ab87a',
+        0.8: '#f59e0b',
+        1.0: '#c94040',
+      },
+    }).addTo(this._map);
+  }
+
+  verbergHeatmap() {
+    if (this._heatLayer && this._map) {
+      this._map.removeLayer(this._heatLayer);
+    }
+    this._heatLayer = null;
+  }
+
+  heatmapActief() {
+    return !!this._heatLayer;
   }
 
   // ── Tankstations ─────────────────────────────────────────────────────────

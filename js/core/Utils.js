@@ -395,6 +395,66 @@ export class Utils {
   }
 
   /**
+   * Voorspel hoeveel km er nog te rijden is op de laatste tankbeurt/laadbeurt.
+   * Werkt met km-standen indien beschikbaar (nauwkeurig), anders met het
+   * gemiddelde verbruik en de getankte hoeveelheid (schatting).
+   *
+   * @param {Array} ritten       Ritten van de auto
+   * @param {Array} tankbeurten  Tankbeurten van de auto
+   * @param {Object} auto        Auto-record (voor km_per_liter / verbruik)
+   * @returns {{km:number, basis:'kmstand'|'schatting'}|null}
+   *          km = resterende kilometers (≥0), of null als er geen voorspelling
+   *          mogelijk is (geen tankbeurten / geen verbruiksdata).
+   */
+  static voltankVoorspelling(ritten, tankbeurten, auto) {
+    if (!auto || !Array.isArray(tankbeurten) || !tankbeurten.length) return null;
+
+    // Pak de meest recente tankbeurt.
+    const gesorteerd = tankbeurten
+      .slice()
+      .sort((a, b) => Date.parse(b.datum) - Date.parse(a.datum));
+    const laatste = gesorteerd[0];
+    if (!laatste) return null;
+
+    const isEV = auto.type === 'elektrisch';
+    // Hoeveelheid energie in de laatste beurt (liters of kWh).
+    const hoeveelheid = Number(laatste.liters) || 0;
+    if (hoeveelheid <= 0) return null;
+
+    // ── Range die de laatste beurt theoretisch geeft ───────────────────────
+    let range;
+    if (isEV) {
+      // km_per_kwh staat soms op de auto; anders afleiden uit kwh_per_100km.
+      const kmPerKwh = Number(auto.km_per_kwh) > 0
+        ? Number(auto.km_per_kwh)
+        : (Number(auto.kwh_per_100km) > 0 ? 100 / Number(auto.kwh_per_100km) : 6);
+      range = hoeveelheid * kmPerKwh;
+    } else {
+      range = hoeveelheid * (Number(auto.km_per_liter) || 14);
+    }
+    if (!(range > 0)) return null;
+
+    // ── Hoeveel is er al gereden sinds die tankbeurt? ──────────────────────
+    const tankTs = Date.parse(laatste.datum);
+    const gveld = (r) => Number(r.km) || 0;
+    const gereden = (ritten || [])
+      .filter((r) => {
+        const ts = Date.parse(r.datum);
+        return !Number.isNaN(ts) && ts >= tankTs;
+      })
+      .reduce((s, r) => s + gveld(r), 0);
+
+    const resterend = Math.max(0, range - gereden);
+    const pct = range > 0 ? Math.min(1, Math.max(0, resterend / range)) : 0;
+    // Betrouwbaar zolang er minder is gereden dan de laatste tankbeurt aan
+    // range biedt. Daarboven mist er vrijwel zeker een niet-gelogde tankbeurt
+    // — dan is een 'tank is leeg'-melding misleidend, dus markeren we 'm
+    // als onbetrouwbaar en toont de UI een neutrale tekst.
+    const betrouwbaar = gereden < range;
+    return { km: resterend, pct, range, gereden, betrouwbaar, basis: 'schatting' };
+  }
+
+  /**
    * Filter items met een `datum`-veld op periode.
    * 'maand'  → huidige kalendermaand (jaar+maand).
    * 'jaar'   → huidige kalenderjaar.

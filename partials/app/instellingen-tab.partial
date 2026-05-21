@@ -48,6 +48,17 @@
         data-form-type="other"
       />
       <button id="btn-stadia-save" class="btn-form-primary">Opslaan</button>
+      <div class="form-kaart-scheiding"></div>
+      <div class="smart-toggle-rij">
+        <div class="smart-toggle-info-col">
+          <div class="smart-toggle-naam">Heatmap</div>
+          <div class="smart-toggle-sub">Toon al je gereden routes als warmtekaart</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="chk-heatmap" />
+          <span class="toggle-knop"></span>
+        </label>
+      </div>
     </div>
 
     <div class="tab-sectie-label">AUTO</div>
@@ -289,6 +300,14 @@
       </div>
       <button id="btn-clear-tiles" class="btn-form-sec">Kaart-cache wissen</button>
       <button id="btn-update-check" class="btn-form-sec">Check op updates</button>
+    </div>
+
+    <!-- RECENT VERWIJDERD (prullenbak) -->
+    <div class="tab-sectie-label">RECENT VERWIJDERD</div>
+    <div class="form-kaart">
+      <p class="trash-info">Verwijderde items blijven 30 dagen bewaard en kunnen hier worden teruggezet.</p>
+      <ul id="trash-lijst" class="trash-lijst"></ul>
+      <button id="trash-leeg-knop" class="btn-form-sec hidden">Prullenbak legen</button>
     </div>
 
     <div class="tab-sectie-label">DATA</div>

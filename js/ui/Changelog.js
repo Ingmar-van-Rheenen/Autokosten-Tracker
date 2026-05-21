@@ -7,6 +7,16 @@ const SEEN_KEY = 'tanklog_changelog_seen';
 
 export const VERSIES = [
   {
+    versie: 9,
+    label: '3.3',
+    datum: '2026-05-20',
+    items: [
+      'Prullenbak: verwijderde ritten en tankbeurten blijven 30 dagen terugzetbaar',
+      'Heatmap: zie al je gereden routes als warmtekaart (aan te zetten bij Kaart-instellingen)',
+      'Voltank-voorspeller: zie hoeveel km je nog kunt rijden op je laatste tankbeurt',
+    ],
+  },
+  {
     versie: 8,
     label: '3.2',
     datum: '2026-05-20',

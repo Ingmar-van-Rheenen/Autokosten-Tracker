@@ -51,6 +51,17 @@
    v3: marquee oppervlak boven Tank-tab. Thema-aware gradient,
    subtiele radiale highlight links-boven, hero-typografie. */
 .saldo-hero {
+  /* Basis-tokens — gelden voor het klassieke (default) thema en elk thema
+     zonder eigen override. De hero is altijd een donker oppervlak, dus de
+     tekst is wit ongeacht het app-thema. Eerder ontbraken deze voor
+     'klassiek', waardoor label/uitleg/knop onzichtbaar donker werden. */
+  --saldo-hero-bg-top: #1b2537;
+  --saldo-hero-bg-bot: #2a3850;
+  --saldo-hero-tekst: #ffffff;
+  --saldo-hero-tekst-zwak: rgba(255, 255, 255, 0.55);
+  --saldo-hero-knop-bg: rgba(255, 255, 255, 0.08);
+  --saldo-hero-knop-border: rgba(255, 255, 255, 0.18);
+
   position: relative;
   overflow: hidden;
   background: var(--saldo-hero-bg-top, #1b2537);
@@ -59,7 +70,7 @@
   isolation: isolate;
 }
 
-/* Thema-specifieke kleuren voor de hero (definieer indien overschreven) */
+/* Thema-specifieke overrides — alleen donker wijkt echt af van de basis. */
 html[data-thema='licht'] .saldo-hero {
   --saldo-hero-bg-top: #1b2537;
   --saldo-hero-bg-bot: #2a3850;
@@ -129,13 +140,16 @@ html[data-thema='auto'] .saldo-hero {
   font-weight: var(--weight-body);
 }
 
-/* v3: Afrekenen-knop op de saldo-hero (donker oppervlak) */
-.saldo-afreken-knop {
-  margin-top: 16px;
+/* v3: Afrekenen-knop op de saldo-hero (donker oppervlak).
+   Selector met .saldo-hero ervoor zodat deze ghost-stijl wint van het
+   later-geïmporteerde .btn-form-sec (cream) — anders werd het een luide
+   crème-pil die het saldo-bedrag visueel beconcurreerde. */
+.saldo-hero .saldo-afreken-knop {
+  margin-top: 14px;
   background: var(--saldo-hero-knop-bg);
-  color: var(--saldo-hero-tekst);
+  color: var(--saldo-hero-tekst-zwak);
   border: 1px solid var(--saldo-hero-knop-border);
-  padding: 10px 20px;
+  padding: 9px 18px;
   border-radius: var(--radius-pill);
   font-family: var(--mono);
   font-size: var(--font-xs);
@@ -147,15 +161,16 @@ html[data-thema='auto'] .saldo-hero {
   align-items: center;
   gap: 6px;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s, transform 0.1s, border-color 0.15s;
+  transition: background 0.15s, transform 0.1s, border-color 0.15s, color 0.15s;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-.saldo-afreken-knop:hover {
+.saldo-hero .saldo-afreken-knop:hover {
   border-color: rgba(255, 255, 255, 0.32);
+  color: var(--saldo-hero-tekst);
 }
-.saldo-afreken-knop:active {
+.saldo-hero .saldo-afreken-knop:active {
   background: rgba(255, 255, 255, 0.18);
   transform: scale(0.97);
 }

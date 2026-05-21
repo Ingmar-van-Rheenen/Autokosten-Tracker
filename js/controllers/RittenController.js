@@ -185,6 +185,8 @@ export class RittenController {
         dd.ritten.unshift(snapshot);
         this._db.save(dd);
       }
+      // Undo: haal het item ook weer uit de prullenbak.
+      this._db.purgeTrashByItemId?.(id);
       this.render();
       this._onUpdate();
       Utils.toast('Rit hersteld ✓');

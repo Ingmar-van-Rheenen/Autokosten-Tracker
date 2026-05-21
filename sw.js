@@ -1,5 +1,5 @@
 // ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v73';
+const CACHE = 'tanklog-v79';
 const TILE_CACHE = 'tanklog-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
@@ -37,6 +37,7 @@ const ASSETS = [
   '/css/features/rit-detail.css',
   '/css/features/maand-recap.css',
   '/css/features/systeem.css',
+  '/css/features/qol.css',
   '/css/desktop/layout.css',
   '/css/desktop/modals.css',
   '/css/desktop/widgets/saldo.css',
@@ -82,6 +83,7 @@ const ASSETS = [
   '/js/controllers/RittenController.js',
   '/js/controllers/RitDetailController.js',
   '/js/controllers/MaandRecapController.js',
+  '/js/controllers/TrashController.js',
   '/js/controllers/TankController.js',
   '/js/controllers/StatsController.js',
   '/js/controllers/AutoManager.js',
@@ -121,6 +123,7 @@ const ASSETS = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
   'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
+  'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js',
   'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
   // Google Fonts CSS bewust NIET in precache — laat de browser cachen.
 ];

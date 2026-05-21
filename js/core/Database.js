@@ -202,6 +202,121 @@ export class Database {
     };
   }
 
+  // ── Kaart-instellingen ────────────────────────────────────────────────────
+  getKaartHeatmapAan() { return !!this.load().kaart_heatmap_aan; }
+  setKaartHeatmapAan(aan) {
+    const d = this.load();
+    d.kaart_heatmap_aan = !!aan;
+    this._schrijf(d);
+    this._emit('setKaartHeatmapAan', { aan: d.kaart_heatmap_aan });
+  }
+
+  // ── Trash (v3) ────────────────────────────────────────────────────────────
+  // Verwijderde records gaan naar `trash` met type + originele payload + datum.
+  // Auto-purge na 30 dagen, handmatige recover via instellingen-tab.
+
+  /** Geef alle nog-niet-verlopen prullenbak-items terug (jongste eerst). */
+  getTrash() {
+    this._pruneOudeTrash();
+    return (this.load().trash || []).slice();
+  }
+
+  /** Verplaats een item naar de prullenbak. Type bv. 'rit', 'tankbeurt', etc. */
+  _naarTrash(type, item) {
+    if (!item) return;
+    const d = this.load();
+    d.trash = d.trash || [];
+    d.trash.unshift({
+      id: Utils.uid(),
+      type,
+      datum: new Date().toISOString(),
+      item: JSON.parse(JSON.stringify(item)),
+    });
+    // Houd 'm overzichtelijk: max 200 items en niets ouder dan 30 dagen.
+    const grens = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    d.trash = d.trash.filter((t) => Date.parse(t.datum) >= grens).slice(0, 200);
+    this._schrijf(d);
+  }
+
+  /** Pruneer items > 30 dagen oud. Wordt door getTrash() impliciet aangeroepen. */
+  _pruneOudeTrash() {
+    const d = this.load();
+    if (!Array.isArray(d.trash) || !d.trash.length) return;
+    const grens = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const voor = d.trash.length;
+    d.trash = d.trash.filter((t) => Date.parse(t.datum) >= grens);
+    if (d.trash.length !== voor) this._schrijf(d);
+  }
+
+  /** Herstel een item uit de prullenbak naar de juiste collectie. */
+  herstelUitTrash(trashId) {
+    if (!trashId) return false;
+    const d = this.load();
+    d.trash = d.trash || [];
+    const idx = d.trash.findIndex((t) => t.id === trashId);
+    if (idx === -1) return false;
+    const entry = d.trash[idx];
+    if (!entry || !entry.item) return false;
+
+    const arrPerType = {
+      rit: 'ritten',
+      tankbeurt: 'tankbeurten',
+      onderhoud: 'onderhoud',
+      vaste_kost: 'vaste_kosten',
+      betaling: 'betalingen',
+    };
+    const veld = arrPerType[entry.type];
+    if (!veld) return false;
+
+    d[veld] = d[veld] || [];
+    // Voorkom duplicaten op id
+    if (entry.item.id && d[veld].some((x) => x.id === entry.item.id)) {
+      d.trash.splice(idx, 1);
+      this._schrijf(d);
+      this._emit('herstelUitTrash', { id: trashId, type: entry.type });
+      return true;
+    }
+    d[veld].unshift(entry.item);
+    d.trash.splice(idx, 1);
+    this._schrijf(d);
+    this._emit('herstelUitTrash', { id: trashId, type: entry.type });
+    return true;
+  }
+
+  /** Definitief verwijderen uit de prullenbak. */
+  purgeTrashItem(trashId) {
+    if (!trashId) return;
+    const d = this.load();
+    d.trash = (d.trash || []).filter((t) => t.id !== trashId);
+    this._schrijf(d);
+    this._emit('purgeTrashItem', { id: trashId });
+  }
+
+  /**
+   * Verwijder prullenbak-entries die verwijzen naar een origineel item-id.
+   * Gebruikt door de swipe-delete-undo: als de gebruiker de verwijdering
+   * terugdraait, hoort het item niet (ook nog) in de prullenbak te staan.
+   */
+  purgeTrashByItemId(itemId) {
+    if (!itemId) return;
+    const d = this.load();
+    if (!Array.isArray(d.trash) || !d.trash.length) return;
+    const voor = d.trash.length;
+    d.trash = d.trash.filter((t) => !(t.item && t.item.id === itemId));
+    if (d.trash.length !== voor) {
+      this._schrijf(d);
+      this._emit('purgeTrashItem', { itemId });
+    }
+  }
+
+  /** Maak de prullenbak helemaal leeg. */
+  purgeAlleTrash() {
+    const d = this.load();
+    d.trash = [];
+    this._schrijf(d);
+    this._emit('purgeAlleTrash', null);
+  }
+
   setNotificatieInstellingen(patch) {
     if (!patch || typeof patch !== 'object') return;
     const d = this.load();
@@ -294,10 +409,11 @@ export class Database {
   deleteRit(id) {
     if (!id) return;
     const d = this.load();
-    const voor = d.ritten.length;
+    const weg = d.ritten.find((r) => r.id === id);
+    if (!weg) return;
     d.ritten = d.ritten.filter((r) => r.id !== id);
-    if (d.ritten.length === voor) return;
     this._schrijf(d);
+    this._naarTrash('rit', weg);
     this._emit('deleteRit', { id });
   }
 
@@ -339,10 +455,11 @@ export class Database {
   deleteTankbeurt(id) {
     if (!id) return;
     const d = this.load();
-    const voor = d.tankbeurten.length;
+    const weg = d.tankbeurten.find((t) => t.id === id);
+    if (!weg) return;
     d.tankbeurten = d.tankbeurten.filter((t) => t.id !== id);
-    if (d.tankbeurten.length === voor) return;
     this._schrijf(d);
+    this._naarTrash('tankbeurt', weg);
     this._emit('deleteTankbeurt', { id });
   }
 
@@ -377,10 +494,11 @@ export class Database {
     if (!id) return;
     const d = this.load();
     d.onderhoud = d.onderhoud || [];
-    const voor = d.onderhoud.length;
+    const weg = d.onderhoud.find((o) => o.id === id);
+    if (!weg) return;
     d.onderhoud = d.onderhoud.filter((o) => o.id !== id);
-    if (d.onderhoud.length === voor) return;
     this._schrijf(d);
+    this._naarTrash('onderhoud', weg);
     this._emit('deleteOnderhoud', { id });
   }
 
@@ -435,10 +553,11 @@ export class Database {
     if (!id) return;
     const d = this.load();
     d.vaste_kosten = d.vaste_kosten || [];
-    const voor = d.vaste_kosten.length;
+    const weg = d.vaste_kosten.find((v) => v.id === id);
+    if (!weg) return;
     d.vaste_kosten = d.vaste_kosten.filter((v) => v.id !== id);
-    if (d.vaste_kosten.length === voor) return;
     this._schrijf(d);
+    this._naarTrash('vaste_kost', weg);
     this._emit('deleteVasteKost', { id });
   }
 
@@ -480,10 +599,11 @@ export class Database {
     if (!id) return;
     const d = this.load();
     d.betalingen = d.betalingen || [];
-    const voor = d.betalingen.length;
+    const weg = d.betalingen.find((b) => b.id === id);
+    if (!weg) return;
     d.betalingen = d.betalingen.filter((b) => b.id !== id);
-    if (d.betalingen.length === voor) return;
     this._schrijf(d);
+    this._naarTrash('betaling', weg);
     this._emit('deleteBetaling', { id });
   }
 
@@ -540,6 +660,8 @@ export class Database {
       notif_deadline_dagen: 14,
       notif_saldo_aan: false,
       notif_saldo_drempel: 25,
+      kaart_heatmap_aan: false,
+      trash: [],
     };
   }
 
@@ -574,6 +696,8 @@ export class Database {
     if (!Number.isFinite(data.notif_deadline_dagen)) data.notif_deadline_dagen = 14;
     if (typeof data.notif_saldo_aan !== 'boolean') data.notif_saldo_aan = false;
     if (!Number.isFinite(data.notif_saldo_drempel)) data.notif_saldo_drempel = 25;
+    if (typeof data.kaart_heatmap_aan !== 'boolean') data.kaart_heatmap_aan = false;
+    if (!Array.isArray(data.trash)) data.trash = [];
 
     // Item-niveau defaults voor nieuwe v3-velden — idempotent.
     data.ritten = data.ritten.map((r) => ({
