@@ -6,6 +6,7 @@
 // hot-reload <script> in elke HTML-response, en doet dat soms midden in
 // de markup (zonder </body> als anchor), wat de partial onbruikbaar maakt.
 // Een onbekende extensie krijgt geen injectie.
+import { Utils } from './Utils.js';
 
 export class Partials {
   static async load() {
@@ -47,6 +48,14 @@ export class Partials {
         fragment.appendChild(doc.body.firstChild);
       }
       mount.replaceWith(fragment);
+    }
+
+    const mislukt = ingeladen.filter((r) => !r.html).length;
+    if (mislukt > 0) {
+      Utils.toast(
+        `Let op: niet alle app-onderdelen konden worden geladen. Herlaad de pagina (${mislukt} mislukt).`,
+        'fout'
+      );
     }
   }
 }
