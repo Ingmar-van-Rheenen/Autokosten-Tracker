@@ -108,18 +108,41 @@ export class Utils {
     }, { passive: true });
   }
 
-  /** Show a small in-app toast notification (replaces browser alert) */
+  /** Toon een in-app toast. Tapbaar om direct te sluiten. */
   static toast(tekst, type = 'ok') {
     const el = document.createElement('div');
     el.className = 'toast toast-' + type;
-    el.textContent = tekst;
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+
+    const iconen = { ok: '✓', err: '!', fout: '!', info: 'i' };
+    const icon = document.createElement('span');
+    icon.className = 'toast-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = iconen[type] ?? '·';
+
+    const tekstEl = document.createElement('span');
+    tekstEl.className = 'toast-tekst';
+    tekstEl.textContent = tekst;
+
+    el.append(icon, tekstEl);
+
+    // Langere berichten krijgen meer leestijd (60ms/teken, min 2.4s, max 6s)
+    const duur = Math.min(6000, Math.max(2400, tekst.length * 60));
+    el.style.setProperty('--toast-duur', duur + 'ms');
+
     document.body.appendChild(el);
-    // Double rAF ensures CSS transition fires after paint
-    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('toast-in')));
-    setTimeout(() => {
+
+    const sluit = () => {
       el.classList.remove('toast-in');
       el.addEventListener('transitionend', () => el.remove(), { once: true });
-    }, 2400);
+    };
+
+    // Double rAF ensures CSS transition fires after paint
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('toast-in')));
+
+    const timer = setTimeout(sluit, duur);
+    el.addEventListener('click', () => { clearTimeout(timer); sluit(); }, { once: true });
   }
 
   // ── v3-toevoegingen ─────────────────────────────────────────────────────────
