@@ -10,9 +10,14 @@ const DB_KEY_V2 = 'tanklog_v2';
 const DB_KEY_V1 = 'autokosten_v1';
 
 export class Database {
+  _cache = null; // Ongeldig gemaakt na elke schrijf-operatie
+
   // ── Load / Save / Wipe ──────────────────────────────────────────────────────
 
   load() {
+    if (this._cache) return this._cache;
+
+    let data;
     try {
       const rawV3 = localStorage.getItem(DB_KEY);
       if (rawV3) {
@@ -22,36 +27,38 @@ export class Database {
         // Persisteer reparaties (orphans, defaults) eenmalig zodat het niet
         // elke load opnieuw hoeft te gebeuren en exports zijn schoon.
         if (JSON.stringify(hydrated) !== ruwStr) this._schrijf(hydrated);
-        return hydrated;
-      }
-
-      const rawV2 = localStorage.getItem(DB_KEY_V2);
-      if (rawV2) {
-        const gemigreerd = this._migreerV2NaarV3(JSON.parse(rawV2));
-        const hydrated = this._hydrate(gemigreerd);
-        this._schrijf(hydrated);
-        // Oude v2-key opruimen — anders raken v2 en v3 uit sync zodra
-        // de gebruiker iets wijzigt en bij een latere reload terugleest.
-        try { localStorage.removeItem(DB_KEY_V2); } catch {}
-        return hydrated;
-      }
-
-      const rawV1 = localStorage.getItem(DB_KEY_V1);
-      if (rawV1) {
-        const v2obj = this._migreerV1NaarV2(JSON.parse(rawV1));
-        const v3obj = this._migreerV2NaarV3(v2obj);
-        const hydrated = this._hydrate(v3obj);
-        this._schrijf(hydrated);
-        try {
-          localStorage.removeItem(DB_KEY_V1);
-          localStorage.removeItem(DB_KEY_V2);
-        } catch {}
-        return hydrated;
+        data = hydrated;
+      } else {
+        const rawV2 = localStorage.getItem(DB_KEY_V2);
+        if (rawV2) {
+          const gemigreerd = this._migreerV2NaarV3(JSON.parse(rawV2));
+          const hydrated = this._hydrate(gemigreerd);
+          this._schrijf(hydrated);
+          // Oude v2-key opruimen — anders raken v2 en v3 uit sync zodra
+          // de gebruiker iets wijzigt en bij een latere reload terugleest.
+          try { localStorage.removeItem(DB_KEY_V2); } catch {}
+          data = hydrated;
+        } else {
+          const rawV1 = localStorage.getItem(DB_KEY_V1);
+          if (rawV1) {
+            const v2obj = this._migreerV1NaarV2(JSON.parse(rawV1));
+            const v3obj = this._migreerV2NaarV3(v2obj);
+            const hydrated = this._hydrate(v3obj);
+            this._schrijf(hydrated);
+            try {
+              localStorage.removeItem(DB_KEY_V1);
+              localStorage.removeItem(DB_KEY_V2);
+            } catch {}
+            data = hydrated;
+          }
+        }
       }
     } catch {
       // Corrupte data — start schoon.
     }
-    return this._leegV3();
+
+    this._cache = data || this._leegV3();
+    return this._cache;
   }
 
   save(data) {
@@ -64,6 +71,7 @@ export class Database {
    * die hun eigen, specifieke event willen uitzenden.
    */
   _schrijf(data) {
+    this._cache = null;
     try {
       localStorage.setItem(DB_KEY, JSON.stringify(data));
     } catch {
@@ -73,6 +81,7 @@ export class Database {
   }
 
   verwijderAlles() {
+    this._cache = null;
     localStorage.removeItem(DB_KEY);
     localStorage.removeItem(DB_KEY_V2);
     localStorage.removeItem(DB_KEY_V1);
