@@ -5,22 +5,39 @@ export class GeoService {
    * Vraag huidige GPS-positie op
    * @returns {Promise<{lat:number,lng:number,accuracy:number,heading:number|null}>}
    */
-  getGps() {
+  /**
+   * @param {AbortSignal} [signal] - Optionele AbortSignal om de GPS-wacht te annuleren.
+   *   Bij abort gooit de promise een DOMException met name 'AbortError'.
+   *   Opmerking: getCurrentPosition loopt door in de browser tot de timeout;
+   *   het resultaat wordt na abort genegeerd.
+   */
+  getGps(signal) {
     return new Promise((res, rej) => {
       if (!navigator.geolocation) {
         rej(new Error('GPS niet beschikbaar op dit apparaat'));
         return;
       }
+      if (signal?.aborted) {
+        rej(new DOMException('GPS geannuleerd', 'AbortError'));
+        return;
+      }
+      let klaar = false;
       navigator.geolocation.getCurrentPosition(
-        (p) => res({
-          lat: p.coords.latitude,
-          lng: p.coords.longitude,
-          accuracy: p.coords.accuracy || 0,
-          heading: Number.isFinite(p.coords.heading) ? p.coords.heading : null,
-        }),
-        (e) => rej(new Error(e.message)),
+        (p) => {
+          klaar = true;
+          res({
+            lat: p.coords.latitude,
+            lng: p.coords.longitude,
+            accuracy: p.coords.accuracy || 0,
+            heading: Number.isFinite(p.coords.heading) ? p.coords.heading : null,
+          });
+        },
+        (e) => { if (!klaar) rej(new Error(e.message)); },
         { enableHighAccuracy: true, timeout: 12000 }
       );
+      signal?.addEventListener('abort', () => {
+        if (!klaar) { klaar = true; rej(new DOMException('GPS geannuleerd', 'AbortError')); }
+      }, { once: true });
     });
   }
 

@@ -30,6 +30,8 @@ export class RitController {
     this._track = [];           // v3: GPS-polyline (alleen bij smart-tracking)
     this._startTijdMs = null;   // v3: voor elapsed-timer
     this._elapsedIntervalId = null;
+    this._gpsBezig = false;     // true terwijl getGps() loopt (voor cancel-knop)
+    this._gpsAbort = null;      // AbortController voor lopende GPS-aanvraag
 
     this._bindEvents();
   }
@@ -76,7 +78,14 @@ export class RitController {
       this._startLiveTracking();
       Utils.toast('Rit hervat ✓');
     } else if (data.state === 'confirm') {
-      document.getElementById('confirm-km').textContent = this._ritKm ? Utils.km(this._ritKm) : '— km';
+      const km = parseFloat(this._ritKm);
+      if (isNaN(km) || km <= 0) {
+        localStorage.removeItem(LOPENDE_RIT_KEY);
+        Utils.toast('Rit kon niet worden hervat — start een nieuwe rit');
+        return;
+      }
+      this._ritKm = km;
+      document.getElementById('confirm-km').textContent = Utils.km(this._ritKm);
       document.getElementById('km-override').value = '';
       document.getElementById('rit-notitie').value = '';
       if (this._bestemming) document.getElementById('bs-rit-naam').textContent = `Rit naar ${this._bestemming}`;
@@ -220,18 +229,22 @@ export class RitController {
   }
 
   async _startRit() {
+    // Tweede tik tijdens GPS-wacht → GPS annuleren
+    if (this._gpsBezig) { this._gpsAbort?.abort(); return; }
     if (this._state !== 'idle') return;
     const auto = this._db.getGeselecteerdeAuto();
     if (!auto) { Utils.toast('Selecteer eerst een auto.', 'err'); return; }
 
     const btn = document.getElementById('btn-start');
-    btn.disabled = true;
     btn.dataset.origText = btn.textContent;
-    btn.innerHTML = '<span class="rit-btn-spinner"></span>LOCATIE BEPALEN…';
+    btn.innerHTML = '<span class="rit-btn-spinner"></span>GPS ANNULEREN';
     this._kaart.reset();
 
+    this._gpsBezig = true;
+    this._gpsAbort = new AbortController();
+
     try {
-      this._ritStart = this._cachedGps || await this._geo.getGps();
+      this._ritStart = this._cachedGps || await this._geo.getGps(this._gpsAbort.signal);
       this._cachedGps = null;
       this._ritKm = 0;
 
@@ -244,30 +257,41 @@ export class RitController {
       this._updateBsStats();
       this._startLiveTracking();
     } catch (e) {
+      if (e.name === 'AbortError') return; // stille annulering, knop hersteld in finally
       const msg = e.code === 1 ? 'Locatietoegang geweigerd — check instellingen van je browser.'
         : e.code === 2 ? 'Locatie niet beschikbaar. Probeer opnieuw.'
         : 'GPS te langzaam. Probeer het opnieuw.';
       Utils.toast(msg, 'err');
     } finally {
+      this._gpsBezig = false;
+      this._gpsAbort = null;
       btn.disabled = false;
       btn.textContent = btn.dataset.origText || 'START RIT';
     }
   }
 
   async _stopRit() {
+    // Tweede tik tijdens GPS-wacht → GPS annuleren, rit gaat door
+    if (this._gpsBezig) { this._gpsAbort?.abort(); return; }
+    if (this._state !== 'bezig') return;
+
     const btn = document.getElementById('btn-stop');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="rit-btn-spinner"></span>LOCATIE BEPALEN…';
+    btn.dataset.origText = btn.textContent;
+    btn.innerHTML = '<span class="rit-btn-spinner"></span>GPS ANNULEREN';
+
+    this._gpsBezig = true;
+    this._gpsAbort = new AbortController();
 
     try {
       this._stopLiveTracking();
-      this._ritEind = await this._geo.getGps();
+      this._ritEind = await this._geo.getGps(this._gpsAbort.signal);
 
       const smartTracking = this._db.getSmartTracking();
 
       if (smartTracking) {
         this._kaart.zetEindMarker?.(this._ritEind);
       } else {
+        btn.disabled = true;
         btn.innerHTML = '<span class="rit-btn-spinner"></span>ROUTE BEREKENEN…';
         try {
           const route = await this._geo.osrmRoute(this._ritStart, this._ritEind);
@@ -292,7 +316,14 @@ export class RitController {
       document.getElementById('rit-notitie').value = '';
       this._setState('confirm');
       this._slaStateOp();
-    } catch {
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        // Rit gaat door — herstel opgebouwde track en herstart tracking
+        const bewaard = Array.isArray(this._track) ? this._track.slice() : [];
+        this._startLiveTracking();
+        if (bewaard.length > 1) this._track = bewaard;
+        return; // finally herstelt de knop
+      }
       this._ritEind = null;
       document.getElementById('confirm-km').textContent = this._ritKm ? Utils.km(this._ritKm) : '— km';
       document.getElementById('km-override').value = '';
@@ -301,10 +332,11 @@ export class RitController {
       this._slaStateOp();
       Utils.toast('GPS niet beschikbaar — voer km handmatig in.', 'err');
     } finally {
+      this._gpsBezig = false;
+      this._gpsAbort = null;
       btn.disabled = false;
-      btn.textContent = 'STOP RIT';
+      btn.textContent = btn.dataset.origText || 'STOP RIT';
     }
-
   }
 
   _slaOp() {
