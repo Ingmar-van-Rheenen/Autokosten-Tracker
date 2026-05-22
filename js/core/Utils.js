@@ -455,6 +455,37 @@ export class Utils {
   }
 
   /**
+   * Gedeelde tile-configuratie voor Leaflet-kaarten.
+   * Kiest Stadia Maps bij een ingestelde API-key of localhost, anders CartoCDN.
+   * @param {string} thema - 'klassiek' | 'licht' | 'donker'
+   * @param {string} [stadiaKey] - Optionele Stadia API-key
+   * @returns {{url: string, attribution: string, subdomains: string}}
+   */
+  static tileConfig(thema, stadiaKey = '') {
+    const t = thema || 'klassiek';
+    const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+    if (stadiaKey || isLocalhost) {
+      const stijlen = { licht: 'alidade_smooth', klassiek: 'alidade_smooth', donker: 'alidade_smooth_dark' };
+      const stijl = stijlen[t] || stijlen.klassiek;
+      const keyParam = stadiaKey ? `?api_key=${encodeURIComponent(stadiaKey)}` : '';
+      return {
+        url: `https://tiles.stadiamaps.com/tiles/${stijl}/{z}/{x}/{y}{r}.png${keyParam}`,
+        attribution: '© <a href="https://stadiamaps.com/">Stadia Maps</a> · '
+          + '© <a href="https://openmaptiles.org/">OpenMapTiles</a> · © OpenStreetMap',
+        subdomains: '',
+      };
+    }
+
+    const tegels = { licht: 'light_all', klassiek: 'light_all', donker: 'dark_all' };
+    return {
+      url: `https://{s}.basemaps.cartocdn.com/${tegels[t] || tegels.klassiek}/{z}/{x}/{y}{r}.png`,
+      attribution: '© <a href="https://carto.com">CARTO</a> © OpenStreetMap',
+      subdomains: 'abcd',
+    };
+  }
+
+  /**
    * Filter items met een `datum`-veld op periode.
    * 'maand'  → huidige kalendermaand (jaar+maand).
    * 'jaar'   → huidige kalenderjaar.

@@ -18,6 +18,14 @@ export class RitDetailController {
     this._historyActief = false;
     this._veegTimers = [];
     this._veegActief = false;
+
+    window.addEventListener('thema:gewijzigd', () => {
+      if (!this._tileLayer || !this._map) return;
+      const cfg = this._tileConfig();
+      this._tileLayer.setUrl(cfg.url);
+      if (this._tileLayer.options) this._tileLayer.options.attribution = cfg.attribution;
+      this._map.attributionControl?._update?.();
+    });
   }
 
   // ── Openen / sluiten ───────────────────────────────────────────────────────
@@ -432,33 +440,10 @@ export class RitDetailController {
     document.querySelector('#rit-detail-overlay .rd-card')?.classList.remove('rd-bob');
   }
 
-  /**
-   * Thema-aware tile-config. Stadia bij localhost of een ingestelde API-key,
-   * anders CartoCDN — identiek aan de hoofdkaart (MapController).
-   */
   _tileConfig() {
     const thema = document.documentElement.getAttribute('data-thema') || 'klassiek';
-    const stadiaKey = typeof this._db.getStadiaApiKey === 'function'
-      ? this._db.getStadiaApiKey()
-      : '';
-    const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
-
-    if (stadiaKey || isLocalhost) {
-      const stijl = thema === 'donker' ? 'alidade_smooth_dark' : 'alidade_smooth';
-      const keyParam = stadiaKey ? `?api_key=${encodeURIComponent(stadiaKey)}` : '';
-      return {
-        url: `https://tiles.stadiamaps.com/tiles/${stijl}/{z}/{x}/{y}{r}.png${keyParam}`,
-        subdomains: '',
-        attribution: '© Stadia Maps © OpenMapTiles © OpenStreetMap',
-      };
-    }
-
-    const stijl = thema === 'donker' ? 'dark_all' : 'light_all';
-    return {
-      url: `https://{s}.basemaps.cartocdn.com/${stijl}/{z}/{x}/{y}{r}.png`,
-      subdomains: 'abcd',
-      attribution: '© CARTO © OpenStreetMap',
-    };
+    const stadiaKey = this._db?.getStadiaApiKey?.() ?? '';
+    return Utils.tileConfig(thema, stadiaKey);
   }
 
   /** Ronde marker-pin (zelfde stijl als de start/eind-pins op de hoofdkaart). */

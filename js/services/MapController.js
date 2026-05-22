@@ -22,22 +22,6 @@ const MERK_KLEUREN = {
   shell_express: '#DD1D21',
 };
 
-const CARTO_TILES = {
-  licht:    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  klassiek: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  donker:   'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-};
-
-const STADIA_STYLES = {
-  licht:    'alidade_smooth',
-  klassiek: 'alidade_smooth',
-  donker:   'alidade_smooth_dark',
-};
-
-const STADIA_ATTRIBUTIE =
-  '© <a href="https://stadiamaps.com/">Stadia Maps</a> · ' +
-  '© <a href="https://openmaptiles.org/">OpenMapTiles</a> · © OpenStreetMap';
-const CARTO_ATTRIBUTIE = '© <a href="https://carto.com">CARTO</a> © OpenStreetMap';
 
 export class MapController {
   /**
@@ -107,28 +91,8 @@ export class MapController {
 
   _tileConfig() {
     const thema = document.documentElement.getAttribute('data-thema') || 'klassiek';
-    const stadiaKey = this._db && typeof this._db.getStadiaApiKey === 'function'
-      ? this._db.getStadiaApiKey()
-      : '';
-    const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
-
-    // Stadia: gebruiken als er een key is, of bij localhost (gratis dev)
-    if (stadiaKey || isLocalhost) {
-      const style = STADIA_STYLES[thema] || STADIA_STYLES.klassiek;
-      const keyParam = stadiaKey ? `?api_key=${encodeURIComponent(stadiaKey)}` : '';
-      return {
-        url: `https://tiles.stadiamaps.com/tiles/${style}/{z}/{x}/{y}{r}.png${keyParam}`,
-        attribution: STADIA_ATTRIBUTIE,
-        subdomains: '',
-      };
-    }
-
-    // Fallback: CartoCDN (geen key nodig, werkt overal)
-    return {
-      url: CARTO_TILES[thema] || CARTO_TILES.klassiek,
-      attribution: CARTO_ATTRIBUTIE,
-      subdomains: 'abcd',
-    };
+    const stadiaKey = this._db?.getStadiaApiKey?.() ?? '';
+    return Utils.tileConfig(thema, stadiaKey);
   }
 
   /** Publiek: trigger tile-refresh (na key-wijziging of thema-switch). */
