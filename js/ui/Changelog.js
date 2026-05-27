@@ -7,6 +7,16 @@ const SEEN_KEY = 'tanklog_changelog_seen';
 
 export const VERSIES = [
   {
+    versie: 10,
+    label: '4.0',
+    datum: '2026-05-27',
+    items: [
+      'Nieuwe naam: Tanklog heet vanaf nu Vroom. Zelfde app, frisse naam.',
+      'Je bestaande data blijft staan en wordt automatisch overgezet bij de eerste keer openen.',
+      'Onder de motorkap: voorbereiding op cloud-sync zodat je straks meerdere apparaten en groepen kunt gebruiken.',
+    ],
+  },
+  {
     versie: 9,
     label: '3.3',
     datum: '2026-05-20',
@@ -28,7 +38,7 @@ export const VERSIES = [
       'Update-banner: nieuwe versies installeren zonder rare half-oude state',
       'Offline-indicator onderaan zodra het netwerk wegvalt',
       'Systeem-sectie in instellingen: app-versie, opslag en kaart-cache wissen',
-      'Tanklog als share-target: deel een locatie vanuit Maps direct naar een nieuwe rit',
+      'App als share-target: deel een locatie vanuit Maps direct naar een nieuwe rit',
       'Vaste data wordt nu persistent gemaakt zodat de browser hem niet evict',
     ],
   },

@@ -1,6 +1,6 @@
-// ── Service Worker — Tanklog PWA ──────────────────────────────────────────────
-const CACHE = 'tanklog-v79';
-const TILE_CACHE = 'tanklog-tiles-v1';
+// ── Service Worker — Vroom PWA ────────────────────────────────────────────────
+const CACHE = 'vroom-v1';
+const TILE_CACHE = 'vroom-tiles-v1';
 const TILE_CACHE_MAX = 400; // ~50MB met 128KB tiles
 const ASSETS = [
   '/',
@@ -79,6 +79,8 @@ const ASSETS = [
   '/js/services/GeoService.js',
   '/js/services/MapController.js',
   '/js/services/PrijsService.js',
+  '/js/services/ApiClient.js',
+  '/js/services/SyncQueue.js',
   '/js/controllers/RitController.js',
   '/js/controllers/RittenController.js',
   '/js/controllers/RitDetailController.js',

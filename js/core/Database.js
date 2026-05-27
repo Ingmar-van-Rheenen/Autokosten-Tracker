@@ -1,11 +1,14 @@
 // ── Database ──────────────────────────────────────────────────────────────────
-// v3 storage. Migreert non-destructief vanuit v2 (tanklog_v2) en v1 (autokosten_v1).
+// Vroom storage. Hoofdsleutel: `vroom_v1`. Bij het laden wordt non-destructief
+// gemigreerd vanuit alle voorgangers — eerst de Tanklog v3-snapshot (zelfde
+// schema, alleen andere naam), daarna de echte schema-migraties v2 en v1.
 // Elke mutator emit een 'db:updated' event op window zodat controllers reactief
 // kunnen re-renderen zonder handmatige callback-chains.
 
 import { Utils } from './Utils.js';
 
-const DB_KEY = 'tanklog_v3';
+const DB_KEY = 'vroom_v1';
+const DB_KEY_TANKLOG_V3 = 'tanklog_v3';
 const DB_KEY_V2 = 'tanklog_v2';
 const DB_KEY_V1 = 'autokosten_v1';
 
@@ -14,9 +17,9 @@ export class Database {
 
   load() {
     try {
-      const rawV3 = localStorage.getItem(DB_KEY);
-      if (rawV3) {
-        const ruw = JSON.parse(rawV3);
+      const raw = localStorage.getItem(DB_KEY);
+      if (raw) {
+        const ruw = JSON.parse(raw);
         const ruwStr = JSON.stringify(ruw);
         const hydrated = this._hydrate(ruw);
         // Persisteer reparaties (orphans, defaults) eenmalig zodat het niet
@@ -25,13 +28,23 @@ export class Database {
         return hydrated;
       }
 
+      // Tanklog v3 had hetzelfde data-schema als vroom_v1; alleen de naam
+      // verandert bij de rebrand. Lees, schrijf onder de nieuwe key en
+      // wis de oude zodat ze niet uit sync raken.
+      const rawTanklogV3 = localStorage.getItem(DB_KEY_TANKLOG_V3);
+      if (rawTanklogV3) {
+        const ruw = JSON.parse(rawTanklogV3);
+        const hydrated = this._hydrate(ruw);
+        this._schrijf(hydrated);
+        try { localStorage.removeItem(DB_KEY_TANKLOG_V3); } catch {}
+        return hydrated;
+      }
+
       const rawV2 = localStorage.getItem(DB_KEY_V2);
       if (rawV2) {
         const gemigreerd = this._migreerV2NaarV3(JSON.parse(rawV2));
         const hydrated = this._hydrate(gemigreerd);
         this._schrijf(hydrated);
-        // Oude v2-key opruimen — anders raken v2 en v3 uit sync zodra
-        // de gebruiker iets wijzigt en bij een latere reload terugleest.
         try { localStorage.removeItem(DB_KEY_V2); } catch {}
         return hydrated;
       }
@@ -74,6 +87,7 @@ export class Database {
 
   verwijderAlles() {
     localStorage.removeItem(DB_KEY);
+    localStorage.removeItem(DB_KEY_TANKLOG_V3);
     localStorage.removeItem(DB_KEY_V2);
     localStorage.removeItem(DB_KEY_V1);
     localStorage.removeItem('tanklog_lopende_rit');

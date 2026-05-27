@@ -5,12 +5,12 @@
 //   • usage()            → totaal gebruikt + quota in bytes.
 //   • clearTiles()       → wist alleen de tile-cache (kaart-tegels), niet de
 //                          app-bestanden of localStorage.
-//   • getVersion()       → vraagt de SW naar zijn CACHE-naam (bv. tanklog-v72).
+//   • getVersion()       → vraagt de SW naar zijn CACHE-naam (bv. vroom-v1).
 //   • formatBytes()      → human-readable bytes.
 
 export const StorageInfo = {
   /**
-   * Vraag de browser om de Tanklog-data persistent op te slaan. Zonder dit
+   * Vraag de browser om de Vroom-data persistent op te slaan. Zonder dit
    * kan de browser onder geheugen-druk localStorage stilletjes wissen.
    * Op browsers zonder deze API: stille no-op.
    * @returns {Promise<boolean | null>} true=granted, false=denied, null=niet ondersteund
@@ -53,7 +53,7 @@ export const StorageInfo = {
       .then((res) => res && res.ok !== false);
   },
 
-  /** @returns {Promise<string | null>} bv. 'tanklog-v72' */
+  /** @returns {Promise<string | null>} bv. 'vroom-v1' */
   async getVersion() {
     const res = await this._roundtrip({ type: 'GET_VERSION' }, 'VERSION', 1000);
     return res ? res.version : null;

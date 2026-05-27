@@ -1,7 +1,7 @@
-// ── Tanklog testdata-seeder ───────────────────────────────────────────────────
-// Plak dit hele bestand in de browser-console terwijl Tanklog open staat
+// ── Vroom testdata-seeder ─────────────────────────────────────────────────────
+// Plak dit hele bestand in de browser-console terwijl Vroom open staat
 // (of voer het uit via DevTools → Snippets). Het script:
-//   • wist bestaande localStorage tanklog_v3
+//   • wist bestaande localStorage (vroom_v1 + oude tanklog_v3)
 //   • zet 2 auto's neer (1 benzine, 1 EV)
 //   • genereert ~6 maanden ritten (deels met opgenomen GPS-track),
 //     tankbeurten, onderhoud, vaste kosten en betalingen
@@ -10,8 +10,8 @@
 // Aantal-knoppen onderaan kun je naar smaak aanpassen.
 // ──────────────────────────────────────────────────────────────────────────────
 
-(function seedTanklog() {
-  const KEY = 'tanklog_v3';
+(function seedVroom() {
+  const KEY = 'vroom_v1';
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const uid = () =>
@@ -262,11 +262,12 @@
 
   localStorage.setItem(KEY, JSON.stringify(data));
   // Oudere versies opruimen zodat migratie niet alsnog overschrijft.
+  localStorage.removeItem('tanklog_v3');
   localStorage.removeItem('tanklog_v2');
   localStorage.removeItem('autokosten_v1');
   localStorage.removeItem('tanklog_lopende_rit');
 
-  console.log('[Tanklog] testdata gezaaid:', {
+  console.log('[Vroom] testdata gezaaid:', {
     autos: autos.length,
     ritten: ritten.length,
     ritten_met_gps: ritten.filter((r) => r.gps_track).length,
@@ -275,6 +276,6 @@
     vaste_kosten: vaste_kosten.length,
     betalingen: betalingen.length,
   });
-  console.log('[Tanklog] pagina herlaadt over 600ms…');
+  console.log('[Vroom] pagina herlaadt over 600ms…');
   setTimeout(() => location.reload(), 600);
 })();

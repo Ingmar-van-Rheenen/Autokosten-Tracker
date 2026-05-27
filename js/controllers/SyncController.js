@@ -1,5 +1,5 @@
 // ── SyncController ───────────────────────────────────────────────────────────
-// Twee manieren om Tanklog-data tussen twee devices over te zetten:
+// Twee manieren om Vroom-data tussen twee devices over te zetten:
 //
 // 1. DEEL ALS BESTAND  (navigator.share() of download-fallback)
 //    Werkt overal. Op iOS opent de share-sheet (AirDrop, Mail, Messages).
@@ -53,7 +53,7 @@ export class SyncController {
       const data = this._db.load();
       const json = JSON.stringify(data, null, 2);
       const datum = new Date().toISOString().split('T')[0];
-      const bestandsnaam = `tanklog-${datum}.json`;
+      const bestandsnaam = `vroom-${datum}.json`;
       const blob = new Blob([json], { type: 'application/json' });
       const file = new File([blob], bestandsnaam, { type: 'application/json' });
 
@@ -62,8 +62,8 @@ export class SyncController {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'Tanklog data',
-          text: 'Tanklog backup ' + datum,
+          title: 'Vroom data',
+          text: 'Vroom backup ' + datum,
         });
         Utils.toast('Gedeeld ✓');
         return;
