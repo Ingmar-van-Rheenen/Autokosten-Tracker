@@ -1,6 +1,8 @@
-# Tanklog
+# Vroom
 
 Mobiele PWA voor het bijhouden van autoritten, tankbeurten en kosten. Gebouwd voor persoonlijk gebruik: het bijhouden van kosten bij het rijden met de auto van je ouders.
+
+Vroom heette eerder Tanklog. Sommige interne sleutels (oude localStorage-namen, historische migratie-paden) dragen die naam nog en blijven dat houden voor backwards-compatibility.
 
 ## Wat het doet
 
@@ -15,7 +17,7 @@ Mobiele PWA voor het bijhouden van autoritten, tankbeurten en kosten. Gebouwd vo
 - Vanilla HTML / CSS / JS — geen framework, geen bundler
 - Leaflet 1.9.4 voor kaartweergave
 - OSRM voor routeberekening (geen API key nodig)
-- localStorage voor opslag (`tanklog_v2`)
+- localStorage voor opslag (`vroom_v1`, migreert van `tanklog_v3`/`v2`/`autokosten_v1`)
 - Service Worker voor PWA offline support
 
 ## Installeren

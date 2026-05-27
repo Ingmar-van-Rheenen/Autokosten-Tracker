@@ -184,7 +184,7 @@ export class App {
       setTimeout(() => document.getElementById('btn-start')?.click(), 400);
     }
 
-    // Share-target: vanuit Google Maps / browser-share opent Tanklog met
+    // Share-target: vanuit Google Maps / browser-share opent Vroom met
     // ?share_title=… &share_text=… &share_url=…  Wij plukken er een leesbare
     // bestemming uit (titel of tekst) en openen het rit-toevoegen-flow.
     const titel = params.get('share_title');

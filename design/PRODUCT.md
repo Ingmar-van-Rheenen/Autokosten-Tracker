@@ -10,7 +10,7 @@ Ingmar — a single user, using his parent's car and splitting costs with them. 
 
 ## Product Purpose
 
-Tanklog tracks car trips, fuel refills, and the running cost balance between Ingmar and the car owner. The core output is a live saldo: who owes what, at a glance. Success means Ingmar never has to manually calculate anything, and every refill or trip takes under 10 seconds to log.
+Vroom tracks car trips, fuel refills, and the running cost balance between Ingmar and the car owner. The core output is a live saldo: who owes what, at a glance. Success means Ingmar never has to manually calculate anything, and every refill or trip takes under 10 seconds to log.
 
 ## Brand Personality
 

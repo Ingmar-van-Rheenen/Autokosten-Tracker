@@ -1,6 +1,6 @@
 ---
-name: Tanklog
-description: Persoonlijke rittenregistratie en kostenverevening voor één gebruiker en één auto.
+name: Vroom
+description: Persoonlijke rittenregistratie en kostenverevening, op weg naar multi-user via vroom-api.
 colors:
   avondlucht: "#1b2537"
   avondlucht-mid: "#232f44"
@@ -85,13 +85,13 @@ components:
     padding: "24px 20px"
 ---
 
-# Design System: Tanklog
+# Design System: Vroom
 
 ## 1. Overview
 
 **Creative North Star: "Het Buitenspiegel"**
 
-The wing mirror. A tool you glance at for two seconds while doing something else entirely. Tanklog is not a dashboard you sit down with; it is a glance that happens while unlocking the car, at a red light, or right before a bank transfer. Everything in this system earns its place by answering one question: can Ingmar read this in three seconds and know where he stands?
+The wing mirror. A tool you glance at for two seconds while doing something else entirely. Vroom is not a dashboard you sit down with; it is a glance that happens while unlocking the car, at a red light, or right before a bank transfer. Everything in this system earns its place by answering one question: can Ingmar read this in three seconds and know where he stands?
 
 The system lives mostly in the dark: deep Avondlucht navy surfaces that recede into the background so the information — and only the information — holds the eye. When cream surfaces appear, they signal input: here is where you fill something in. The green accent, Bosrand, is reserved for actions and positive numbers. Fout-rood for negative balance. The system never decorates; it reports.
 
@@ -161,7 +161,7 @@ The palette is committed and restrained simultaneously: committed to the dark na
 
 ## 4. Elevation
 
-Tanklog uses tonal layering on dark surfaces, not shadows. Depth is expressed by lightness steps: Avondlucht (darkest) at the base, Avondlucht Mid for overlaid surfaces, Avondlucht Surface for interactive cards and inset elements. This keeps the interface flat and legible in all ambient conditions, including direct sunlight on a phone screen.
+Vroom uses tonal layering on dark surfaces, not shadows. Depth is expressed by lightness steps: Avondlucht (darkest) at the base, Avondlucht Mid for overlaid surfaces, Avondlucht Surface for interactive cards and inset elements. This keeps the interface flat and legible in all ambient conditions, including direct sunlight on a phone screen.
 
 Light (cream) surfaces use minimal ambient shadow for lift, never for decoration.
 

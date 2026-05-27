@@ -16,7 +16,7 @@ export class DataManager {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'tanklog-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.download = 'vroom-' + new Date().toISOString().slice(0, 10) + '.json';
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 100);
   }

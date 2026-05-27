@@ -1,15 +1,15 @@
-# Autokosten Tracker — CLAUDE.md
+# Vroom — CLAUDE.md
 
 ## Project
 
-**Tanklog** is a mobile-first PWA for tracking car trips, fuel refills, and costs. Built for personal use (tracking usage of a parent's car). No backend, no build step.
+**Vroom** (voorheen Tanklog) is a mobile-first PWA for tracking car trips, fuel refills, and costs. Originally built for personal use (tracking usage of a parent's car), now evolving into a multi-user app backed by `vroom-api` (zie repo `Ingmar-van-Rheenen/vroom-api`).
 
 ## Stack
 
 - **HTML / CSS / Vanilla JS** — ES modules, no framework, no bundler
 - **Leaflet 1.9.4** — map rendering (loaded via CDN)
 - **OSRM** — public routing API for distance calculation (no API key)
-- **localStorage** — all data stored client-side (`tanklog_v2`)
+- **localStorage** — primary data store today (`vroom_v1`, migrates from `tanklog_v3`/`v2`/`autokosten_v1`); the Vroom API is being introduced as the authoritative source in upcoming sprints
 - **Service Worker** — PWA offline support (`sw.js`)
 
 ## Architecture
@@ -22,7 +22,7 @@ style.css           All styles (no preprocessor)
 js/
   main.js           Entry point — instantiates App and calls init()
   App.js            Orchestrator: screen transitions, tab navigation, PWA install
-  Database.js       localStorage CRUD — key: tanklog_v2, migrates from autokosten_v1
+  Database.js       localStorage CRUD — key: vroom_v1, migrates from tanklog_v3/v2/autokosten_v1
   GeoService.js     GPS / geolocation wrapper
   MapController.js  Leaflet map init, markers, route polyline
   RitController.js  Start/stop trip flow, OSRM API call, save trip
@@ -34,7 +34,7 @@ js/
   Utils.js          uid(), wacht(), currency/date formatters
 ```
 
-## Data model (localStorage key: `tanklog_v2`)
+## Data model (localStorage key: `vroom_v1`)
 
 ```json
 {

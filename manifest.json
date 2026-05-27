@@ -1,5 +1,5 @@
 {
-  "name": "Vroom — Autokosten Tracker",
+  "name": "Vroom",
   "short_name": "Vroom",
   "description": "Bijhouden van ritten, tankbeurten en kosten per auto.",
   "start_url": "/",
@@ -55,7 +55,7 @@
   ],
   "protocol_handlers": [
     {
-      "protocol": "web+tanklog",
+      "protocol": "web+vroom",
       "url": "/?action=%s"
     }
   ],
